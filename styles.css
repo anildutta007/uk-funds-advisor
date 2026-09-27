@@ -1,0 +1,123 @@
+/* UK Funds Selection Advisor Custom Styles */
+
+/* Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Risk Card Selection Animation */
+.risk-card {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.risk-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.05);
+}
+
+.risk-card.active {
+  box-shadow: 0 4px 14px -2px rgba(2, 132, 199, 0.18);
+}
+
+/* Strategy Tab Active State */
+.strategy-tab {
+  transition: all 0.15s ease-in-out;
+}
+
+.strategy-tab.active {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+/* Metric card subtle hover effect */
+.metric-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Fund card style */
+.fund-card {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.fund-card:hover {
+  border-color: #93c5fd;
+  box-shadow: 0 6px 18px -4px rgba(2, 132, 199, 0.08);
+}
+
+/* Chart Canvas container */
+canvas {
+  max-width: 100%;
+}
+
+/* Print & PDF Export Styles */
+@media print {
+  /* Hide interactive controls and header elements */
+  .print\:hidden,
+  button,
+  header .flex-items-center.gap-2\.5,
+  #advisor-form input,
+  .strategy-tab {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-size: 10pt;
+  }
+
+  main {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  section {
+    break-inside: avoid;
+    box-shadow: none !important;
+    border: 1px solid #e2e8f0 !important;
+    margin-bottom: 12px !important;
+    padding: 12px !important;
+  }
+
+  /* Make sure all hidden strategy sections print in sequence */
+  .strategy-section {
+    display: block !important;
+    margin-top: 20px !important;
+    page-break-before: always;
+  }
+
+  #section-active {
+    page-break-before: auto !important;
+  }
+
+  .fund-card {
+    break-inside: avoid;
+    border: 1px solid #cbd5e1 !important;
+    margin-bottom: 8px !important;
+  }
+}
