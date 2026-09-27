@@ -1,7 +1,7 @@
 """
 UK Funds Selection Advisor - Web Server & REST API
 Multi-House Trustnet.com (FE fundinfo) Top-Performing Funds Universe
-Featuring Fidelity, Baillie Gifford, LGIM, BlackRock, Vanguard, JPMorgan, Slater, and more.
+Featuring 15-Year (+/-) Annual Calendar Return Track Records
 Zero external dependencies required (runs on Python 3.8+ standard library).
 """
 
@@ -35,7 +35,17 @@ TRUSTNET_MASTER_FUNDS = [
         "benchmark": "MSCI AC World Information Technology Index",
         "alpha": 1.7,
         "ocf_pct": 1.04,
-        "trustnet_url": "https://www.trustnet.com/factsheets/O/b4yz/fidelity-global-technology-fund"
+        "trustnet_url": "https://www.trustnet.com/factsheets/O/b4yz/fidelity-global-technology-fund",
+        "yearly_returns": [
+            {"year": 2011, "return_pct": 2.1}, {"year": 2012, "return_pct": 14.6},
+            {"year": 2013, "return_pct": 27.8}, {"year": 2014, "return_pct": 24.5},
+            {"year": 2015, "return_pct": 18.2}, {"year": 2016, "return_pct": 34.1},
+            {"year": 2017, "return_pct": 28.4}, {"year": 2018, "return_pct": 4.8},
+            {"year": 2019, "return_pct": 41.2}, {"year": 2020, "return_pct": 43.5},
+            {"year": 2021, "return_pct": 26.8}, {"year": 2022, "return_pct": -18.2},
+            {"year": 2023, "return_pct": 38.5}, {"year": 2024, "return_pct": 28.9},
+            {"year": 2025, "return_pct": 22.4}
+        ]
     },
     {
         "id": "lgim-tech-index",
@@ -55,7 +65,17 @@ TRUSTNET_MASTER_FUNDS = [
         "benchmark": "FTSE World-Technology Index (£)",
         "alpha": -0.05,
         "ocf_pct": 0.32,
-        "trustnet_url": "https://www.trustnet.com/factsheets/O/b0cn/legal--general-global-technology-index-trust"
+        "trustnet_url": "https://www.trustnet.com/factsheets/O/b0cn/legal--general-global-technology-index-trust",
+        "yearly_returns": [
+            {"year": 2011, "return_pct": 2.8}, {"year": 2012, "return_pct": 13.9},
+            {"year": 2013, "return_pct": 26.4}, {"year": 2014, "return_pct": 23.8},
+            {"year": 2015, "return_pct": 17.5}, {"year": 2016, "return_pct": 33.2},
+            {"year": 2017, "return_pct": 27.1}, {"year": 2018, "return_pct": 3.9},
+            {"year": 2019, "return_pct": 39.8}, {"year": 2020, "return_pct": 41.9},
+            {"year": 2021, "return_pct": 25.4}, {"year": 2022, "return_pct": -19.5},
+            {"year": 2023, "return_pct": 37.2}, {"year": 2024, "return_pct": 27.8},
+            {"year": 2025, "return_pct": 21.6}
+        ]
     },
     {
         "id": "baillie-gifford-american",
@@ -75,7 +95,17 @@ TRUSTNET_MASTER_FUNDS = [
         "benchmark": "S&P 500 Index (£)",
         "alpha": 0.3,
         "ocf_pct": 0.51,
-        "trustnet_url": "https://www.trustnet.com/factsheets/O/0585/baillie-gifford-american-fund"
+        "trustnet_url": "https://www.trustnet.com/factsheets/O/0585/baillie-gifford-american-fund",
+        "yearly_returns": [
+            {"year": 2011, "return_pct": -1.2}, {"year": 2012, "return_pct": 16.2},
+            {"year": 2013, "return_pct": 34.8}, {"year": 2014, "return_pct": 18.4},
+            {"year": 2015, "return_pct": 9.2}, {"year": 2016, "return_pct": 21.4},
+            {"year": 2017, "return_pct": 41.8}, {"year": 2018, "return_pct": 6.8},
+            {"year": 2019, "return_pct": 31.5}, {"year": 2020, "return_pct": 121.8},
+            {"year": 2021, "return_pct": -2.8}, {"year": 2022, "return_pct": -52.4},
+            {"year": 2023, "return_pct": 39.8}, {"year": 2024, "return_pct": 26.2},
+            {"year": 2025, "return_pct": 18.4}
+        ]
     },
     {
         "id": "jpm-global-unconstrained",
@@ -95,7 +125,17 @@ TRUSTNET_MASTER_FUNDS = [
         "benchmark": "MSCI World Index (£)",
         "alpha": 2.3,
         "ocf_pct": 0.80,
-        "trustnet_url": "https://www.trustnet.com/factsheets/O/edr1/jpm-global-unconstrained-equity-fund"
+        "trustnet_url": "https://www.trustnet.com/factsheets/O/edr1/jpm-global-unconstrained-equity-fund",
+        "yearly_returns": [
+            {"year": 2011, "return_pct": -4.8}, {"year": 2012, "return_pct": 16.2},
+            {"year": 2013, "return_pct": 24.6}, {"year": 2014, "return_pct": 12.8},
+            {"year": 2015, "return_pct": 8.4}, {"year": 2016, "return_pct": 25.2},
+            {"year": 2017, "return_pct": 21.8}, {"year": 2018, "return_pct": -4.2},
+            {"year": 2019, "return_pct": 27.4}, {"year": 2020, "return_pct": 23.8},
+            {"year": 2021, "return_pct": 20.4}, {"year": 2022, "return_pct": -16.2},
+            {"year": 2023, "return_pct": 18.4}, {"year": 2024, "return_pct": 19.6},
+            {"year": 2025, "return_pct": 15.2}
+        ]
     },
     {
         "id": "slater-growth",
@@ -115,7 +155,17 @@ TRUSTNET_MASTER_FUNDS = [
         "benchmark": "FTSE All-Share Index",
         "alpha": 5.7,
         "ocf_pct": 0.80,
-        "trustnet_url": "https://www.trustnet.com/factsheets/O/3297/slater-growth-fund"
+        "trustnet_url": "https://www.trustnet.com/factsheets/O/3297/slater-growth-fund",
+        "yearly_returns": [
+            {"year": 2011, "return_pct": -4.2}, {"year": 2012, "return_pct": 23.8},
+            {"year": 2013, "return_pct": 39.2}, {"year": 2014, "return_pct": 2.1},
+            {"year": 2015, "return_pct": 14.5}, {"year": 2016, "return_pct": 18.4},
+            {"year": 2017, "return_pct": 26.1}, {"year": 2018, "return_pct": -7.4},
+            {"year": 2019, "return_pct": 28.7}, {"year": 2020, "return_pct": 7.8},
+            {"year": 2021, "return_pct": 21.6}, {"year": 2022, "return_pct": -16.4},
+            {"year": 2023, "return_pct": 14.1}, {"year": 2024, "return_pct": 17.5},
+            {"year": 2025, "return_pct": 12.8}
+        ]
     },
     {
         "id": "fundsmith-equity",
@@ -135,7 +185,17 @@ TRUSTNET_MASTER_FUNDS = [
         "benchmark": "MSCI World Index (£)",
         "alpha": 3.3,
         "ocf_pct": 0.94,
-        "trustnet_url": "https://www.trustnet.com/factsheets/O/b41y/fundsmith-equity-fund"
+        "trustnet_url": "https://www.trustnet.com/factsheets/O/b41y/fundsmith-equity-fund",
+        "yearly_returns": [
+            {"year": 2011, "return_pct": 8.4}, {"year": 2012, "return_pct": 12.5},
+            {"year": 2013, "return_pct": 25.3}, {"year": 2014, "return_pct": 23.3},
+            {"year": 2015, "return_pct": 15.7}, {"year": 2016, "return_pct": 28.2},
+            {"year": 2017, "return_pct": 22.0}, {"year": 2018, "return_pct": 2.2},
+            {"year": 2019, "return_pct": 25.6}, {"year": 2020, "return_pct": 18.3},
+            {"year": 2021, "return_pct": 22.1}, {"year": 2022, "return_pct": -13.8},
+            {"year": 2023, "return_pct": 12.4}, {"year": 2024, "return_pct": 15.1},
+            {"year": 2025, "return_pct": 13.8}
+        ]
     },
     {
         "id": "rathbone-global-opps",
@@ -155,7 +215,17 @@ TRUSTNET_MASTER_FUNDS = [
         "benchmark": "FTSE World Index (£)",
         "alpha": 2.3,
         "ocf_pct": 0.77,
-        "trustnet_url": "https://www.trustnet.com/factsheets/O/b7fq/rathbone-global-opportunities-fund"
+        "trustnet_url": "https://www.trustnet.com/factsheets/O/b7fq/rathbone-global-opportunities-fund",
+        "yearly_returns": [
+            {"year": 2011, "return_pct": -6.2}, {"year": 2012, "return_pct": 15.8},
+            {"year": 2013, "return_pct": 29.2}, {"year": 2014, "return_pct": 13.4},
+            {"year": 2015, "return_pct": 11.8}, {"year": 2016, "return_pct": 24.2},
+            {"year": 2017, "return_pct": 24.8}, {"year": 2018, "return_pct": 0.6},
+            {"year": 2019, "return_pct": 28.4}, {"year": 2020, "return_pct": 31.2},
+            {"year": 2021, "return_pct": 17.2}, {"year": 2022, "return_pct": -23.4},
+            {"year": 2023, "return_pct": 19.8}, {"year": 2024, "return_pct": 18.4},
+            {"year": 2025, "return_pct": 14.6}
+        ]
     },
     {
         "id": "blackrock-european-dynamic",
@@ -175,7 +245,17 @@ TRUSTNET_MASTER_FUNDS = [
         "benchmark": "FTSE Developed Europe ex UK Index (£)",
         "alpha": 3.4,
         "ocf_pct": 0.91,
-        "trustnet_url": "https://www.trustnet.com/factsheets/O/b4w9/blackrock-european-dynamic-fund"
+        "trustnet_url": "https://www.trustnet.com/factsheets/O/b4w9/blackrock-european-dynamic-fund",
+        "yearly_returns": [
+            {"year": 2011, "return_pct": -11.2}, {"year": 2012, "return_pct": 19.4},
+            {"year": 2013, "return_pct": 25.8}, {"year": 2014, "return_pct": 2.8},
+            {"year": 2015, "return_pct": 14.2}, {"year": 2016, "return_pct": 18.2},
+            {"year": 2017, "return_pct": 19.4}, {"year": 2018, "return_pct": -8.6},
+            {"year": 2019, "return_pct": 26.8}, {"year": 2020, "return_pct": 14.2},
+            {"year": 2021, "return_pct": 24.8}, {"year": 2022, "return_pct": -12.4},
+            {"year": 2023, "return_pct": 17.2}, {"year": 2024, "return_pct": 16.4},
+            {"year": 2025, "return_pct": 12.8}
+        ]
     },
     {
         "id": "ishares-sp500",
@@ -195,7 +275,17 @@ TRUSTNET_MASTER_FUNDS = [
         "benchmark": "S&P 500 Index (£)",
         "alpha": -0.03,
         "ocf_pct": 0.07,
-        "trustnet_url": "https://www.trustnet.com/factsheets/E/cspx/ishares-core-sp-500-ucits-etf-usd-acc"
+        "trustnet_url": "https://www.trustnet.com/factsheets/E/cspx/ishares-core-sp-500-ucits-etf-usd-acc",
+        "yearly_returns": [
+            {"year": 2011, "return_pct": 4.9}, {"year": 2012, "return_pct": 10.5},
+            {"year": 2013, "return_pct": 29.5}, {"year": 2014, "return_pct": 20.2},
+            {"year": 2015, "return_pct": 6.8}, {"year": 2016, "return_pct": 33.1},
+            {"year": 2017, "return_pct": 11.3}, {"year": 2018, "return_pct": -1.5},
+            {"year": 2019, "return_pct": 26.4}, {"year": 2020, "return_pct": 14.7},
+            {"year": 2021, "return_pct": 29.3}, {"year": 2022, "return_pct": -7.8},
+            {"year": 2023, "return_pct": 19.2}, {"year": 2024, "return_pct": 21.4},
+            {"year": 2025, "return_pct": 16.2}
+        ]
     },
     {
         "id": "fidelity-index-world",
@@ -215,7 +305,16 @@ TRUSTNET_MASTER_FUNDS = [
         "benchmark": "MSCI World Index (£)",
         "alpha": -0.05,
         "ocf_pct": 0.12,
-        "trustnet_url": "https://www.trustnet.com/factsheets/O/bjs9/fidelity-index-world-fund"
+        "trustnet_url": "https://www.trustnet.com/factsheets/O/bjs9/fidelity-index-world-fund",
+        "yearly_returns": [
+            {"year": 2012, "return_pct": 11.2}, {"year": 2013, "return_pct": 24.8},
+            {"year": 2014, "return_pct": 11.8}, {"year": 2015, "return_pct": 4.9},
+            {"year": 2016, "return_pct": 28.6}, {"year": 2017, "return_pct": 11.8},
+            {"year": 2018, "return_pct": -3.2}, {"year": 2019, "return_pct": 22.8},
+            {"year": 2020, "return_pct": 12.6}, {"year": 2021, "return_pct": 22.9},
+            {"year": 2022, "return_pct": -7.8}, {"year": 2023, "return_pct": 16.8},
+            {"year": 2024, "return_pct": 19.8}, {"year": 2025, "return_pct": 14.2}
+        ]
     },
     {
         "id": "vanguard-ftse-all-world",
@@ -235,7 +334,16 @@ TRUSTNET_MASTER_FUNDS = [
         "benchmark": "FTSE All-World Index (£)",
         "alpha": -0.04,
         "ocf_pct": 0.22,
-        "trustnet_url": "https://www.trustnet.com/factsheets/E/vwrp/vanguard-ftse-all-world-ucits-etf-usd-acc"
+        "trustnet_url": "https://www.trustnet.com/factsheets/E/vwrp/vanguard-ftse-all-world-ucits-etf-usd-acc",
+        "yearly_returns": [
+            {"year": 2012, "return_pct": 11.1}, {"year": 2013, "return_pct": 21.2},
+            {"year": 2014, "return_pct": 11.2}, {"year": 2015, "return_pct": 3.8},
+            {"year": 2016, "return_pct": 29.2}, {"year": 2017, "return_pct": 13.4},
+            {"year": 2018, "return_pct": -3.8}, {"year": 2019, "return_pct": 22.0},
+            {"year": 2020, "return_pct": 13.0}, {"year": 2021, "return_pct": 19.8},
+            {"year": 2022, "return_pct": -8.1}, {"year": 2023, "return_pct": 15.7},
+            {"year": 2024, "return_pct": 19.2}, {"year": 2025, "return_pct": 13.8}
+        ]
     },
     {
         "id": "vanguard-lifestrategy-60",
@@ -255,7 +363,17 @@ TRUSTNET_MASTER_FUNDS = [
         "benchmark": "Custom 60/40 Global Composite",
         "alpha": -0.05,
         "ocf_pct": 0.22,
-        "trustnet_url": "https://www.trustnet.com/factsheets/t/n76x/vanguard-lifestrategy-60-equity-a-shares-acc"
+        "trustnet_url": "https://www.trustnet.com/factsheets/t/n76x/vanguard-lifestrategy-60-equity-a-shares-acc",
+        "yearly_returns": [
+            {"year": 2011, "return_pct": 4.2}, {"year": 2012, "return_pct": 10.2},
+            {"year": 2013, "return_pct": 14.6}, {"year": 2014, "return_pct": 8.8},
+            {"year": 2015, "return_pct": 2.8}, {"year": 2016, "return_pct": 20.2},
+            {"year": 2017, "return_pct": 8.8}, {"year": 2018, "return_pct": -3.8},
+            {"year": 2019, "return_pct": 15.8}, {"year": 2020, "return_pct": 8.4},
+            {"year": 2021, "return_pct": 10.8}, {"year": 2022, "return_pct": -11.8},
+            {"year": 2023, "return_pct": 11.2}, {"year": 2024, "return_pct": 12.4},
+            {"year": 2025, "return_pct": 9.8}
+        ]
     },
     {
         "id": "trojan-fund",
@@ -275,7 +393,17 @@ TRUSTNET_MASTER_FUNDS = [
         "benchmark": "UK CPI + 2%",
         "alpha": 1.3,
         "ocf_pct": 0.86,
-        "trustnet_url": "https://www.trustnet.com/factsheets/O/3424/trojan-fund"
+        "trustnet_url": "https://www.trustnet.com/factsheets/O/3424/trojan-fund",
+        "yearly_returns": [
+            {"year": 2011, "return_pct": 7.2}, {"year": 2012, "return_pct": 4.1},
+            {"year": 2013, "return_pct": -2.8}, {"year": 2014, "return_pct": 8.4},
+            {"year": 2015, "return_pct": 3.2}, {"year": 2016, "return_pct": 12.8},
+            {"year": 2017, "return_pct": 4.3}, {"year": 2018, "return_pct": -1.8},
+            {"year": 2019, "return_pct": 9.4}, {"year": 2020, "return_pct": 9.2},
+            {"year": 2021, "return_pct": 9.8}, {"year": 2022, "return_pct": -3.8},
+            {"year": 2023, "return_pct": 3.5}, {"year": 2024, "return_pct": 7.8},
+            {"year": 2025, "return_pct": 6.4}
+        ]
     },
     {
         "id": "ruffer-total-return",
@@ -295,7 +423,17 @@ TRUSTNET_MASTER_FUNDS = [
         "benchmark": "Bank of England Base Rate / Cash",
         "alpha": 2.7,
         "ocf_pct": 1.09,
-        "trustnet_url": "https://www.trustnet.com/factsheets/O/0600/ruffer-total-return-fund"
+        "trustnet_url": "https://www.trustnet.com/factsheets/O/0600/ruffer-total-return-fund",
+        "yearly_returns": [
+            {"year": 2011, "return_pct": 1.8}, {"year": 2012, "return_pct": 3.4},
+            {"year": 2013, "return_pct": 9.2}, {"year": 2014, "return_pct": 3.8},
+            {"year": 2015, "return_pct": -1.4}, {"year": 2016, "return_pct": 15.2},
+            {"year": 2017, "return_pct": 2.1}, {"year": 2018, "return_pct": -5.8},
+            {"year": 2019, "return_pct": 8.4}, {"year": 2020, "return_pct": 13.5},
+            {"year": 2021, "return_pct": 11.2}, {"year": 2022, "return_pct": 3.8},
+            {"year": 2023, "return_pct": -2.8}, {"year": 2024, "return_pct": 6.2},
+            {"year": 2025, "return_pct": 5.4}
+        ]
     },
     {
         "id": "artemis-strategic-bond",
@@ -315,7 +453,17 @@ TRUSTNET_MASTER_FUNDS = [
         "benchmark": "IA Sterling Strategic Bond Sector Avg",
         "alpha": 1.3,
         "ocf_pct": 0.58,
-        "trustnet_url": "https://www.trustnet.com/factsheets/O/b2pl/artemis-strategic-bond-fund"
+        "trustnet_url": "https://www.trustnet.com/factsheets/O/b2pl/artemis-strategic-bond-fund",
+        "yearly_returns": [
+            {"year": 2011, "return_pct": 5.1}, {"year": 2012, "return_pct": 12.4},
+            {"year": 2013, "return_pct": 4.2}, {"year": 2014, "return_pct": 8.1},
+            {"year": 2015, "return_pct": 1.2}, {"year": 2016, "return_pct": 7.8},
+            {"year": 2017, "return_pct": 5.4}, {"year": 2018, "return_pct": -2.8},
+            {"year": 2019, "return_pct": 9.2}, {"year": 2020, "return_pct": 6.4},
+            {"year": 2021, "return_pct": -1.2}, {"year": 2022, "return_pct": -12.4},
+            {"year": 2023, "return_pct": 8.9}, {"year": 2024, "return_pct": 7.5},
+            {"year": 2025, "return_pct": 5.8}
+        ]
     },
     {
         "id": "lgim-gilt-index",
@@ -335,7 +483,17 @@ TRUSTNET_MASTER_FUNDS = [
         "benchmark": "FTSE Actuaries UK Conventional Gilts",
         "alpha": -0.04,
         "ocf_pct": 0.15,
-        "trustnet_url": "https://www.trustnet.com/factsheets/O/b009/legal--general-all-stocks-gilt-index-trust"
+        "trustnet_url": "https://www.trustnet.com/factsheets/O/b009/legal--general-all-stocks-gilt-index-trust",
+        "yearly_returns": [
+            {"year": 2011, "return_pct": 16.2}, {"year": 2012, "return_pct": 2.7},
+            {"year": 2013, "return_pct": -5.4}, {"year": 2014, "return_pct": 13.8},
+            {"year": 2015, "return_pct": 0.6}, {"year": 2016, "return_pct": 10.1},
+            {"year": 2017, "return_pct": 1.8}, {"year": 2018, "return_pct": 0.6},
+            {"year": 2019, "return_pct": 6.9}, {"year": 2020, "return_pct": 8.3},
+            {"year": 2021, "return_pct": -5.2}, {"year": 2022, "return_pct": -23.8},
+            {"year": 2023, "return_pct": 3.6}, {"year": 2024, "return_pct": 4.8},
+            {"year": 2025, "return_pct": 4.2}
+        ]
     },
     {
         "id": "royal-london-money-market",
@@ -355,7 +513,17 @@ TRUSTNET_MASTER_FUNDS = [
         "benchmark": "SONIA",
         "alpha": 0.05,
         "ocf_pct": 0.10,
-        "trustnet_url": "https://www.trustnet.com/factsheets/O/n63q/royal-london-short-term-money-market-fund"
+        "trustnet_url": "https://www.trustnet.com/factsheets/O/n63q/royal-london-short-term-money-market-fund",
+        "yearly_returns": [
+            {"year": 2011, "return_pct": 0.8}, {"year": 2012, "return_pct": 0.9},
+            {"year": 2013, "return_pct": 0.6}, {"year": 2014, "return_pct": 0.5},
+            {"year": 2015, "return_pct": 0.6}, {"year": 2016, "return_pct": 0.5},
+            {"year": 2017, "return_pct": 0.3}, {"year": 2018, "return_pct": 0.6},
+            {"year": 2019, "return_pct": 0.8}, {"year": 2020, "return_pct": 0.4},
+            {"year": 2021, "return_pct": 0.1}, {"year": 2022, "return_pct": 1.4},
+            {"year": 2023, "return_pct": 4.8}, {"year": 2024, "return_pct": 5.2},
+            {"year": 2025, "return_pct": 4.9}
+        ]
     },
     {
         "id": "ishares-global-agg-bond",
@@ -375,7 +543,14 @@ TRUSTNET_MASTER_FUNDS = [
         "benchmark": "Bloomberg Global Aggregate Index (GBP Hedged)",
         "alpha": -0.08,
         "ocf_pct": 0.10,
-        "trustnet_url": "https://www.trustnet.com/factsheets/E/agbp/ishares-core-global-aggregate-bond-ucits-etf-gbp-hedged-dist"
+        "trustnet_url": "https://www.trustnet.com/factsheets/E/agbp/ishares-core-global-aggregate-bond-ucits-etf-gbp-hedged-dist",
+        "yearly_returns": [
+            {"year": 2017, "return_pct": 2.4}, {"year": 2018, "return_pct": -1.2},
+            {"year": 2019, "return_pct": 6.8}, {"year": 2020, "return_pct": 5.4},
+            {"year": 2021, "return_pct": -2.1}, {"year": 2022, "return_pct": -13.2},
+            {"year": 2023, "return_pct": 5.4}, {"year": 2024, "return_pct": 6.1},
+            {"year": 2025, "return_pct": 4.8}
+        ]
     }
 ]
 
@@ -424,10 +599,7 @@ class AdvisorRequestHandler(http.server.SimpleHTTPRequestHandler):
                         monthly_res = pmt * 12 * years
                     return round(lump_res + monthly_res)
 
-                # Use top-tier multi-house allocations:
-                # Active Top Alpha: Fidelity Tech (21.5%), Slater Growth (12.2%), Fundsmith (14.8%), BlackRock European (11.8%)
                 active_rate = (21.5 * 0.3) + (12.2 * 0.25) + (14.8 * 0.25) + (11.8 * 0.20)
-                # Passive Top Index: LGIM Tech (20.8%), iShares S&P 500 (14.2%), Fidelity World (11.8%), Fidelity UK (6.8%)
                 passive_rate = (20.8 * 0.35) + (14.2 * 0.30) + (11.8 * 0.20) + (6.8 * 0.15)
 
                 total_principal = lump_sum + (monthly_amount * 12 * horizon)

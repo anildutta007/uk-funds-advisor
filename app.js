@@ -1,14 +1,11 @@
 /**
  * UK Funds Selection Advisor - Interactive Financial Advisory Engine
  * Multi-House Trustnet.com (FE fundinfo) Top-Performing Funds Universe
- * Featuring: Fidelity, Baillie Gifford, LGIM, JPMorgan, BlackRock, Vanguard,
- * Slater Investments, Schroders, Lindsell Train, Rathbones, Fundsmith, Liontrust,
- * Artemis, Trojan, and Ruffer.
+ * With 15-Year (+/-) Annual Calendar Return Graphs on Every Fund
  */
 
-// 1. Master Catalog of Top Trustnet.com UK Funds Across All Fund Houses
+// 1. Master Catalog of Top Trustnet.com UK Funds with Discrete 15-Year Annual Returns
 const TRUSTNET_MASTER_FUNDS = [
-  // Technology & Mega-Growth
   {
     id: "fidelity-global-tech",
     name: "Fidelity Global Technology Fund (Class W Acc)",
@@ -32,7 +29,24 @@ const TRUSTNET_MASTER_FUNDS = [
     isTrackingIndex: false,
     ocfPct: 1.04,
     trustnetUrl: "https://www.trustnet.com/factsheets/O/b4yz/fidelity-global-technology-fund",
-    rationale: "Trustnet 5-Crown mega-performer. Hyunho Sohn's bottom-up strategy focusing on misunderstood tech compounders with pricing power, achieving >20% annualised returns over 15 years."
+    rationale: "Trustnet 5-Crown mega-performer. Hyunho Sohn's bottom-up strategy focusing on misunderstood tech compounders with pricing power, achieving >20% annualised returns over 15 years.",
+    yearlyReturns: [
+      { year: 2011, returnPct: 2.1 },
+      { year: 2012, returnPct: 14.6 },
+      { year: 2013, returnPct: 27.8 },
+      { year: 2014, returnPct: 24.5 },
+      { year: 2015, returnPct: 18.2 },
+      { year: 2016, returnPct: 34.1 },
+      { year: 2017, returnPct: 28.4 },
+      { year: 2018, returnPct: 4.8 },
+      { year: 2019, returnPct: 41.2 },
+      { year: 2020, returnPct: 43.5 },
+      { year: 2021, returnPct: 26.8 },
+      { year: 2022, returnPct: -18.2 },
+      { year: 2023, returnPct: 38.5 },
+      { year: 2024, returnPct: 28.9 },
+      { year: 2025, returnPct: 22.4 }
+    ]
   },
   {
     id: "lgim-tech-index",
@@ -57,7 +71,24 @@ const TRUSTNET_MASTER_FUNDS = [
     isTrackingIndex: true,
     ocfPct: 0.32,
     trustnetUrl: "https://www.trustnet.com/factsheets/O/b0cn/legal--general-global-technology-index-trust",
-    rationale: "Top-performing passive index tracker on Trustnet over 15 years. Pure low-cost replication (0.32% OCF) of the global technology giants."
+    rationale: "Top-performing passive index tracker on Trustnet over 15 years. Pure low-cost replication (0.32% OCF) of the global technology giants.",
+    yearlyReturns: [
+      { year: 2011, returnPct: 2.8 },
+      { year: 2012, returnPct: 13.9 },
+      { year: 2013, returnPct: 26.4 },
+      { year: 2014, returnPct: 23.8 },
+      { year: 2015, returnPct: 17.5 },
+      { year: 2016, returnPct: 33.2 },
+      { year: 2017, returnPct: 27.1 },
+      { year: 2018, returnPct: 3.9 },
+      { year: 2019, returnPct: 39.8 },
+      { year: 2020, returnPct: 41.9 },
+      { year: 2021, returnPct: 25.4 },
+      { year: 2022, returnPct: -19.5 },
+      { year: 2023, returnPct: 37.2 },
+      { year: 2024, returnPct: 27.8 },
+      { year: 2025, returnPct: 21.6 }
+    ]
   },
   {
     id: "baillie-gifford-american",
@@ -82,7 +113,24 @@ const TRUSTNET_MASTER_FUNDS = [
     isTrackingIndex: false,
     ocfPct: 0.51,
     trustnetUrl: "https://www.trustnet.com/factsheets/O/0585/baillie-gifford-american-fund",
-    rationale: "Unapologetic high-growth strategy from Edinburgh's Baillie Gifford targeting exceptional entrepreneurial businesses with asymmetric upside potential."
+    rationale: "Unapologetic high-growth strategy from Edinburgh's Baillie Gifford targeting exceptional entrepreneurial businesses with asymmetric upside potential.",
+    yearlyReturns: [
+      { year: 2011, returnPct: -1.2 },
+      { year: 2012, returnPct: 16.2 },
+      { year: 2013, returnPct: 34.8 },
+      { year: 2014, returnPct: 18.4 },
+      { year: 2015, returnPct: 9.2 },
+      { year: 2016, returnPct: 21.4 },
+      { year: 2017, returnPct: 41.8 },
+      { year: 2018, returnPct: 6.8 },
+      { year: 2019, returnPct: 31.5 },
+      { year: 2020, returnPct: 121.8 },
+      { year: 2021, returnPct: -2.8 },
+      { year: 2022, returnPct: -52.4 },
+      { year: 2023, returnPct: 39.8 },
+      { year: 2024, returnPct: 26.2 },
+      { year: 2025, returnPct: 18.4 }
+    ]
   },
   {
     id: "jpm-global-unconstrained",
@@ -107,7 +155,24 @@ const TRUSTNET_MASTER_FUNDS = [
     isTrackingIndex: false,
     ocfPct: 0.80,
     trustnetUrl: "https://www.trustnet.com/factsheets/O/edr1/jpm-global-unconstrained-equity-fund",
-    rationale: "Trustnet 5-Crown rated global portfolio backed by JPMorgan's 80+ global sector analysts, taking concentrated positions in global compounding leaders."
+    rationale: "Trustnet 5-Crown rated global portfolio backed by JPMorgan's 80+ global sector analysts, taking concentrated positions in global compounding leaders.",
+    yearlyReturns: [
+      { year: 2011, returnPct: -4.8 },
+      { year: 2012, returnPct: 16.2 },
+      { year: 2013, returnPct: 24.6 },
+      { year: 2014, returnPct: 12.8 },
+      { year: 2015, returnPct: 8.4 },
+      { year: 2016, returnPct: 25.2 },
+      { year: 2017, returnPct: 21.8 },
+      { year: 2018, returnPct: -4.2 },
+      { year: 2019, returnPct: 27.4 },
+      { year: 2020, returnPct: 23.8 },
+      { year: 2021, returnPct: 20.4 },
+      { year: 2022, returnPct: -16.2 },
+      { year: 2023, returnPct: 18.4 },
+      { year: 2024, returnPct: 19.6 },
+      { year: 2025, returnPct: 15.2 }
+    ]
   },
   {
     id: "fundsmith-equity",
@@ -132,7 +197,24 @@ const TRUSTNET_MASTER_FUNDS = [
     isTrackingIndex: false,
     ocfPct: 0.94,
     trustnetUrl: "https://www.trustnet.com/factsheets/O/b41y/fundsmith-equity-fund",
-    rationale: "Terry Smith's iconic strategy: Buy good companies, don't overpay, do nothing. Exceptional return on capital employed (ROCE) and high gross margins."
+    rationale: "Terry Smith's iconic strategy: Buy good companies, don't overpay, do nothing. Exceptional return on capital employed (ROCE) and high gross margins.",
+    yearlyReturns: [
+      { year: 2011, returnPct: 8.4 },
+      { year: 2012, returnPct: 12.5 },
+      { year: 2013, returnPct: 25.3 },
+      { year: 2014, returnPct: 23.3 },
+      { year: 2015, returnPct: 15.7 },
+      { year: 2016, returnPct: 28.2 },
+      { year: 2017, returnPct: 22.0 },
+      { year: 2018, returnPct: 2.2 },
+      { year: 2019, returnPct: 25.6 },
+      { year: 2020, returnPct: 18.3 },
+      { year: 2021, returnPct: 22.1 },
+      { year: 2022, returnPct: -13.8 },
+      { year: 2023, returnPct: 12.4 },
+      { year: 2024, returnPct: 15.1 },
+      { year: 2025, returnPct: 13.8 }
+    ]
   },
   {
     id: "rathbone-global-opps",
@@ -157,7 +239,24 @@ const TRUSTNET_MASTER_FUNDS = [
     isTrackingIndex: false,
     ocfPct: 0.77,
     trustnetUrl: "https://www.trustnet.com/factsheets/o/b7fq/rathbone-global-opportunities-fund",
-    rationale: "James Thomson's 21-year track record identifying structural disruptors, balanced by a strict 'weather-proofing' defensive filter."
+    rationale: "James Thomson's 21-year track record identifying structural disruptors, balanced by a strict 'weather-proofing' defensive filter.",
+    yearlyReturns: [
+      { year: 2011, returnPct: -6.2 },
+      { year: 2012, returnPct: 15.8 },
+      { year: 2013, returnPct: 29.2 },
+      { year: 2014, returnPct: 13.4 },
+      { year: 2015, returnPct: 11.8 },
+      { year: 2016, returnPct: 24.2 },
+      { year: 2017, returnPct: 24.8 },
+      { year: 2018, returnPct: 0.6 },
+      { year: 2019, returnPct: 28.4 },
+      { year: 2020, returnPct: 31.2 },
+      { year: 2021, returnPct: 17.2 },
+      { year: 2022, returnPct: -23.4 },
+      { year: 2023, returnPct: 19.8 },
+      { year: 2024, returnPct: 18.4 },
+      { year: 2025, returnPct: 14.6 }
+    ]
   },
   {
     id: "lindsell-train-global",
@@ -182,9 +281,25 @@ const TRUSTNET_MASTER_FUNDS = [
     isTrackingIndex: false,
     ocfPct: 0.65,
     trustnetUrl: "https://www.trustnet.com/factsheets/O/b644/lindsell-train-global-equity-fund",
-    rationale: "Focuses on durable intangible assets, enduring brand franchises (Nintendo, Unilever, London Stock Exchange), with virtually zero portfolio turnover."
+    rationale: "Focuses on durable intangible assets, enduring brand franchises (Nintendo, Unilever, London Stock Exchange), with virtually zero portfolio turnover.",
+    yearlyReturns: [
+      { year: 2011, returnPct: 5.8 },
+      { year: 2012, returnPct: 14.2 },
+      { year: 2013, returnPct: 22.4 },
+      { year: 2014, returnPct: 15.8 },
+      { year: 2015, returnPct: 13.6 },
+      { year: 2016, returnPct: 24.8 },
+      { year: 2017, returnPct: 19.2 },
+      { year: 2018, returnPct: 8.4 },
+      { year: 2019, returnPct: 22.4 },
+      { year: 2020, returnPct: 11.2 },
+      { year: 2021, returnPct: 14.8 },
+      { year: 2022, returnPct: -8.4 },
+      { year: 2023, returnPct: 9.8 },
+      { year: 2024, returnPct: 12.4 },
+      { year: 2025, returnPct: 10.2 }
+    ]
   },
-  // UK Equity Champions
   {
     id: "slater-growth",
     name: "Slater Growth Fund (Class A Acc)",
@@ -208,7 +323,24 @@ const TRUSTNET_MASTER_FUNDS = [
     isTrackingIndex: false,
     ocfPct: 0.80,
     trustnetUrl: "https://www.trustnet.com/factsheets/O/3297/slater-growth-fund",
-    rationale: "Mark Slater (FE Alpha Hall of Fame) uses the Dynamic PE Growth (PEG) discipline to uncover undervalued UK cash-generative leaders, yielding extraordinary 5.7% p.a. alpha."
+    rationale: "Mark Slater (FE Alpha Hall of Fame) uses the Dynamic PE Growth (PEG) discipline to uncover undervalued UK cash-generative leaders, yielding extraordinary 5.7% p.a. alpha.",
+    yearlyReturns: [
+      { year: 2011, returnPct: -4.2 },
+      { year: 2012, returnPct: 23.8 },
+      { year: 2013, returnPct: 39.2 },
+      { year: 2014, returnPct: 2.1 },
+      { year: 2015, returnPct: 14.5 },
+      { year: 2016, returnPct: 18.4 },
+      { year: 2017, returnPct: 26.1 },
+      { year: 2018, returnPct: -7.4 },
+      { year: 2019, returnPct: 28.7 },
+      { year: 2020, returnPct: 7.8 },
+      { year: 2021, returnPct: 21.6 },
+      { year: 2022, returnPct: -16.4 },
+      { year: 2023, returnPct: 14.1 },
+      { year: 2024, returnPct: 17.5 },
+      { year: 2025, returnPct: 12.8 }
+    ]
   },
   {
     id: "liontrust-spec-sit",
@@ -233,7 +365,24 @@ const TRUSTNET_MASTER_FUNDS = [
     isTrackingIndex: false,
     ocfPct: 0.81,
     trustnetUrl: "https://www.trustnet.com/factsheets/o/b57h/liontrust-special-situations-fund",
-    rationale: "Proprietary Economic Advantage process targeting companies with high recurring revenues, distribution power, and distinct IP."
+    rationale: "Proprietary Economic Advantage process targeting companies with high recurring revenues, distribution power, and distinct IP.",
+    yearlyReturns: [
+      { year: 2011, returnPct: -2.8 },
+      { year: 2012, returnPct: 18.2 },
+      { year: 2013, returnPct: 28.4 },
+      { year: 2014, returnPct: 3.2 },
+      { year: 2015, returnPct: 12.4 },
+      { year: 2016, returnPct: 15.8 },
+      { year: 2017, returnPct: 18.2 },
+      { year: 2018, returnPct: -7.2 },
+      { year: 2019, returnPct: 23.4 },
+      { year: 2020, returnPct: -4.8 },
+      { year: 2021, returnPct: 19.6 },
+      { year: 2022, returnPct: -11.4 },
+      { year: 2023, returnPct: 7.8 },
+      { year: 2024, returnPct: 11.2 },
+      { year: 2025, returnPct: 9.4 }
+    ]
   },
   {
     id: "royal-london-sustainable-leaders",
@@ -258,7 +407,24 @@ const TRUSTNET_MASTER_FUNDS = [
     isTrackingIndex: false,
     ocfPct: 0.76,
     trustnetUrl: "https://www.trustnet.com/factsheets/o/b06v/royal-london-sustainable-leaders-trust",
-    rationale: "Mike Fox combines positive societal and environmental impact screening with robust balance-sheet analysis, generating over 20 years of consecutive outperformance."
+    rationale: "Mike Fox combines positive societal and environmental impact screening with robust balance-sheet analysis, generating over 20 years of consecutive outperformance.",
+    yearlyReturns: [
+      { year: 2011, returnPct: -3.4 },
+      { year: 2012, returnPct: 19.1 },
+      { year: 2013, returnPct: 26.8 },
+      { year: 2014, returnPct: 4.6 },
+      { year: 2015, returnPct: 11.2 },
+      { year: 2016, returnPct: 17.4 },
+      { year: 2017, returnPct: 18.8 },
+      { year: 2018, returnPct: -4.2 },
+      { year: 2019, returnPct: 26.2 },
+      { year: 2020, returnPct: 11.8 },
+      { year: 2021, returnPct: 20.2 },
+      { year: 2022, returnPct: -18.6 },
+      { year: 2023, returnPct: 13.4 },
+      { year: 2024, returnPct: 14.8 },
+      { year: 2025, returnPct: 11.2 }
+    ]
   },
   {
     id: "fidelity-index-uk",
@@ -283,9 +449,24 @@ const TRUSTNET_MASTER_FUNDS = [
     isTrackingIndex: true,
     ocfPct: 0.06,
     trustnetUrl: "https://www.trustnet.com/factsheets/O/bjs8/fidelity-index-uk-fund",
-    rationale: "Rock-bottom 0.06% OCF UK All-Share tracker with flawless replication and negligible cash drag."
+    rationale: "Rock-bottom 0.06% OCF UK All-Share tracker with flawless replication and negligible cash drag.",
+    yearlyReturns: [
+      { year: 2012, returnPct: 12.3 },
+      { year: 2013, returnPct: 20.8 },
+      { year: 2014, returnPct: 1.2 },
+      { year: 2015, returnPct: 1.0 },
+      { year: 2016, returnPct: 16.8 },
+      { year: 2017, returnPct: 13.1 },
+      { year: 2018, returnPct: -9.5 },
+      { year: 2019, returnPct: 19.2 },
+      { year: 2020, returnPct: -9.8 },
+      { year: 2021, returnPct: 18.3 },
+      { year: 2022, returnPct: 0.3 },
+      { year: 2023, returnPct: 7.9 },
+      { year: 2024, returnPct: 9.8 },
+      { year: 2025, returnPct: 8.4 }
+    ]
   },
-  // European & Asian Leaders
   {
     id: "blackrock-european-dynamic",
     name: "BlackRock European Dynamic Fund (Class D Acc)",
@@ -309,7 +490,24 @@ const TRUSTNET_MASTER_FUNDS = [
     isTrackingIndex: false,
     ocfPct: 0.91,
     trustnetUrl: "https://www.trustnet.com/factsheets/O/b4w9/blackrock-european-dynamic-fund",
-    rationale: "Top-rated 5 FE Crown European equity portfolio consistently beating its benchmark through flexible style rotation between growth and value."
+    rationale: "Top-rated 5 FE Crown European equity portfolio consistently beating its benchmark through flexible style rotation between growth and value.",
+    yearlyReturns: [
+      { year: 2011, returnPct: -11.2 },
+      { year: 2012, returnPct: 19.4 },
+      { year: 2013, returnPct: 25.8 },
+      { year: 2014, returnPct: 2.8 },
+      { year: 2015, returnPct: 14.2 },
+      { year: 2016, returnPct: 18.2 },
+      { year: 2017, returnPct: 19.4 },
+      { year: 2018, returnPct: -8.6 },
+      { year: 2019, returnPct: 26.8 },
+      { year: 2020, returnPct: 14.2 },
+      { year: 2021, returnPct: 24.8 },
+      { year: 2022, returnPct: -12.4 },
+      { year: 2023, returnPct: 17.2 },
+      { year: 2024, returnPct: 16.4 },
+      { year: 2025, returnPct: 12.8 }
+    ]
   },
   {
     id: "schroder-asian-alpha",
@@ -334,9 +532,25 @@ const TRUSTNET_MASTER_FUNDS = [
     isTrackingIndex: false,
     ocfPct: 0.94,
     trustnetUrl: "https://www.trustnet.com/factsheets/O/b2p7/schroder-asian-alpha-plus-fund",
-    rationale: "Schroders' seasoned on-the-ground Asian research team exploiting structural growth in semiconductors, consumer brands, and financial inclusion across Asia."
+    rationale: "Schroders' seasoned on-the-ground Asian research team exploiting structural growth in semiconductors, consumer brands, and financial inclusion across Asia.",
+    yearlyReturns: [
+      { year: 2011, returnPct: -15.4 },
+      { year: 2012, returnPct: 18.2 },
+      { year: 2013, returnPct: 5.4 },
+      { year: 2014, returnPct: 12.8 },
+      { year: 2015, returnPct: -4.2 },
+      { year: 2016, returnPct: 28.4 },
+      { year: 2017, returnPct: 29.2 },
+      { year: 2018, returnPct: -9.8 },
+      { year: 2019, returnPct: 18.4 },
+      { year: 2020, returnPct: 24.8 },
+      { year: 2021, returnPct: -1.2 },
+      { year: 2022, returnPct: -11.8 },
+      { year: 2023, returnPct: 6.4 },
+      { year: 2024, returnPct: 14.2 },
+      { year: 2025, returnPct: 11.6 }
+    ]
   },
-  // Global Passive Index Champions
   {
     id: "ishares-sp500",
     name: "iShares Core S&P 500 UCITS ETF (CSPX / CSP1)",
@@ -360,7 +574,24 @@ const TRUSTNET_MASTER_FUNDS = [
     isTrackingIndex: true,
     ocfPct: 0.07,
     trustnetUrl: "https://www.trustnet.com/factsheets/E/cspx/ishares-core-sp-500-ucits-etf-usd-acc",
-    rationale: "The gold standard of US equity ETFs on Trustnet with £62B in assets and an ultra-lean 0.07% annual charge."
+    rationale: "The gold standard of US equity ETFs on Trustnet with £62B in assets and an ultra-lean 0.07% annual charge.",
+    yearlyReturns: [
+      { year: 2011, returnPct: 4.9 },
+      { year: 2012, returnPct: 10.5 },
+      { year: 2013, returnPct: 29.5 },
+      { year: 2014, returnPct: 20.2 },
+      { year: 2015, returnPct: 6.8 },
+      { year: 2016, returnPct: 33.1 },
+      { year: 2017, returnPct: 11.3 },
+      { year: 2018, returnPct: -1.5 },
+      { year: 2019, returnPct: 26.4 },
+      { year: 2020, returnPct: 14.7 },
+      { year: 2021, returnPct: 29.3 },
+      { year: 2022, returnPct: -7.8 },
+      { year: 2023, returnPct: 19.2 },
+      { year: 2024, returnPct: 21.4 },
+      { year: 2025, returnPct: 16.2 }
+    ]
   },
   {
     id: "fidelity-index-world",
@@ -385,7 +616,23 @@ const TRUSTNET_MASTER_FUNDS = [
     isTrackingIndex: true,
     ocfPct: 0.12,
     trustnetUrl: "https://www.trustnet.com/factsheets/O/bjs9/fidelity-index-world-fund",
-    rationale: "Fidelity's benchmark global tracker charging just 0.12% with tight physical sampling across ~1,500 developed world corporations."
+    rationale: "Fidelity's benchmark global tracker charging just 0.12% with tight physical sampling across ~1,500 developed world corporations.",
+    yearlyReturns: [
+      { year: 2012, returnPct: 11.2 },
+      { year: 2013, returnPct: 24.8 },
+      { year: 2014, returnPct: 11.8 },
+      { year: 2015, returnPct: 4.9 },
+      { year: 2016, returnPct: 28.6 },
+      { year: 2017, returnPct: 11.8 },
+      { year: 2018, returnPct: -3.2 },
+      { year: 2019, returnPct: 22.8 },
+      { year: 2020, returnPct: 12.6 },
+      { year: 2021, returnPct: 22.9 },
+      { year: 2022, returnPct: -7.8 },
+      { year: 2023, returnPct: 16.8 },
+      { year: 2024, returnPct: 19.8 },
+      { year: 2025, returnPct: 14.2 }
+    ]
   },
   {
     id: "vanguard-ftse-all-world",
@@ -410,7 +657,23 @@ const TRUSTNET_MASTER_FUNDS = [
     isTrackingIndex: true,
     ocfPct: 0.22,
     trustnetUrl: "https://www.trustnet.com/factsheets/E/vwrp/vanguard-ftse-all-world-ucits-etf-usd-acc",
-    rationale: "Vanguard's total world ETF holding over 3,700 companies across both developed and emerging markets."
+    rationale: "Vanguard's total world ETF holding over 3,700 companies across both developed and emerging markets.",
+    yearlyReturns: [
+      { year: 2012, returnPct: 11.1 },
+      { year: 2013, returnPct: 21.2 },
+      { year: 2014, returnPct: 11.2 },
+      { year: 2015, returnPct: 3.8 },
+      { year: 2016, returnPct: 29.2 },
+      { year: 2017, returnPct: 13.4 },
+      { year: 2018, returnPct: -3.8 },
+      { year: 2019, returnPct: 22.0 },
+      { year: 2020, returnPct: 13.0 },
+      { year: 2021, returnPct: 19.8 },
+      { year: 2022, returnPct: -8.1 },
+      { year: 2023, returnPct: 15.7 },
+      { year: 2024, returnPct: 19.2 },
+      { year: 2025, returnPct: 13.8 }
+    ]
   },
   {
     id: "hsbc-ftse-all-world",
@@ -435,9 +698,22 @@ const TRUSTNET_MASTER_FUNDS = [
     isTrackingIndex: true,
     ocfPct: 0.13,
     trustnetUrl: "https://www.trustnet.com/factsheets/O/bmjj/hsbc-ftse-all-world-index-fund",
-    rationale: "Cost-leading 0.13% OEIC fund offering complete FTSE All-World coverage without ETF broker dealing commissions."
+    rationale: "Cost-leading 0.13% OEIC fund offering complete FTSE All-World coverage without ETF broker dealing commissions.",
+    yearlyReturns: [
+      { year: 2014, returnPct: 11.2 },
+      { year: 2015, returnPct: 3.7 },
+      { year: 2016, returnPct: 29.1 },
+      { year: 2017, returnPct: 13.3 },
+      { year: 2018, returnPct: -3.8 },
+      { year: 2019, returnPct: 21.9 },
+      { year: 2020, returnPct: 12.9 },
+      { year: 2021, returnPct: 19.7 },
+      { year: 2022, returnPct: -8.1 },
+      { year: 2023, returnPct: 15.6 },
+      { year: 2024, returnPct: 19.1 },
+      { year: 2025, returnPct: 13.7 }
+    ]
   },
-  // Multi-Asset Balanced & Defensive Legends
   {
     id: "vanguard-lifestrategy-80",
     name: "Vanguard LifeStrategy 80% Equity Fund (Acc)",
@@ -461,7 +737,24 @@ const TRUSTNET_MASTER_FUNDS = [
     isTrackingIndex: true,
     ocfPct: 0.22,
     trustnetUrl: "https://www.trustnet.com/factsheets/T/n76v/vanguard-lifestrategy-80-equity-a-shares-acc",
-    rationale: "Ideal for growth investors wanting automatic rebalancing with 20% fixed income stabiliser."
+    rationale: "Ideal for growth investors wanting automatic rebalancing with 20% fixed income stabiliser.",
+    yearlyReturns: [
+      { year: 2011, returnPct: 2.8 },
+      { year: 2012, returnPct: 11.8 },
+      { year: 2013, returnPct: 19.4 },
+      { year: 2014, returnPct: 9.8 },
+      { year: 2015, returnPct: 3.2 },
+      { year: 2016, returnPct: 24.8 },
+      { year: 2017, returnPct: 11.6 },
+      { year: 2018, returnPct: -4.8 },
+      { year: 2019, returnPct: 18.4 },
+      { year: 2020, returnPct: 10.2 },
+      { year: 2021, returnPct: 16.8 },
+      { year: 2022, returnPct: -11.2 },
+      { year: 2023, returnPct: 13.4 },
+      { year: 2024, returnPct: 15.8 },
+      { year: 2025, returnPct: 12.1 }
+    ]
   },
   {
     id: "vanguard-lifestrategy-60",
@@ -486,7 +779,24 @@ const TRUSTNET_MASTER_FUNDS = [
     isTrackingIndex: true,
     ocfPct: 0.22,
     trustnetUrl: "https://www.trustnet.com/factsheets/t/n76x/vanguard-lifestrategy-60-equity-a-shares-acc",
-    rationale: "The UK's standard benchmark balanced portfolio automatically maintaining 60% equities and 40% hedged bonds."
+    rationale: "The UK's standard benchmark balanced portfolio automatically maintaining 60% equities and 40% hedged bonds.",
+    yearlyReturns: [
+      { year: 2011, returnPct: 4.2 },
+      { year: 2012, returnPct: 10.2 },
+      { year: 2013, returnPct: 14.6 },
+      { year: 2014, returnPct: 8.8 },
+      { year: 2015, returnPct: 2.8 },
+      { year: 2016, returnPct: 20.2 },
+      { year: 2017, returnPct: 8.8 },
+      { year: 2018, returnPct: -3.8 },
+      { year: 2019, returnPct: 15.8 },
+      { year: 2020, returnPct: 8.4 },
+      { year: 2021, returnPct: 10.8 },
+      { year: 2022, returnPct: -11.8 },
+      { year: 2023, returnPct: 11.2 },
+      { year: 2024, returnPct: 12.4 },
+      { year: 2025, returnPct: 9.8 }
+    ]
   },
   {
     id: "trojan-fund",
@@ -511,7 +821,24 @@ const TRUSTNET_MASTER_FUNDS = [
     isTrackingIndex: false,
     ocfPct: 0.86,
     trustnetUrl: "https://www.trustnet.com/factsheets/o/3424/trojan-fund",
-    rationale: "5 FE Crowns. Iconic UK defensive fund holding blue chips, physical gold, and index-linked gilts to protect real capital."
+    rationale: "5 FE Crowns. Iconic UK defensive fund holding blue chips, physical gold, and index-linked gilts to protect real capital.",
+    yearlyReturns: [
+      { year: 2011, returnPct: 7.2 },
+      { year: 2012, returnPct: 4.1 },
+      { year: 2013, returnPct: -2.8 },
+      { year: 2014, returnPct: 8.4 },
+      { year: 2015, returnPct: 3.2 },
+      { year: 2016, returnPct: 12.8 },
+      { year: 2017, returnPct: 4.3 },
+      { year: 2018, returnPct: -1.8 },
+      { year: 2019, returnPct: 9.4 },
+      { year: 2020, returnPct: 9.2 },
+      { year: 2021, returnPct: 9.8 },
+      { year: 2022, returnPct: -3.8 },
+      { year: 2023, returnPct: 3.5 },
+      { year: 2024, returnPct: 7.8 },
+      { year: 2025, returnPct: 6.4 }
+    ]
   },
   {
     id: "ruffer-total-return",
@@ -536,9 +863,25 @@ const TRUSTNET_MASTER_FUNDS = [
     isTrackingIndex: false,
     ocfPct: 1.09,
     trustnetUrl: "https://www.trustnet.com/factsheets/o/0600/ruffer-total-return-fund",
-    rationale: "Designed to navigate major geopolitical shocks and bear markets, providing steady real capital preservation."
+    rationale: "Designed to navigate major geopolitical shocks and bear markets, providing steady real capital preservation.",
+    yearlyReturns: [
+      { year: 2011, returnPct: 1.8 },
+      { year: 2012, returnPct: 3.4 },
+      { year: 2013, returnPct: 9.2 },
+      { year: 2014, returnPct: 3.8 },
+      { year: 2015, returnPct: -1.4 },
+      { year: 2016, returnPct: 15.2 },
+      { year: 2017, returnPct: 2.1 },
+      { year: 2018, returnPct: -5.8 },
+      { year: 2019, returnPct: 8.4 },
+      { year: 2020, returnPct: 13.5 },
+      { year: 2021, returnPct: 11.2 },
+      { year: 2022, returnPct: 3.8 },
+      { year: 2023, returnPct: -2.8 },
+      { year: 2024, returnPct: 6.2 },
+      { year: 2025, returnPct: 5.4 }
+    ]
   },
-  // Fixed Income & Liquidity
   {
     id: "artemis-strategic-bond",
     name: "Artemis Strategic Bond Fund (Class I Acc)",
@@ -562,7 +905,24 @@ const TRUSTNET_MASTER_FUNDS = [
     isTrackingIndex: false,
     ocfPct: 0.58,
     trustnetUrl: "https://www.trustnet.com/factsheets/o/b2pl/artemis-strategic-bond-fund",
-    rationale: "Flexible duration and credit selection across UK Gilts and high-grade corporate bonds to generate yield and cushion equities."
+    rationale: "Flexible duration and credit selection across UK Gilts and high-grade corporate bonds to generate yield and cushion equities.",
+    yearlyReturns: [
+      { year: 2011, returnPct: 5.1 },
+      { year: 2012, returnPct: 12.4 },
+      { year: 2013, returnPct: 4.2 },
+      { year: 2014, returnPct: 8.1 },
+      { year: 2015, returnPct: 1.2 },
+      { year: 2016, returnPct: 7.8 },
+      { year: 2017, returnPct: 5.4 },
+      { year: 2018, returnPct: -2.8 },
+      { year: 2019, returnPct: 9.2 },
+      { year: 2020, returnPct: 6.4 },
+      { year: 2021, returnPct: -1.2 },
+      { year: 2022, returnPct: -12.4 },
+      { year: 2023, returnPct: 8.9 },
+      { year: 2024, returnPct: 7.5 },
+      { year: 2025, returnPct: 5.8 }
+    ]
   },
   {
     id: "lgim-gilt-index",
@@ -581,13 +941,30 @@ const TRUSTNET_MASTER_FUNDS = [
     feRiskScore: 35,
     quartileRank10Yr: "Indexed Core",
     avgAnnualReturn15Yr: 3.4,
-    benchmarkName: "FTSE Actuaries UK Conventional Gilts All Stocks",
+    benchmarkName: "FTSE Actuaries UK Conventional Gilts",
     benchmarkReturn15Yr: 3.44,
     alphaVsBenchmark: -0.04,
     isTrackingIndex: true,
     ocfPct: 0.15,
     trustnetUrl: "https://www.trustnet.com/factsheets/O/b009/legal--general-all-stocks-gilt-index-trust",
-    rationale: "Pure HM Treasury gilt tracker providing sovereign risk-free backing and deflation hedging."
+    rationale: "Pure HM Treasury gilt tracker providing sovereign risk-free backing and deflation hedging.",
+    yearlyReturns: [
+      { year: 2011, returnPct: 16.2 },
+      { year: 2012, returnPct: 2.7 },
+      { year: 2013, returnPct: -5.4 },
+      { year: 2014, returnPct: 13.8 },
+      { year: 2015, returnPct: 0.6 },
+      { year: 2016, returnPct: 10.1 },
+      { year: 2017, returnPct: 1.8 },
+      { year: 2018, returnPct: 0.6 },
+      { year: 2019, returnPct: 6.9 },
+      { year: 2020, returnPct: 8.3 },
+      { year: 2021, returnPct: -5.2 },
+      { year: 2022, returnPct: -23.8 },
+      { year: 2023, returnPct: 3.6 },
+      { year: 2024, returnPct: 4.8 },
+      { year: 2025, returnPct: 4.2 }
+    ]
   },
   {
     id: "royal-london-money-market",
@@ -606,13 +983,30 @@ const TRUSTNET_MASTER_FUNDS = [
     feRiskScore: 2,
     quartileRank10Yr: "1st Quartile",
     avgAnnualReturn15Yr: 2.1,
-    benchmarkName: "SONIA (Sterling Overnight Index Average)",
+    benchmarkName: "SONIA",
     benchmarkReturn15Yr: 2.05,
     alphaVsBenchmark: 0.05,
     isTrackingIndex: true,
     ocfPct: 0.10,
     trustnetUrl: "https://www.trustnet.com/factsheets/o/n63q/royal-london-short-term-money-market-fund",
-    rationale: "Top-rated 5-Crown Sterling liquidity manager on Trustnet yielding floating BoE money market rates while eliminating market risk."
+    rationale: "Top-rated 5-Crown Sterling liquidity manager on Trustnet yielding floating BoE money market rates while eliminating market risk.",
+    yearlyReturns: [
+      { year: 2011, returnPct: 0.8 },
+      { year: 2012, returnPct: 0.9 },
+      { year: 2013, returnPct: 0.6 },
+      { year: 2014, returnPct: 0.5 },
+      { year: 2015, returnPct: 0.6 },
+      { year: 2016, returnPct: 0.5 },
+      { year: 2017, returnPct: 0.3 },
+      { year: 2018, returnPct: 0.6 },
+      { year: 2019, returnPct: 0.8 },
+      { year: 2020, returnPct: 0.4 },
+      { year: 2021, returnPct: 0.1 },
+      { year: 2022, returnPct: 1.4 },
+      { year: 2023, returnPct: 4.8 },
+      { year: 2024, returnPct: 5.2 },
+      { year: 2025, returnPct: 4.9 }
+    ]
   },
   {
     id: "ishares-global-agg-bond",
@@ -637,11 +1031,22 @@ const TRUSTNET_MASTER_FUNDS = [
     isTrackingIndex: true,
     ocfPct: 0.10,
     trustnetUrl: "https://www.trustnet.com/factsheets/e/agbp/ishares-core-global-aggregate-bond-ucits-etf-gbp-hedged-dist",
-    rationale: "Institutional fixed income standard covering 28,000+ government and corporate bonds globally, fully hedged to GBP."
+    rationale: "Institutional fixed income standard covering 28,000+ government and corporate bonds globally, fully hedged to GBP.",
+    yearlyReturns: [
+      { year: 2017, returnPct: 2.4 },
+      { year: 2018, returnPct: -1.2 },
+      { year: 2019, returnPct: 6.8 },
+      { year: 2020, returnPct: 5.4 },
+      { year: 2021, returnPct: -2.1 },
+      { year: 2022, returnPct: -13.2 },
+      { year: 2023, returnPct: 5.4 },
+      { year: 2024, returnPct: 6.1 },
+      { year: 2025, returnPct: 4.8 }
+    ]
   }
 ];
 
-// 2. Pre-configured Top Strategy Model Allocations based on Risk Profile & Strategy Style
+// 2. Pre-configured Model Presets
 const STRATEGY_PRESETS = {
   high: {
     label: "High Risk (Maximum Growth / 95-100% Equity)",
@@ -690,18 +1095,21 @@ const STRATEGY_PRESETS = {
   }
 };
 
-// Current active portfolio state (user customizable!)
+// Current active portfolio state
 let activeCustomPortfolio = JSON.parse(JSON.stringify(STRATEGY_PRESETS.medium.active));
 let passiveCustomPortfolio = JSON.parse(JSON.stringify(STRATEGY_PRESETS.medium.passive));
 
 let currentRisk = "medium";
-let activeTab = "active"; // "active" | "passive" | "compare" | "screener"
+let activeTab = "active";
 
-// Chart Instances
+// Main Chart Instances
 let trajectoryChart = null;
 let allocationDonutChart = null;
 let fundFutureValueBarChart = null;
 let benchmarkComparisonChart = null;
+
+// Individual Fund Yearly Return Charts registry
+let fundYearlyCharts = {};
 
 // Currency & Number Formatter
 const formatCurrency = (val) => {
@@ -714,16 +1122,10 @@ const formatCurrency = (val) => {
 
 const formatPct = (val) => `${val >= 0 ? "+" : ""}${val.toFixed(2)}%`;
 
-/**
- * Lookup full fund object by ID
- */
 function getFundById(id) {
   return TRUSTNET_MASTER_FUNDS.find(f => f.id === id) || TRUSTNET_MASTER_FUNDS[0];
 }
 
-/**
- * Mathematical Compound Model
- */
 function calculateFutureValue(lumpSum, monthlyAmount, annualRatePct, years) {
   const r = annualRatePct / 100;
   if (years <= 0) return lumpSum;
@@ -744,9 +1146,6 @@ function calculateFutureValue(lumpSum, monthlyAmount, annualRatePct, years) {
   return Math.round(lumpFuture + monthlyFuture);
 }
 
-/**
- * Compute portfolio-weighted annualised historical return
- */
 function calculateWeightedReturn(allocatedItems) {
   return allocatedItems.reduce((acc, item) => {
     const fund = getFundById(item.fundId);
@@ -754,9 +1153,6 @@ function calculateWeightedReturn(allocatedItems) {
   }, 0);
 }
 
-/**
- * Render FE Crowns Badge
- */
 function renderFeCrowns(crowns) {
   if (crowns === 0) {
     return `<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700">Indexed (Passive)</span>`;
@@ -768,9 +1164,6 @@ function renderFeCrowns(crowns) {
   </span>`;
 }
 
-/**
- * Get form inputs
- */
 function getInputs() {
   const currentAge = parseInt(document.getElementById("current-age").value, 10) || 35;
   const retirementAge = parseInt(document.getElementById("retirement-age").value, 10) || 65;
@@ -791,13 +1184,9 @@ function getInputs() {
   };
 }
 
-/**
- * Main update routine
- */
 function updateAdvisor() {
   const inputs = getInputs();
 
-  // Update horizon badges
   document.getElementById("horizon-years").textContent = `${inputs.horizon} Years`;
   document.getElementById("trajectory-end-age").textContent = inputs.retirementAge;
   document.getElementById("legend-target-rate").textContent = `${inputs.targetGrowth}%`;
@@ -805,7 +1194,6 @@ function updateAdvisor() {
   const currentYearTotal = inputs.lumpSum + (inputs.monthlyAmount * 12);
   document.getElementById("current-year-total").textContent = formatCurrency(currentYearTotal);
 
-  // Calculate weighted returns from current active and passive portfolio selections
   const activeWeightedReturn = calculateWeightedReturn(activeCustomPortfolio);
   const passiveWeightedReturn = calculateWeightedReturn(passiveCustomPortfolio);
 
@@ -813,7 +1201,6 @@ function updateAdvisor() {
   const activeProjectedValue = calculateFutureValue(inputs.lumpSum, inputs.monthlyAmount, activeWeightedReturn, inputs.horizon);
   const passiveProjectedValue = calculateFutureValue(inputs.lumpSum, inputs.monthlyAmount, passiveWeightedReturn, inputs.horizon);
 
-  // Update Top Metric Cards
   document.getElementById("stat-total-contributions").textContent = formatCurrency(totalPrincipal);
   document.getElementById("stat-contributions-breakdown").textContent = 
     `${formatCurrency(inputs.lumpSum)} lump sum + ${formatCurrency(inputs.monthlyAmount * 12 * inputs.horizon)} monthly`;
@@ -840,17 +1227,17 @@ function updateAdvisor() {
   document.getElementById("active-total-future-header").textContent = formatCurrency(activeProjectedValue);
   document.getElementById("passive-total-future-header").textContent = formatCurrency(passiveProjectedValue);
 
-  // Render Portfolios
+  // Render Portfolios with Yearly Returns Graphs
   renderPortfolioCards("active", activeCustomPortfolio, inputs);
   renderPortfolioCards("passive", passiveCustomPortfolio, inputs);
 
   // Render Comparison Matrix
   renderComparisonMatrix(activeCustomPortfolio, passiveCustomPortfolio, activeWeightedReturn, passiveWeightedReturn, activeProjectedValue, passiveProjectedValue, totalPrincipal, inputs);
 
-  // Render Trustnet Master Screener Table
+  // Render Screener Table
   renderTrustnetScreener();
 
-  // Update All 4 Graphs
+  // Update Top Portfolio Level Graphs
   const currentPortfolioList = activeTab === "passive" ? passiveCustomPortfolio : activeCustomPortfolio;
   updateTrajectoryChart(inputs, activeWeightedReturn, passiveWeightedReturn);
   updateDonutChart(currentPortfolioList, activeTab);
@@ -863,12 +1250,23 @@ function updateAdvisor() {
 }
 
 /**
- * Render Fund Cards with Swap Ability
+ * Render Fund Cards With Individual Yearly Returns Chart (+ or - growth every year)
  */
 function renderPortfolioCards(strategyType, portfolioItems, inputs) {
   const container = document.getElementById(`${strategyType}-funds-container`);
   if (!container) return;
 
+  // 1. Destroy existing yearly charts for this strategy type
+  Object.keys(fundYearlyCharts).forEach(key => {
+    if (key.startsWith(strategyType)) {
+      if (fundYearlyCharts[key]) {
+        fundYearlyCharts[key].destroy();
+        delete fundYearlyCharts[key];
+      }
+    }
+  });
+
+  // 2. Render Card HTML
   container.innerHTML = portfolioItems.map((item, index) => {
     const fund = getFundById(item.fundId);
     const fundLumpSum = inputs.lumpSum * (item.allocationPct / 100);
@@ -878,6 +1276,8 @@ function renderPortfolioCards(strategyType, portfolioItems, inputs) {
     const fundPrincipal = fundLumpSum + (fundMonthly * 12 * inputs.horizon);
     const fundProfit = fundFutureVal - fundPrincipal;
     const isPositiveAlpha = fund.alphaVsBenchmark >= 0;
+
+    const startYear = fund.inceptionYear > 2011 ? fund.inceptionYear : 2011;
 
     return `
       <div class="fund-card bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
@@ -978,6 +1378,31 @@ function renderPortfolioCards(strategyType, portfolioItems, inputs) {
 
         </div>
 
+        <!-- NEW: Discrete Yearly Returns Graph (+ or - Growth Every Year for Last 15 Years / Inception) -->
+        <div class="mt-3 pt-3 border-t border-slate-100 bg-slate-50/70 p-3.5 rounded-xl border">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+            <div class="flex items-center gap-2">
+              <i data-lucide="activity" class="w-4 h-4 text-brand-600"></i>
+              <span class="text-xs font-bold text-slate-900">
+                Annual Calendar Growth (+/- % per Year since ${startYear})
+              </span>
+              <span class="text-[10px] px-2 py-0.5 rounded font-bold bg-slate-200 text-slate-700">Trustnet Discrete Track Record</span>
+            </div>
+            <div class="flex items-center gap-3 text-[11px]">
+              <span class="flex items-center gap-1 font-semibold text-emerald-700">
+                <span class="w-2.5 h-2.5 rounded bg-emerald-500 inline-block"></span> Positive Year
+              </span>
+              <span class="flex items-center gap-1 font-semibold text-rose-700">
+                <span class="w-2.5 h-2.5 rounded bg-rose-500 inline-block"></span> Negative / Drawdown Year
+              </span>
+            </div>
+          </div>
+
+          <div class="h-32 w-full relative">
+            <canvas id="yearly-chart-${strategyType}-${index}"></canvas>
+          </div>
+        </div>
+
         <!-- Rationale & Suitability -->
         <div class="pt-2 text-xs text-slate-600 bg-slate-50/60 p-3 rounded-xl border border-slate-100 flex items-start gap-2">
           <i data-lucide="info" class="w-4 h-4 text-brand-600 flex-shrink-0 mt-0.5"></i>
@@ -990,11 +1415,67 @@ function renderPortfolioCards(strategyType, portfolioItems, inputs) {
       </div>
     `;
   }).join("");
+
+  // 3. Instantiate Individual Yearly Return Chart for Each Fund Card
+  portfolioItems.forEach((item, index) => {
+    const fund = getFundById(item.fundId);
+    const canvasId = `yearly-chart-${strategyType}-${index}`;
+    const canvasEl = document.getElementById(canvasId);
+
+    if (canvasEl && fund.yearlyReturns && fund.yearlyReturns.length > 0) {
+      const labels = fund.yearlyReturns.map(r => r.year);
+      const data = fund.yearlyReturns.map(r => r.returnPct);
+      const bgColors = data.map(v => v >= 0 ? "rgba(16, 185, 129, 0.85)" : "rgba(244, 63, 94, 0.85)");
+      const borderColors = data.map(v => v >= 0 ? "#059669" : "#e11d48");
+
+      fundYearlyCharts[`${strategyType}-${index}`] = new Chart(canvasEl, {
+        type: "bar",
+        data: {
+          labels: labels,
+          datasets: [{
+            label: "Annual Growth (%)",
+            data: data,
+            backgroundColor: bgColors,
+            borderColor: borderColors,
+            borderWidth: 1,
+            borderRadius: 3
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: "#0f172a",
+              padding: 9,
+              titleFont: { size: 11, weight: "bold" },
+              bodyFont: { size: 11 },
+              callbacks: {
+                label: (ctx) => ` Growth: ${ctx.raw >= 0 ? "+" : ""}${ctx.raw}% in ${ctx.label}`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { font: { size: 9 }, color: "#64748b" }
+            },
+            y: {
+              grid: { color: "#f1f5f9" },
+              ticks: {
+                font: { size: 9 },
+                color: "#64748b",
+                callback: (v) => `${v >= 0 ? "+" : ""}${v}%`
+              }
+            }
+          }
+        }
+      });
+    }
+  });
 }
 
-/**
- * Render Side-by-Side Comparison Matrix
- */
 function renderComparisonMatrix(activeItems, passiveItems, activeReturn, passiveReturn, activeVal, passiveVal, principal, inputs) {
   const tbody = document.getElementById("compare-matrix-body");
   if (!tbody) return;
@@ -1061,9 +1542,6 @@ function renderComparisonMatrix(activeItems, passiveItems, activeReturn, passive
   `).join("");
 }
 
-/**
- * Render Master Trustnet Fund Screener Table
- */
 function renderTrustnetScreener(filterSector = "all", filterHouse = "all") {
   const tbody = document.getElementById("screener-table-body");
   if (!tbody) return;
@@ -1076,7 +1554,6 @@ function renderTrustnetScreener(filterSector = "all", filterHouse = "all") {
     funds = funds.filter(f => f.house === filterHouse);
   }
 
-  // Sort descending by 15-year return
   funds = [...funds].sort((a, b) => b.avgAnnualReturn15Yr - a.avgAnnualReturn15Yr);
 
   tbody.innerHTML = funds.map(f => `
@@ -1112,9 +1589,6 @@ function renderTrustnetScreener(filterSector = "all", filterHouse = "all") {
   }
 }
 
-/**
- * Visual Graph 1: Wealth Accumulation Trajectory (Line Chart)
- */
 function updateTrajectoryChart(inputs, activeReturn, passiveReturn) {
   const ctx = document.getElementById("trajectoryChart");
   if (!ctx) return;
@@ -1239,9 +1713,6 @@ function updateTrajectoryChart(inputs, activeReturn, passiveReturn) {
   });
 }
 
-/**
- * Visual Graph 2: Donut Chart
- */
 function updateDonutChart(portfolioItems, strategyType) {
   const ctx = document.getElementById("allocationDonutChart");
   if (!ctx) return;
@@ -1306,9 +1777,6 @@ function updateDonutChart(portfolioItems, strategyType) {
   }
 }
 
-/**
- * Visual Graph 3: Future Value Bar Chart
- */
 function updateFundFutureValueChart(portfolioItems, inputs) {
   const ctx = document.getElementById("fundFutureValueBarChart");
   if (!ctx) return;
@@ -1378,9 +1846,6 @@ function updateFundFutureValueChart(portfolioItems, inputs) {
   });
 }
 
-/**
- * Visual Graph 4: Benchmark Bar Chart
- */
 function updateBenchmarkChart(portfolioItems) {
   const ctx = document.getElementById("benchmarkComparisonChart");
   if (!ctx) return;
@@ -1442,9 +1907,6 @@ function updateBenchmarkChart(portfolioItems) {
   });
 }
 
-/**
- * Swap Fund Modal Implementation
- */
 let pendingSwap = { strategyType: "active", slotIndex: 0 };
 
 window.openSwapFundModal = function(strategyType, slotIndex) {
@@ -1458,7 +1920,6 @@ window.openSwapFundModal = function(strategyType, slotIndex) {
 
   modalSlotTitle.textContent = `Swap Slot ${slotIndex + 1} (${currentFund.name} - ${currentSlot.allocationPct}%)`;
 
-  // Filter available funds matching strategy type
   const targetType = strategyType === "active" ? "Active" : "Passive";
   const eligibleFunds = TRUSTNET_MASTER_FUNDS.filter(f => f.type === targetType);
 
@@ -1503,9 +1964,6 @@ window.selectSwappedFund = function(newFundId) {
   updateAdvisor();
 };
 
-/**
- * CSV Export Functionality
- */
 function exportCSV() {
   const inputs = getInputs();
 
@@ -1565,9 +2023,6 @@ function exportCSV() {
   document.body.removeChild(link);
 }
 
-/**
- * Event Listeners & Bootstrapping
- */
 document.addEventListener("DOMContentLoaded", () => {
   const inputIds = ["current-age", "retirement-age", "lump-sum", "monthly-amount", "target-growth"];
   inputIds.forEach(id => {
@@ -1584,7 +2039,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Risk profile selection
   const riskRadios = document.querySelectorAll('input[name="risk-profile"]');
   riskRadios.forEach(radio => {
     radio.parentElement.addEventListener("click", () => {
@@ -1598,7 +2052,6 @@ document.addEventListener("DOMContentLoaded", () => {
       radio.parentElement.classList.remove("border-slate-200", "bg-white");
       currentRisk = radio.value;
 
-      // Reset to default model preset for selected risk
       activeCustomPortfolio = JSON.parse(JSON.stringify(STRATEGY_PRESETS[currentRisk].active));
       passiveCustomPortfolio = JSON.parse(JSON.stringify(STRATEGY_PRESETS[currentRisk].passive));
 
@@ -1606,7 +2059,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Strategy navigation tabs
   const tabActive = document.getElementById("tab-active");
   const tabPassive = document.getElementById("tab-passive");
   const tabCompare = document.getElementById("tab-compare");
@@ -1650,7 +2102,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (tabCompare) tabCompare.addEventListener("click", () => setTab("compare"));
   if (tabScreener) tabScreener.addEventListener("click", () => setTab("screener"));
 
-  // Screener Filters
   const filterSectorEl = document.getElementById("screener-filter-sector");
   const filterHouseEl = document.getElementById("screener-filter-house");
   if (filterSectorEl && filterHouseEl) {
