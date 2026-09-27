@@ -347,6 +347,10 @@
           <i data-lucide="columns-2" class="w-4 h-4 text-indigo-600"></i>
           <span>Side-by-Side Comparison</span>
         </button>
+        <button id="tab-screener" class="strategy-tab px-5 py-2 text-xs font-bold rounded-lg transition text-slate-600 hover:text-slate-900 flex items-center gap-2">
+          <i data-lucide="compass" class="w-4 h-4 text-amber-600"></i>
+          <span>Explore All Trustnet Funds</span>
+        </button>
       </div>
 
       <div class="hidden sm:flex items-center gap-2 text-xs text-slate-500">
@@ -513,6 +517,93 @@
       </div>
     </section>
 
+    <!-- Master Trustnet Fund Screener Section -->
+    <section id="section-screener" class="strategy-section hidden space-y-4">
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-100">
+          <div>
+            <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+              <i data-lucide="database" class="w-5 h-5 text-amber-600"></i>
+              Trustnet.com Multi-House Fund Universe (Top UK Performers)
+            </h3>
+            <p class="text-xs text-slate-500">
+              Browse top-performing UK funds from Fidelity, Baillie Gifford, LGIM, BlackRock, Vanguard, JPMorgan, Slater, and more. Filter by Sector and Fund House.
+            </p>
+          </div>
+
+          <!-- Filters -->
+          <div class="flex flex-wrap items-center gap-3">
+            <div class="flex items-center gap-1.5 text-xs">
+              <label for="screener-filter-house" class="font-semibold text-slate-700">House:</label>
+              <select id="screener-filter-house" class="py-1.5 px-2.5 rounded-lg border border-slate-300 text-xs font-medium focus:ring-1 focus:ring-brand-500">
+                <option value="all">All Fund Houses</option>
+                <option value="Fidelity International">Fidelity</option>
+                <option value="Baillie Gifford">Baillie Gifford</option>
+                <option value="Legal & General (LGIM)">Legal & General (LGIM)</option>
+                <option value="JPMorgan Asset Management">JPMorgan</option>
+                <option value="Fundsmith LLP">Fundsmith</option>
+                <option value="Slater Investments">Slater Investments</option>
+                <option value="BlackRock">BlackRock</option>
+                <option value="BlackRock (iShares)">BlackRock (iShares)</option>
+                <option value="Vanguard">Vanguard</option>
+                <option value="Rathbones">Rathbones</option>
+                <option value="Lindsell Train">Lindsell Train</option>
+                <option value="Liontrust">Liontrust</option>
+                <option value="Schroders">Schroders</option>
+                <option value="Royal London Asset Management">Royal London</option>
+                <option value="Troy Asset Management">Troy (Trojan)</option>
+                <option value="Ruffer LLP">Ruffer</option>
+                <option value="Artemis">Artemis</option>
+                <option value="HSBC Global Asset Management">HSBC</option>
+              </select>
+            </div>
+
+            <div class="flex items-center gap-1.5 text-xs">
+              <label for="screener-filter-sector" class="font-semibold text-slate-700">IA Sector:</label>
+              <select id="screener-filter-sector" class="py-1.5 px-2.5 rounded-lg border border-slate-300 text-xs font-medium focus:ring-1 focus:ring-brand-500">
+                <option value="all">All IA Sectors</option>
+                <option value="IA Global">IA Global</option>
+                <option value="IA Technology & Technology Innovations">IA Technology</option>
+                <option value="IA North America">IA North America</option>
+                <option value="IA UK All Companies">IA UK All Companies</option>
+                <option value="IA Europe Excluding UK">IA Europe ex UK</option>
+                <option value="IA Asia Pacific Excluding Japan">IA Asia Pacific</option>
+                <option value="IA Mixed Investment 40-85% Shares">IA Mixed Investment (Balanced)</option>
+                <option value="IA Flexible Investment">IA Flexible (Capital Preservation)</option>
+                <option value="IA Sterling Strategic Bond">IA Strategic Bond</option>
+                <option value="IA UK Gilts">IA UK Gilts</option>
+                <option value="IA Short Term Money Market">IA Short Term Money Market</option>
+                <option value="IA Global Mixed Bond">IA Global Mixed Bond</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Screener Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="border-b border-slate-200 bg-slate-50 text-slate-700">
+                <th class="py-3 px-3 font-bold">Fund Name & Identifiers</th>
+                <th class="py-3 px-3 font-bold">Fund House</th>
+                <th class="py-3 px-3 font-bold">IA Sector</th>
+                <th class="py-3 px-3 font-bold">Type</th>
+                <th class="py-3 px-3 font-bold">FE Crowns</th>
+                <th class="py-3 px-3 font-bold">FE Risk</th>
+                <th class="py-3 px-3 font-bold text-emerald-700">15-Yr Return</th>
+                <th class="py-3 px-3 font-bold">AUM (£B)</th>
+                <th class="py-3 px-3 font-bold">OCF</th>
+                <th class="py-3 px-3 font-bold text-right">Factsheet</th>
+              </tr>
+            </thead>
+            <tbody id="screener-table-body" class="divide-y divide-slate-100">
+              <!-- Dynamically populated via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
     <!-- Methodology & Compliance Section -->
     <section id="compliance" class="bg-slate-100 rounded-2xl p-6 border border-slate-200 text-xs text-slate-600 space-y-3">
       <div class="flex items-center gap-2 text-slate-900 font-bold text-sm">
@@ -548,6 +639,42 @@
       </div>
     </div>
   </footer>
+
+  <!-- Swap Fund Modal Dialog -->
+  <div id="swap-fund-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4 overflow-y-auto">
+    <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh]">
+      
+      <!-- Modal Header -->
+      <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/60">
+        <div>
+          <h4 class="text-base font-bold text-slate-900 flex items-center gap-2">
+            <i data-lucide="refresh-cw" class="w-4 h-4 text-brand-600"></i>
+            <span>Select Alternative Trustnet Fund</span>
+          </h4>
+          <p id="swap-modal-slot-title" class="text-xs text-slate-500 mt-0.5">
+            Choose a top-ranked fund from our multi-house Trustnet database to replace this holding.
+          </p>
+        </div>
+        <button onclick="closeSwapModal()" class="w-8 h-8 rounded-lg bg-slate-200/80 hover:bg-slate-300 flex items-center justify-center text-slate-600 transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body (List of eligible funds) -->
+      <div id="swap-modal-fund-list" class="p-5 overflow-y-auto space-y-2.5 flex-1">
+        <!-- Injected via JS -->
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between text-xs text-slate-500">
+        <span>Click any fund to swap it into your portfolio and update all charts instantly.</span>
+        <button onclick="closeSwapModal()" class="px-4 py-2 font-semibold rounded-lg bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 transition shadow-sm">
+          Cancel
+        </button>
+      </div>
+
+    </div>
+  </div>
 
   <script src="app.js"></script>
 </body>
