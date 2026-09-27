@@ -30,6 +30,13 @@ The **UK Funds Selection Advisor** enables self-directed UK investors to model, 
   2. **Asset Allocation Donut Chart**: Visual fund split percentages.
   3. **Expected Value at Retirement by Fund**: Future terminal capital breakdown.
   4. **Benchmark Tracking / Alpha Indicator**: Historical 15-year return vs. benchmark index comparison.
+  5. **15-Year Discrete Annual Return Graphs**: Individual per-fund bar charts showing calendar-year gains (green) and drawdowns (red) from 2011 to 2025 plus current year 2026 YTD (cyan).
+  6. **Fund Longevity Drawdown Trajectory**: Shows fund value as age increases, comparing Nominal Fund Balance against Real Purchasing Power in today's money (adjusted for 3% inflation).
+- **Retirement Longevity & Drawdown Calculator ("How Long Will My Fund Last?")**:
+  - **Net-to-Gross UK Tax Calculation**: Automatically calculates the required Gross withdrawal needed for a target Net monthly cash in hand, factoring in UK Income Tax bands (Personal Allowance £12,570, Basic 20%, Higher 40%, Additional 45%, and the 25% tax-free UFPLS lump sum).
+  - **3% Annual Inflation Protection**: Models the real purchasing power of the fund in current year money.
+  - **Depletion Milestone**: Projects exact exhaustion age (or indefinite sustainability if growth exceeds withdrawals).
+  - **Year-by-Year Schedule**: Full table and downloadable CSV schedule of balances, growth, gross withdrawals, tax deducted, and net cash.
 - **Side-by-Side Strategy Matrix**: Evaluates terminal capital, fee impact (OCF), FE Risk Scores, manager tenure, downside volatility cushion, and tracking accuracy.
 - **UK Tax Wrapper Tracking**: Displays annual ISA (£20,000) and SIPP (£60,000) allowances.
 - **Data Export & Print**: 1-click CSV export and print-ready PDF stylesheet for client presentations or personal records.

@@ -958,6 +958,149 @@ class AdvisorRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.wfile.write(json.dumps({"error": str(e)}).encode("utf-8"))
                 return
 
+        if parsed.path == "/api/drawdown":
+            content_length = int(self.headers.get("Content-Length", 0))
+            body = self.rfile.read(content_length)
+            try:
+                data = json.loads(body.decode("utf-8"))
+                fund_val = float(data.get("fund_value", 500000))
+                retire_age = int(data.get("retire_age", 65))
+                net_monthly = float(data.get("net_monthly", 2500))
+                growth_rate = float(data.get("growth_rate", 5.5)) / 100.0
+                inflation_rate = float(data.get("inflation_rate", 3.0)) / 100.0
+                wrapper = str(data.get("wrapper", "pension_ufpls"))
+                other_income = float(data.get("other_income", 0))
+                adjust_inflation = bool(data.get("adjust_inflation", True))
+
+                def uk_tax(gross, other=0.0):
+                    if wrapper == "isa_tax_free" or gross <= 0:
+                        return 0.0
+                    taxable = gross * 0.75 if wrapper == "pension_ufpls" else gross
+                    tot = taxable + other
+                    def tax_for(inc):
+                        if inc <= 0: return 0.0
+                        pa = 12570.0 if inc <= 100000 else max(0.0, 12570.0 - (inc - 100000.0) / 2.0)
+                        after_pa = max(0.0, inc - pa)
+                        if after_pa <= 0: return 0.0
+                        basic = min(after_pa, 37700.0) * 0.20
+                        higher = 0.0
+                        add = 0.0
+                        if after_pa > 37700.0:
+                            h_max = max(0.0, 125140.0 - pa - 37700.0)
+                            higher = min(after_pa - 37700.0, h_max) * 0.40
+                            if after_pa > 37700.0 + h_max:
+                                add = (after_pa - 37700.0 - h_max) * 0.45
+                        return basic + higher + add
+                    return max(0.0, tax_for(tot) - tax_for(other))
+
+                def find_gross(target_net, other=0.0):
+                    if target_net <= 0 or wrapper == "isa_tax_free":
+                        return target_net
+                    low = target_net
+                    high = target_net * 2.5
+                    for _ in range(35):
+                        mid = (low + high) / 2.0
+                        if abs(mid - uk_tax(mid, other) - target_net) < 0.01:
+                            return mid
+                        if mid - uk_tax(mid, other) < target_net:
+                            low = mid
+                        else:
+                            high = mid
+                    return (low + high) / 2.0
+
+                year1_net = net_monthly * 12
+                year1_gross = find_gross(year1_net, other_income)
+                year1_tax = uk_tax(year1_gross, other_income)
+
+                balance = fund_val
+                m_rate = (1.0 + growth_rate) ** (1.0 / 12.0) - 1.0
+                schedule = []
+                depleted = False
+                depletion_age = None
+                total_tax = 0.0
+                total_net = 0.0
+
+                for yr in range(45):
+                    age_start = retire_age + yr
+                    start_b = balance
+                    if balance <= 0:
+                        if not depleted:
+                            depleted = True
+                            depletion_age = age_start
+                        break
+                    inf_factor = (1.0 + inflation_rate) ** yr
+                    target_net = year1_net * inf_factor if adjust_inflation else year1_net
+                    other_y = other_income * inf_factor if adjust_inflation else other_income
+                    gross_y = find_gross(target_net, other_y)
+                    tax_y = uk_tax(gross_y, other_y)
+                    m_gross = gross_y / 12.0
+
+                    y_growth = 0.0
+                    actual_gross = 0.0
+                    for m in range(12):
+                        if balance <= 0: break
+                        m_int = balance * m_rate
+                        y_growth += m_int
+                        balance += m_int
+                        if balance >= m_gross:
+                            balance -= m_gross
+                            actual_gross += m_gross
+                        else:
+                            actual_gross += balance
+                            balance = 0.0
+                            depleted = True
+                            depletion_age = age_start + ((m + 1) / 12.0)
+                            break
+
+                    ratio = actual_gross / gross_y if gross_y > 0 else 1.0
+                    actual_tax = tax_y * ratio
+                    actual_net = actual_gross - actual_tax
+                    total_tax += actual_tax
+                    total_net += actual_net
+
+                    real_b = balance / ((1.0 + inflation_rate) ** (yr + 1))
+                    schedule.append({
+                        "age": age_start + 1,
+                        "year_num": yr + 1,
+                        "start_balance": round(start_b),
+                        "growth": round(y_growth),
+                        "gross_drawn": round(actual_gross),
+                        "tax_paid": round(actual_tax),
+                        "net_in_hand": round(actual_net),
+                        "end_balance_nominal": round(balance),
+                        "end_balance_real": round(real_b)
+                    })
+                    if balance <= 0:
+                        break
+
+                res_obj = {
+                    "is_depleted": depleted,
+                    "depletion_age": round(depletion_age, 1) if depletion_age else None,
+                    "longevity_years": round(depletion_age - retire_age, 1) if depletion_age else 45.0,
+                    "is_sustainable": not depleted,
+                    "year1_gross_monthly": round(year1_gross / 12.0),
+                    "year1_gross_annual": round(year1_gross),
+                    "year1_tax_monthly": round(year1_tax / 12.0),
+                    "year1_tax_annual": round(year1_tax),
+                    "year1_effective_tax_pct": round((year1_tax / year1_gross * 100), 2) if year1_gross > 0 else 0,
+                    "lifetime_tax_paid": round(total_tax),
+                    "lifetime_net_withdrawn": round(total_net),
+                    "schedule_count": len(schedule)
+                }
+
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                self.wfile.write(json.dumps(res_obj).encode("utf-8"))
+                return
+            except Exception as e:
+                self.send_response(400)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode("utf-8"))
+                return
+
         return super().do_GET()
 
 def start_server():

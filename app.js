@@ -2095,6 +2095,490 @@ function exportCSV() {
   document.body.removeChild(link);
 }
 
+// ==========================================
+// RETIREMENT FUND LONGEVITY & DRAWDOWN LOGIC
+// ==========================================
+
+let drawdownLongevityChart = null;
+let cachedDrawdownSchedule = [];
+
+const formatCompactNumber = (val) => {
+  if (val >= 1000000) return (val / 1000000).toFixed(2) + "M";
+  if (val >= 1000) return (val / 1000).toFixed(0) + "k";
+  return Math.round(val).toString();
+};
+
+/**
+ * Computes UK income tax on gross pension income according to current HMRC tax bands (2026/27).
+ * Accounts for 25% tax-free UFPLS lump sum, standard Personal Allowance (£12,570), 
+ * basic rate (20%), higher rate (40%), and additional rate (45%) with tapering over £100,000.
+ */
+function calculateUkTaxOnGross(grossPensionIncome, otherTaxableIncome = 0, taxWrapper = "pension_ufpls") {
+  if (taxWrapper === "isa_tax_free" || grossPensionIncome <= 0) {
+    return {
+      taxFreeLumpPortion: grossPensionIncome,
+      taxablePensionPortion: 0,
+      totalTaxableIncome: otherTaxableIncome,
+      incomeTax: 0,
+      netIncome: grossPensionIncome,
+      effectiveTaxRate: 0
+    };
+  }
+
+  let taxFreeLumpPortion = 0;
+  let taxablePensionPortion = grossPensionIncome;
+
+  if (taxWrapper === "pension_ufpls") {
+    taxFreeLumpPortion = grossPensionIncome * 0.25;
+    taxablePensionPortion = grossPensionIncome * 0.75;
+  }
+
+  const totalTaxable = taxablePensionPortion + otherTaxableIncome;
+
+  function computeStandardTax(income) {
+    if (income <= 0) return 0;
+    let pa = 12570;
+    if (income > 100000) {
+      pa = Math.max(0, 12570 - (income - 100000) / 2);
+    }
+    const taxableAfterPa = Math.max(0, income - pa);
+    if (taxableAfterPa <= 0) return 0;
+
+    const basicBandMax = 37700; // £50,270 - £12,570
+    const basicTaxable = Math.min(taxableAfterPa, basicBandMax);
+    const basicTax = basicTaxable * 0.20;
+
+    let higherTax = 0;
+    let addTax = 0;
+
+    if (taxableAfterPa > basicBandMax) {
+      const higherBandMax = Math.max(0, 125140 - pa - basicBandMax);
+      const higherTaxable = Math.min(taxableAfterPa - basicBandMax, higherBandMax);
+      higherTax = higherTaxable * 0.40;
+
+      if (taxableAfterPa > basicBandMax + higherBandMax) {
+        const addTaxable = taxableAfterPa - basicBandMax - higherBandMax;
+        addTax = addTaxable * 0.45;
+      }
+    }
+
+    return basicTax + higherTax + addTax;
+  }
+
+  const taxOnOtherOnly = computeStandardTax(otherTaxableIncome);
+  const totalTaxWithPension = computeStandardTax(totalTaxable);
+  const marginalTaxOnPension = Math.max(0, totalTaxWithPension - taxOnOtherOnly);
+
+  const netIncome = grossPensionIncome - marginalTaxOnPension;
+  const effectiveTaxRate = grossPensionIncome > 0 ? (marginalTaxOnPension / grossPensionIncome) * 100 : 0;
+
+  return {
+    taxFreeLumpPortion,
+    taxablePensionPortion,
+    totalTaxableIncome: totalTaxable,
+    incomeTax: marginalTaxOnPension,
+    netIncome,
+    effectiveTaxRate
+  };
+}
+
+/**
+ * Finds the exact gross annual withdrawal required to yield a target net take-home cash amount.
+ * Solves Net(G) = TargetNet using bisection to penny precision.
+ */
+function findGrossWithdrawalForNet(targetNetAnnual, otherTaxableIncome = 0, taxWrapper = "pension_ufpls") {
+  if (targetNetAnnual <= 0) return 0;
+  if (taxWrapper === "isa_tax_free") return targetNetAnnual;
+
+  let low = targetNetAnnual;
+  let high = targetNetAnnual * 2.5;
+
+  while (calculateUkTaxOnGross(high, otherTaxableIncome, taxWrapper).netIncome < targetNetAnnual) {
+    high *= 1.5;
+  }
+
+  for (let i = 0; i < 35; i++) {
+    const mid = (low + high) / 2;
+    const taxRes = calculateUkTaxOnGross(mid, otherTaxableIncome, taxWrapper);
+    if (Math.abs(taxRes.netIncome - targetNetAnnual) < 0.01) {
+      return mid;
+    }
+    if (taxRes.netIncome < targetNetAnnual) {
+      low = mid;
+    } else {
+      high = mid;
+    }
+  }
+  return (low + high) / 2;
+}
+
+/**
+ * Runs the full retirement fund longevity simulation, calculates nominal & real balances,
+ * updates KPI statistics, updates the Chart.js graph, and populates the schedule table.
+ */
+function updateDrawdownCalculator() {
+  const fundValueEl = document.getElementById("drawdown-fund-value");
+  const retireAgeEl = document.getElementById("drawdown-retire-age");
+  const netMonthlyEl = document.getElementById("drawdown-net-monthly");
+  const fundGrowthEl = document.getElementById("drawdown-fund-growth");
+  const taxWrapperEl = document.getElementById("drawdown-tax-wrapper");
+  const inflationRateEl = document.getElementById("drawdown-inflation-rate");
+  const otherIncomeEl = document.getElementById("drawdown-other-income");
+  const inflationAdjustEl = document.getElementById("drawdown-inflation-adjust");
+
+  if (!fundValueEl || !retireAgeEl || !netMonthlyEl || !fundGrowthEl) return;
+
+  const initialFund = Math.max(0, parseFloat(fundValueEl.value) || 0);
+  const retireAge = Math.max(40, parseInt(retireAgeEl.value, 10) || 65);
+  const netMonthly = Math.max(0, parseFloat(netMonthlyEl.value) || 0);
+  const annualGrowthPct = parseFloat(fundGrowthEl.value) || 0;
+  const taxWrapper = taxWrapperEl ? taxWrapperEl.value : "pension_ufpls";
+  const inflationPct = parseFloat(inflationRateEl ? inflationRateEl.value : 3.0) || 3.0;
+  const otherIncome = parseFloat(otherIncomeEl ? otherIncomeEl.value : 0) || 0;
+  const adjustForInflation = inflationAdjustEl ? inflationAdjustEl.checked : true;
+
+  const annualGrowthRate = annualGrowthPct / 100;
+  const annualInflationRate = inflationPct / 100;
+  const monthlyGrowthRate = Math.pow(1 + annualGrowthRate, 1 / 12) - 1;
+
+  // Compute Year 1 Gross & Tax metrics for top cards
+  const year1TargetNetAnnual = netMonthly * 12;
+  const year1GrossAnnual = findGrossWithdrawalForNet(year1TargetNetAnnual, otherIncome, taxWrapper);
+  const year1TaxRes = calculateUkTaxOnGross(year1GrossAnnual, otherIncome, taxWrapper);
+  const year1GrossMonthly = year1GrossAnnual / 12;
+  const year1TaxMonthly = year1TaxRes.incomeTax / 12;
+
+  // Run Simulation
+  let balance = initialFund;
+  let currentYear = new Date().getFullYear();
+  let schedule = [];
+  let isDepleted = false;
+  let depletionAge = null;
+  let totalNetWithdrawn = 0;
+  let totalGrossWithdrawn = 0;
+  let totalTaxPaid = 0;
+
+  const maxSimYears = 45;
+
+  // Initial milestone at Age retireAge (Year 0)
+  schedule.push({
+    age: retireAge,
+    year: currentYear,
+    startBalance: initialFund,
+    growthEarned: 0,
+    grossWithdrawal: 0,
+    ukTaxPaid: 0,
+    netWithdrawal: 0,
+    endBalanceNominal: initialFund,
+    endBalanceReal: initialFund,
+    isInitial: true
+  });
+
+  for (let yr = 0; yr < maxSimYears; yr++) {
+    const ageAtStart = retireAge + yr;
+    const calendarYear = currentYear + yr;
+    const startBalance = balance;
+
+    if (balance <= 0) {
+      if (!isDepleted) {
+        isDepleted = true;
+        depletionAge = ageAtStart;
+      }
+      break;
+    }
+
+    const inflationFactor = Math.pow(1 + annualInflationRate, yr);
+    const targetNetThisYear = adjustForInflation ? (year1TargetNetAnnual * inflationFactor) : year1TargetNetAnnual;
+    const otherIncomeThisYear = adjustForInflation ? (otherIncome * inflationFactor) : otherIncome;
+
+    const grossThisYear = findGrossWithdrawalForNet(targetNetThisYear, otherIncomeThisYear, taxWrapper);
+    const taxResThisYear = calculateUkTaxOnGross(grossThisYear, otherIncomeThisYear, taxWrapper);
+    const monthlyGrossThisYear = grossThisYear / 12;
+
+    let yearGrowth = 0;
+    let actualGrossDrawn = 0;
+
+    for (let m = 0; m < 12; m++) {
+      if (balance <= 0) break;
+
+      const monthInterest = balance * monthlyGrowthRate;
+      yearGrowth += monthInterest;
+      balance += monthInterest;
+
+      if (balance >= monthlyGrossThisYear) {
+        balance -= monthlyGrossThisYear;
+        actualGrossDrawn += monthlyGrossThisYear;
+      } else {
+        actualGrossDrawn += balance;
+        balance = 0;
+        isDepleted = true;
+        depletionAge = ageAtStart + ((m + 1) / 12);
+        break;
+      }
+    }
+
+    const drawRatio = grossThisYear > 0 ? (actualGrossDrawn / grossThisYear) : 1;
+    const actualTaxDeducted = taxResThisYear.incomeTax * drawRatio;
+    const actualNetReceived = actualGrossDrawn - actualTaxDeducted;
+
+    totalGrossWithdrawn += actualGrossDrawn;
+    totalNetWithdrawn += actualNetReceived;
+    totalTaxPaid += actualTaxDeducted;
+
+    const endOfYrInflationFactor = Math.pow(1 + annualInflationRate, yr + 1);
+    const endBalanceReal = balance / endOfYrInflationFactor;
+
+    schedule.push({
+      age: ageAtStart + 1,
+      year: calendarYear + 1,
+      startBalance: startBalance,
+      growthEarned: yearGrowth,
+      grossWithdrawal: actualGrossDrawn,
+      ukTaxPaid: actualTaxDeducted,
+      netWithdrawal: actualNetReceived,
+      endBalanceNominal: balance,
+      endBalanceReal: endBalanceReal,
+      isInitial: false
+    });
+
+    if (balance <= 0) {
+      isDepleted = true;
+      if (!depletionAge) depletionAge = ageAtStart + 1;
+      break;
+    }
+  }
+
+  cachedDrawdownSchedule = schedule;
+
+  // Update KPI Cards
+  const statLongevityAge = document.getElementById("stat-longevity-age");
+  const statLongevitySubtext = document.getElementById("stat-longevity-subtext");
+  const statLongevityStatus = document.getElementById("stat-longevity-status");
+
+  if (statLongevityAge && statLongevitySubtext && statLongevityStatus) {
+    if (isDepleted && depletionAge) {
+      const wholeYears = Math.floor(depletionAge - retireAge);
+      const wholeMonths = Math.round(((depletionAge - retireAge) - wholeYears) * 12);
+      statLongevityAge.textContent = `Until Age ${depletionAge.toFixed(1)}`;
+      statLongevityAge.className = depletionAge < 80 ? "text-2xl font-black text-rose-600" : (depletionAge < 90 ? "text-2xl font-black text-amber-600" : "text-2xl font-black text-slate-900");
+      statLongevitySubtext.textContent = `${wholeYears} Years and ${wholeMonths} Months`;
+      statLongevitySubtext.className = depletionAge < 80 ? "text-xs text-rose-700 font-semibold mt-1" : "text-xs text-amber-700 font-semibold mt-1";
+      statLongevityStatus.textContent = depletionAge < 85 ? `Fund exhausted around year ${Math.round(currentYear + depletionAge - retireAge)}` : `Sufficient longevity past UK average life expectancy`;
+    } else {
+      statLongevityAge.textContent = "Sustainable Indefinitely";
+      statLongevityAge.className = "text-2xl font-black text-emerald-600";
+      statLongevitySubtext.textContent = "Portfolio growth covers withdrawals";
+      statLongevitySubtext.className = "text-xs text-emerald-700 font-semibold mt-1";
+      const finalRow = schedule[schedule.length - 1];
+      statLongevityStatus.textContent = `At Age ${finalRow.age}, remaining balance is £${formatCompactNumber(finalRow.endBalanceNominal)}`;
+    }
+  }
+
+  const statGrossMonthly = document.getElementById("stat-gross-monthly");
+  const statGrossAnnual = document.getElementById("stat-gross-annual");
+  const statTaxDeducted = document.getElementById("stat-tax-deducted");
+  if (statGrossMonthly && statGrossAnnual && statTaxDeducted) {
+    statGrossMonthly.textContent = `£${Math.round(year1GrossMonthly).toLocaleString()} / mo`;
+    statGrossAnnual.textContent = `£${Math.round(year1GrossAnnual).toLocaleString()} Gross / Year`;
+    const effTaxRate = year1GrossAnnual > 0 ? (year1TaxRes.incomeTax / year1GrossAnnual * 100).toFixed(1) : "0.0";
+    statTaxDeducted.textContent = `UK Tax: £${Math.round(year1TaxMonthly).toLocaleString()}/mo (£${Math.round(year1TaxRes.incomeTax).toLocaleString()}/yr) | ${effTaxRate}% Effective Rate`;
+  }
+
+  // 10-Year Purchasing Power Card
+  const statReal10Yr = document.getElementById("stat-real-value-10yr");
+  const statNominal10Yr = document.getElementById("stat-nominal-value-10yr");
+  if (statReal10Yr && statNominal10Yr) {
+    const idx10 = Math.min(10, schedule.length - 1);
+    const row10 = schedule[idx10];
+    if (row10) {
+      statReal10Yr.textContent = `£${Math.round(row10.endBalanceReal).toLocaleString()}`;
+      statNominal10Yr.textContent = `Nominal: £${Math.round(row10.endBalanceNominal).toLocaleString()} (At Age ${row10.age})`;
+    } else {
+      statReal10Yr.textContent = "£0";
+      statNominal10Yr.textContent = "Depleted before 10 years";
+    }
+  }
+
+  // Total Lifetime Tax Paid Card
+  const statTotalTax = document.getElementById("stat-total-tax-paid");
+  const statTotalWithdrawn = document.getElementById("stat-total-withdrawn");
+  if (statTotalTax && statTotalWithdrawn) {
+    statTotalTax.textContent = `£${Math.round(totalTaxPaid).toLocaleString()}`;
+    statTotalWithdrawn.textContent = `Total Net Withdrawn: £${Math.round(totalNetWithdrawn).toLocaleString()}`;
+  }
+
+  // Render Schedule Table Body
+  const tbody = document.getElementById("drawdown-schedule-body");
+  if (tbody) {
+    tbody.innerHTML = schedule.filter(r => !r.isInitial).map(r => {
+      const isDepletedRow = r.endBalanceNominal <= 0;
+      return `
+        <tr class="hover:bg-slate-50 transition ${isDepletedRow ? 'bg-rose-50/40 text-rose-900' : ''}">
+          <td class="py-2 px-3 font-bold text-slate-900">${r.age}</td>
+          <td class="py-2 px-3 text-slate-500 font-mono text-[11px]">${r.year}</td>
+          <td class="py-2 px-3 text-slate-700">£${Math.round(r.startBalance).toLocaleString()}</td>
+          <td class="py-2 px-3 font-semibold text-emerald-600">+£${Math.round(r.growthEarned).toLocaleString()}</td>
+          <td class="py-2 px-3 font-semibold text-amber-800">£${Math.round(r.grossWithdrawal).toLocaleString()}</td>
+          <td class="py-2 px-3 font-semibold text-rose-600">£${Math.round(r.ukTaxPaid).toLocaleString()}</td>
+          <td class="py-2 px-3 font-bold text-brand-700">£${Math.round(r.netWithdrawal).toLocaleString()}</td>
+          <td class="py-2 px-3 font-extrabold ${isDepletedRow ? 'text-rose-600' : 'text-indigo-900'}">£${Math.round(r.endBalanceNominal).toLocaleString()}</td>
+          <td class="py-2 px-3 font-extrabold text-emerald-900 bg-emerald-50/50">£${Math.round(r.endBalanceReal).toLocaleString()}</td>
+        </tr>
+      `;
+    }).join("");
+  }
+
+  // Render Drawdown Chart
+  renderDrawdownChart(schedule, inflationPct);
+
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+}
+
+function renderDrawdownChart(schedule, inflationPct) {
+  const ctx = document.getElementById("drawdownLongevityChart");
+  if (!ctx) return;
+
+  if (drawdownLongevityChart) {
+    drawdownLongevityChart.destroy();
+  }
+
+  const labels = schedule.map(r => `Age ${r.age}`);
+  const nominalData = schedule.map(r => Math.round(r.endBalanceNominal));
+  const realData = schedule.map(r => Math.round(r.endBalanceReal));
+
+  drawdownLongevityChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: "Nominal Fund Balance (£)",
+          data: nominalData,
+          borderColor: "#6366f1",
+          backgroundColor: "rgba(99, 102, 241, 0.08)",
+          fill: true,
+          tension: 0.3,
+          borderWidth: 3,
+          pointRadius: 3,
+          pointHoverRadius: 6
+        },
+        {
+          label: `Real Money (Today's Value @ ${inflationPct}% Inflation)`,
+          data: realData,
+          borderColor: "#059669",
+          backgroundColor: "rgba(5, 150, 105, 0.08)",
+          fill: true,
+          tension: 0.3,
+          borderWidth: 3,
+          pointRadius: 3,
+          pointHoverRadius: 6
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: "#0f172a",
+          padding: 12,
+          callbacks: {
+            title: (items) => `${items[0].label} (${schedule[items[0].dataIndex].year})`,
+            label: (ctx) => ` ${ctx.dataset.label}: ${formatCurrency(ctx.raw)}`,
+            afterBody: (items) => {
+              const row = schedule[items[0].dataIndex];
+              if (!row || row.isInitial) return [];
+              return [
+                `Gross Withdrawal: ${formatCurrency(row.grossWithdrawal)}/yr`,
+                `Net Cash in Hand: ${formatCurrency(row.netWithdrawal)}/yr`,
+                `UK Income Tax: ${formatCurrency(row.ukTaxPaid)}/yr`
+              ];
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { font: { size: 10 }, color: "#64748b" }
+        },
+        y: {
+          grid: { color: "#f1f5f9" },
+          ticks: {
+            font: { size: 10 },
+            color: "#64748b",
+            callback: (v) => v >= 1000000 ? `£${(v/1000000).toFixed(1)}M` : (v >= 1000 ? `£${(v/1000).toFixed(0)}k` : `£${v}`)
+          }
+        }
+      }
+    }
+  });
+}
+
+function exportDrawdownCSV() {
+  if (!cachedDrawdownSchedule || cachedDrawdownSchedule.length === 0) return;
+
+  const fundValueEl = document.getElementById("drawdown-fund-value");
+  const retireAgeEl = document.getElementById("drawdown-retire-age");
+  const netMonthlyEl = document.getElementById("drawdown-net-monthly");
+  const fundGrowthEl = document.getElementById("drawdown-fund-growth");
+
+  let csv = "UK Funds Selection Advisor - Retirement Drawdown & Longevity Schedule\n";
+  csv += `Date Generated: ${new Date().toLocaleDateString('en-GB')}\n`;
+  csv += `Starting Fund Value: £${fundValueEl ? fundValueEl.value : ''}\n`;
+  csv += `Retirement Age: ${retireAgeEl ? retireAgeEl.value : ''}\n`;
+  csv += `Net Monthly Withdrawal: £${netMonthlyEl ? netMonthlyEl.value : ''}\n`;
+  csv += `Expected Fund Growth: ${fundGrowthEl ? fundGrowthEl.value : ''}%\n`;
+  csv += `Inflation Assumption: 3.0% per annum\n\n`;
+
+  csv += "Age,Calendar Year,Start Balance (£),Growth Earned (£),Gross Withdrawal (£),UK Income Tax Paid (£),Net in Hand (£),End Balance Nominal (£),End Balance Real (Today's Money £)\n";
+
+  cachedDrawdownSchedule.forEach(r => {
+    csv += [
+      r.age,
+      r.year,
+      Math.round(r.startBalance),
+      Math.round(r.growthEarned),
+      Math.round(r.grossWithdrawal),
+      Math.round(r.ukTaxPaid),
+      Math.round(r.netWithdrawal),
+      Math.round(r.endBalanceNominal),
+      Math.round(r.endBalanceReal)
+    ].join(",") + "\n";
+  });
+
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", `UK_Retirement_Drawdown_Longevity_Schedule.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+function syncAdvisorToDrawdown() {
+  const inputs = getInputs();
+  const activeRate = STRATEGY_PRESETS[currentRisk].active.reduce((acc, item) => {
+    return acc + (getFundById(item.fundId).avgAnnualReturn15Yr * (item.allocationPct / 100));
+  }, 0);
+  const activeVal = calculateFutureValue(inputs.lumpSum, inputs.monthlyAmount, activeRate, inputs.horizon);
+
+  const fundValInput = document.getElementById("drawdown-fund-value");
+  const retireAgeInput = document.getElementById("drawdown-retire-age");
+  const growthInput = document.getElementById("drawdown-fund-growth");
+
+  if (fundValInput) fundValInput.value = activeVal;
+  if (retireAgeInput) retireAgeInput.value = inputs.retirementAge;
+  if (growthInput) growthInput.value = Math.max(4.0, Math.min(8.0, (activeRate * 0.65).toFixed(1)));
+
+  updateDrawdownCalculator();
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const inputIds = ["current-age", "retirement-age", "lump-sum", "monthly-amount", "target-growth"];
   inputIds.forEach(id => {
@@ -2107,6 +2591,9 @@ document.addEventListener("DOMContentLoaded", () => {
           retAgeEl.value = curAge + 1;
         }
         updateAdvisor();
+        if (activeTab === "drawdown") {
+          updateDrawdownCalculator();
+        }
       });
     }
   });
@@ -2128,6 +2615,9 @@ document.addEventListener("DOMContentLoaded", () => {
       passiveCustomPortfolio = JSON.parse(JSON.stringify(STRATEGY_PRESETS[currentRisk].passive));
 
       updateAdvisor();
+      if (activeTab === "drawdown") {
+        updateDrawdownCalculator();
+      }
     });
   });
 
@@ -2135,16 +2625,18 @@ document.addEventListener("DOMContentLoaded", () => {
   const tabPassive = document.getElementById("tab-passive");
   const tabCompare = document.getElementById("tab-compare");
   const tabScreener = document.getElementById("tab-screener");
+  const tabDrawdown = document.getElementById("tab-drawdown");
 
   const secActive = document.getElementById("section-active");
   const secPassive = document.getElementById("section-passive");
   const secCompare = document.getElementById("section-compare");
   const secScreener = document.getElementById("section-screener");
+  const secDrawdown = document.getElementById("section-drawdown");
 
   function setTab(tab) {
     activeTab = tab;
-    [tabActive, tabPassive, tabCompare, tabScreener].forEach(t => t && t.classList.remove("active"));
-    [secActive, secPassive, secCompare, secScreener].forEach(s => s && s.classList.add("hidden"));
+    [tabActive, tabPassive, tabCompare, tabScreener, tabDrawdown].forEach(t => t && t.classList.remove("active"));
+    [secActive, secPassive, secCompare, secScreener, secDrawdown].forEach(s => s && s.classList.add("hidden"));
 
     if (tab === "active") {
       tabActive.classList.add("active");
@@ -2160,6 +2652,10 @@ document.addEventListener("DOMContentLoaded", () => {
     } else if (tab === "screener") {
       tabScreener.classList.add("active");
       secScreener.classList.remove("hidden");
+    } else if (tab === "drawdown") {
+      tabDrawdown.classList.add("active");
+      secDrawdown.classList.remove("hidden");
+      updateDrawdownCalculator();
     }
 
     const inputs = getInputs();
@@ -2173,6 +2669,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (tabPassive) tabPassive.addEventListener("click", () => setTab("passive"));
   if (tabCompare) tabCompare.addEventListener("click", () => setTab("compare"));
   if (tabScreener) tabScreener.addEventListener("click", () => setTab("screener"));
+  if (tabDrawdown) tabDrawdown.addEventListener("click", () => setTab("drawdown"));
 
   const filterSectorEl = document.getElementById("screener-filter-sector");
   const filterHouseEl = document.getElementById("screener-filter-house");
@@ -2184,8 +2681,41 @@ document.addEventListener("DOMContentLoaded", () => {
     filterHouseEl.addEventListener("change", handleScreenerFilter);
   }
 
+  const drawdownInputIds = [
+    "drawdown-fund-value",
+    "drawdown-retire-age",
+    "drawdown-net-monthly",
+    "drawdown-fund-growth",
+    "drawdown-tax-wrapper",
+    "drawdown-inflation-rate",
+    "drawdown-other-income"
+  ];
+  drawdownInputIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener("input", updateDrawdownCalculator);
+      el.addEventListener("change", updateDrawdownCalculator);
+    }
+  });
+
+  const inflationAdjustEl = document.getElementById("drawdown-inflation-adjust");
+  if (inflationAdjustEl) {
+    inflationAdjustEl.addEventListener("change", updateDrawdownCalculator);
+  }
+
+  const btnSyncAdvisor = document.getElementById("btn-sync-advisor-portfolio");
+  if (btnSyncAdvisor) {
+    btnSyncAdvisor.addEventListener("click", syncAdvisorToDrawdown);
+  }
+
+  const btnExportDrawdown = document.getElementById("btn-export-drawdown-csv");
+  if (btnExportDrawdown) {
+    btnExportDrawdown.addEventListener("click", exportDrawdownCSV);
+  }
+
   document.getElementById("btn-export-csv").addEventListener("click", exportCSV);
   document.getElementById("btn-print-report").addEventListener("click", () => window.print());
 
   updateAdvisor();
+  updateDrawdownCalculator();
 });
