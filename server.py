@@ -1,5 +1,5 @@
 """
-UK Funds Selection Advisor - Web Server & REST API
+Dutta UK Funds Selection Advisor - Web Server & REST API
 Multi-House Trustnet.com (FE fundinfo) Top-Performing Funds Universe
 Featuring 15-Year (+/-) Annual Calendar Return Track Records
 Zero external dependencies required (runs on Python 3.8+ standard library).
@@ -1108,7 +1108,7 @@ def start_server():
     with socketserver.TCPServer(("", PORT), AdvisorRequestHandler) as httpd:
         url = f"http://localhost:{PORT}"
         print(f"============================================================")
-        print(f" UK Funds Selection Advisor (Multi-House Trustnet Edition)")
+        print(f" Dutta UK Funds Selection Advisor (Trustnet Edition)")
         print(f" Local URL: {url}")
         print(f" Data Source: Trustnet.com (FE fundinfo)")
         print(f" Press Ctrl+C to stop the server.")

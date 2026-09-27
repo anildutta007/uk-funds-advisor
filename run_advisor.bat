@@ -1,7 +1,7 @@
 @echo off
-title UK Funds Selection Advisor
+title Dutta UK Funds Selection Advisor
 echo ==============================================================
-echo        Starting UK Funds Selection Advisor Web App...
+echo        Starting Dutta UK Funds Selection Advisor...
 echo ==============================================================
 echo.
 cd /d "%~dp0"

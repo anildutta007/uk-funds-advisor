@@ -1,4 +1,4 @@
-# UK Funds Selection Advisor 🇬🇧 (Trustnet Data Edition)
+# Dutta UK Funds Selection Advisor 🇬🇧 (Trustnet Data Edition)
 
 An intelligent, interactive asset allocation and fund advisory web application tailored specifically for the **UK retail investment market** (ISAs, SIPPs, and General Investment Accounts), integrated with authentic data from **Trustnet.com (FE fundinfo)**.
 
@@ -6,7 +6,7 @@ An intelligent, interactive asset allocation and fund advisory web application t
 
 ## 🌟 Overview & Purpose
 
-The **UK Funds Selection Advisor** enables self-directed UK investors to model, evaluate, and compare tailored **Active** and **Passive** fund portfolios aligned with their age, retirement timeline, capital, and risk appetite.
+The **Dutta UK Funds Selection Advisor** enables self-directed UK investors to model, evaluate, and compare tailored **Active** and **Passive** fund portfolios aligned with their age, retirement timeline, capital, and risk appetite.
 
 ### Key Capabilities:
 - **Demographic & Goal Modeling**: Collects Current Age, Retirement Age (dynamic Horizon calculation), Initial Lump Sum (£), Monthly Regular Contribution (£), Risk Profile (Low, Medium, High), and Target Annual Growth (%).

@@ -2038,7 +2038,7 @@ window.selectSwappedFund = function(newFundId) {
 function exportCSV() {
   const inputs = getInputs();
 
-  let csv = "UK Funds Selection Advisor - Master Trustnet Export (With 2026 YTD)\n";
+  let csv = "Dutta UK Funds Selection Advisor - Master Trustnet Export (With 2026 YTD)\n";
   csv += `Date Generated: ${new Date().toLocaleDateString('en-GB')}\n`;
   csv += `Data Source: Trustnet.com (FE fundinfo)\n`;
   csv += `Current Age: ${inputs.currentAge}, Target Retirement Age: ${inputs.retirementAge}, Horizon: ${inputs.horizon} Years\n`;
@@ -2089,7 +2089,7 @@ function exportCSV() {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.setAttribute("href", url);
-  link.setAttribute("download", `UK_Funds_Allocation_Master_Trustnet_With_YTD.csv`);
+  link.setAttribute("download", `Dutta_UK_Funds_Allocation_Master_Trustnet_With_YTD.csv`);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
@@ -2527,7 +2527,7 @@ function exportDrawdownCSV() {
   const netMonthlyEl = document.getElementById("drawdown-net-monthly");
   const fundGrowthEl = document.getElementById("drawdown-fund-growth");
 
-  let csv = "UK Funds Selection Advisor - Retirement Drawdown & Longevity Schedule\n";
+  let csv = "Dutta UK Funds Selection Advisor - Retirement Drawdown & Longevity Schedule\n";
   csv += `Date Generated: ${new Date().toLocaleDateString('en-GB')}\n`;
   csv += `Starting Fund Value: £${fundValueEl ? fundValueEl.value : ''}\n`;
   csv += `Retirement Age: ${retireAgeEl ? retireAgeEl.value : ''}\n`;
@@ -2555,7 +2555,7 @@ function exportDrawdownCSV() {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.setAttribute("href", url);
-  link.setAttribute("download", `UK_Retirement_Drawdown_Longevity_Schedule.csv`);
+  link.setAttribute("download", `Dutta_UK_Retirement_Drawdown_Longevity_Schedule.csv`);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
