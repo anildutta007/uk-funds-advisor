@@ -1247,17 +1247,30 @@ function updateAdvisor() {
   const activeProjectedValue = calculateFutureValue(inputs.lumpSum, inputs.monthlyAmount, activeWeightedReturn, inputs.horizon);
   const passiveProjectedValue = calculateFutureValue(inputs.lumpSum, inputs.monthlyAmount, passiveWeightedReturn, inputs.horizon);
 
+  // Inflation discounting at 3.0% compound annual inflation
+  const inflationRate = 0.03;
+  const inflationFactor = Math.pow(1 + inflationRate, inputs.horizon);
+  const activeRealValue = Math.round(activeProjectedValue / inflationFactor);
+  const passiveRealValue = Math.round(passiveProjectedValue / inflationFactor);
+  const alphaRealDiff = activeRealValue - passiveRealValue;
+
   document.getElementById("stat-total-contributions").textContent = formatCurrency(totalPrincipal);
   document.getElementById("stat-contributions-breakdown").textContent = 
     `${formatCurrency(inputs.lumpSum)} lump sum + ${formatCurrency(inputs.monthlyAmount * 12 * inputs.horizon)} monthly`;
 
   document.getElementById("stat-active-value").textContent = formatCurrency(activeProjectedValue);
+  const activeRealEl = document.getElementById("stat-active-real-value");
+  if (activeRealEl) activeRealEl.textContent = formatCurrency(activeRealValue);
+
   const activeGain = activeProjectedValue - totalPrincipal;
   const activeGainPct = totalPrincipal > 0 ? ((activeGain / totalPrincipal) * 100).toFixed(0) : 0;
   document.getElementById("stat-active-gain").textContent = `+${formatCurrency(activeGain)} (+${activeGainPct}% growth)`;
   document.getElementById("stat-active-rate").textContent = `${activeWeightedReturn.toFixed(2)}% p.a.`;
 
   document.getElementById("stat-passive-value").textContent = formatCurrency(passiveProjectedValue);
+  const passiveRealEl = document.getElementById("stat-passive-real-value");
+  if (passiveRealEl) passiveRealEl.textContent = formatCurrency(passiveRealValue);
+
   const passiveGain = passiveProjectedValue - totalPrincipal;
   const passiveGainPct = totalPrincipal > 0 ? ((passiveGain / totalPrincipal) * 100).toFixed(0) : 0;
   document.getElementById("stat-passive-gain").textContent = `+${formatCurrency(passiveGain)} (+${passiveGainPct}% growth)`;
@@ -1267,11 +1280,23 @@ function updateAdvisor() {
   const alphaEl = document.getElementById("stat-alpha-difference");
   alphaEl.textContent = `${alphaDiff >= 0 ? "+" : ""}${formatCurrency(alphaDiff)}`;
   alphaEl.className = `text-2xl font-extrabold ${alphaDiff >= 0 ? "text-purple-900" : "text-rose-700"}`;
+
+  const alphaRealEl = document.getElementById("stat-alpha-real-difference");
+  if (alphaRealEl) {
+    alphaRealEl.textContent = `${alphaRealDiff >= 0 ? "+" : ""}${formatCurrency(alphaRealDiff)}`;
+    alphaRealEl.className = `font-black ${alphaRealDiff >= 0 ? "text-purple-700" : "text-rose-700"}`;
+  }
+
   document.getElementById("stat-alpha-subtext").textContent = 
     alphaDiff >= 0 ? "Active historical premium over passive" : "Passive historical advantage over active";
 
   document.getElementById("active-total-future-header").textContent = formatCurrency(activeProjectedValue);
+  const activeRealHeader = document.getElementById("active-total-real-header");
+  if (activeRealHeader) activeRealHeader.innerHTML = `<i data-lucide="coins" class="w-3 h-3 text-emerald-600"></i><span>Today's World: ${formatCurrency(activeRealValue)} (@ 3% infl.)</span>`;
+
   document.getElementById("passive-total-future-header").textContent = formatCurrency(passiveProjectedValue);
+  const passiveRealHeader = document.getElementById("passive-total-real-header");
+  if (passiveRealHeader) passiveRealHeader.innerHTML = `<i data-lucide="coins" class="w-3 h-3 text-teal-600"></i><span>Today's World: ${formatCurrency(passiveRealValue)} (@ 3% infl.)</span>`;
 
   renderPortfolioCards("active", activeCustomPortfolio, inputs);
   renderPortfolioCards("passive", passiveCustomPortfolio, inputs);
@@ -1312,6 +1337,7 @@ function renderPortfolioCards(strategyType, portfolioItems, inputs) {
     const fundMonthly = inputs.monthlyAmount * (item.allocationPct / 100);
     
     const fundFutureVal = calculateFutureValue(fundLumpSum, fundMonthly, fund.avgAnnualReturn15Yr, inputs.horizon);
+    const fundRealVal = Math.round(fundFutureVal / Math.pow(1 + 0.03, inputs.horizon));
     const fundPrincipal = fundLumpSum + (fundMonthly * 12 * inputs.horizon);
     const fundProfit = fundFutureVal - fundPrincipal;
     const isPositiveAlpha = fund.alphaVsBenchmark >= 0;
@@ -1418,10 +1444,22 @@ function renderPortfolioCards(strategyType, portfolioItems, inputs) {
             </span>
           </div>
 
-          <div class="bg-gradient-to-br from-brand-50 to-cyan-50/50 p-2.5 rounded-xl border border-brand-200">
-            <span class="text-[11px] text-brand-700 font-semibold block mb-0.5">Expected at ${inputs.retirementAge}</span>
-            <span class="font-black text-brand-900 text-sm">${formatCurrency(fundFutureVal)}</span>
-            <span class="text-[10px] text-emerald-600 font-semibold">+${formatCurrency(fundProfit)} gain</span>
+          <div class="bg-gradient-to-br from-brand-50 to-cyan-50/50 p-2.5 rounded-xl border border-brand-200 flex flex-col justify-between">
+            <div>
+              <span class="text-[11px] text-brand-700 font-semibold block mb-0.5">Expected at Age ${inputs.retirementAge}</span>
+              <div class="flex items-baseline justify-between gap-1">
+                <span class="font-black text-brand-900 text-sm">${formatCurrency(fundFutureVal)}</span>
+                <span class="text-[9px] text-slate-400 uppercase font-semibold">Nominal</span>
+              </div>
+              <span class="text-[10px] text-emerald-600 font-semibold block">+${formatCurrency(fundProfit)} gain</span>
+            </div>
+            <div class="mt-1.5 pt-1 border-t border-brand-200/80">
+              <div class="flex items-center justify-between text-[10px] font-bold text-emerald-800">
+                <span>Today's World:</span>
+                <span>${formatCurrency(fundRealVal)}</span>
+              </div>
+              <span class="text-[9px] text-slate-400 block text-right">(@ 3% infl.)</span>
+            </div>
           </div>
 
         </div>
@@ -1558,11 +1596,20 @@ function renderComparisonMatrix(activeItems, passiveItems, activeReturn, passive
   const activeHouses = [...new Set(activeFunds.map(f => f.house))].join(", ");
   const passiveHouses = [...new Set(passiveFunds.map(f => f.house))].join(", ");
 
+  const inflationFactor = Math.pow(1 + 0.03, inputs.horizon);
+  const activeRealVal = Math.round(activeVal / inflationFactor);
+  const passiveRealVal = Math.round(passiveVal / inflationFactor);
+
   const rows = [
     {
-      criteria: "Projected Value at Retirement (Age " + inputs.retirementAge + ")",
+      criteria: "Nominal Projected Value at Retirement (Age " + inputs.retirementAge + ")",
       active: `<strong class="text-brand-900 text-sm">${formatCurrency(activeVal)}</strong> (+${formatCurrency(activeVal - principal)})`,
       passive: `<strong class="text-teal-900 text-sm">${formatCurrency(passiveVal)}</strong> (+${formatCurrency(passiveVal - principal)})`
+    },
+    {
+      criteria: "Real Value in Today's World (3% Annual Inflation Adjusted)",
+      active: `<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-900"><i data-lucide="coins" class="w-3.5 h-3.5 text-emerald-600"></i><span class="text-sm font-black text-emerald-700">${formatCurrency(activeRealVal)}</span><span class="text-[10px] font-normal text-slate-500">(@ 3% infl.)</span></div>`,
+      passive: `<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-teal-50 border border-teal-200 text-xs font-bold text-teal-900"><i data-lucide="coins" class="w-3.5 h-3.5 text-teal-600"></i><span class="text-sm font-black text-teal-700">${formatCurrency(passiveRealVal)}</span><span class="text-[10px] font-normal text-slate-500">(@ 3% infl.)</span></div>`
     },
     {
       criteria: "2026 Current Year YTD Return",
@@ -1608,6 +1655,10 @@ function renderComparisonMatrix(activeItems, passiveItems, activeReturn, passive
       <td class="py-3 px-4 text-slate-700 bg-teal-50/30">${r.passive}</td>
     </tr>
   `).join("");
+
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
 }
 
 function renderTrustnetScreener(filterSector = "all", filterHouse = "all") {
@@ -1757,7 +1808,17 @@ function updateTrajectoryChart(inputs, activeReturn, passiveReturn) {
           padding: 12,
           callbacks: {
             label: function(context) {
-              return ` ${context.dataset.label}: ${formatCurrency(context.raw)}`;
+              const val = context.raw;
+              const ageMatch = context.label ? context.label.match(/\d+/) : null;
+              if (ageMatch) {
+                const pointAge = parseInt(ageMatch[0], 10);
+                const yearsElapsed = pointAge - inputs.currentAge;
+                if (yearsElapsed > 0) {
+                  const realVal = Math.round(val / Math.pow(1 + 0.03, yearsElapsed));
+                  return ` ${context.dataset.label}: ${formatCurrency(val)} (Today: ${formatCurrency(realVal)})`;
+                }
+              }
+              return ` ${context.dataset.label}: ${formatCurrency(val)}`;
             }
           }
         }
@@ -1898,7 +1959,13 @@ function updateFundFutureValueChart(portfolioItems, inputs) {
         tooltip: {
           backgroundColor: "#0f172a",
           callbacks: {
-            label: (ctx) => ` ${ctx.dataset.label}: ${formatCurrency(ctx.raw)}`
+            label: (ctx) => {
+              if (ctx.datasetIndex === 1) {
+                const realVal = Math.round(ctx.raw / Math.pow(1 + 0.03, inputs.horizon));
+                return ` ${ctx.dataset.label}: ${formatCurrency(ctx.raw)} (Today's World: ${formatCurrency(realVal)})`;
+              }
+              return ` ${ctx.dataset.label}: ${formatCurrency(ctx.raw)}`;
+            }
           }
         }
       },
