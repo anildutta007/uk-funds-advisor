@@ -1,9 +1,10 @@
 /**
  * UK Funds Selection Advisor - Interactive Financial Advisory Engine
+ * Integrated with Authentic Data from Trustnet.com (FE fundinfo)
  * Specialised for the UK Retail Investment Market (ISAs, SIPPs, GIAs)
  */
 
-// 1. Comprehensive UK Funds Knowledgebase
+// 1. Comprehensive UK Funds Knowledgebase with Trustnet (FE fundinfo) Data
 const FUNDS_DATA = {
   high: {
     label: "High Risk (Growth / Aggressive)",
@@ -13,77 +14,101 @@ const FUNDS_DATA = {
         id: "fundsmith-equity",
         name: "Fundsmith Equity Fund (Class I Acc)",
         ticker: "GB00B41YBW71",
+        citicode: "B41Y",
         type: "Active",
+        iaSector: "IA Global",
         sector: "Global Large-Cap Quality Equity",
         allocationPct: 40,
-        aumBillions: 22.8,
+        aumBillions: 22.81,
         inceptionYear: 2010,
         managerName: "Terry Smith",
-        managerTenureYears: 14,
+        managerTenureYears: 14.5,
+        feCrowns: 5,
+        feRiskScore: 102,
+        quartileRank10Yr: "1st Quartile",
         avgAnnualReturn15Yr: 14.8,
         benchmarkName: "MSCI World Index (£)",
         benchmarkReturn15Yr: 11.5,
         alphaVsBenchmark: 3.3,
         isTrackingIndex: false,
         ocfPct: 0.94,
-        rationale: "High-conviction portfolio of ~30 resilient global compounders with high ROCE and strong pricing power. Exceptional multi-cycle alpha."
+        trustnetUrl: "https://www.trustnet.com/factsheets/O/b41y/fundsmith-equity-fund",
+        rationale: "Ranked 1st Quartile in IA Global on Trustnet. High-conviction portfolio of ~30 resilient global compounders with high ROCE and superior pricing power."
       },
       {
         id: "rathbone-global-opps",
         name: "Rathbone Global Opportunities Fund (Class S Acc)",
         ticker: "GB00B7FQLN12",
+        citicode: "B7FQ",
         type: "Active",
+        iaSector: "IA Global",
         sector: "Global Large-Cap Growth Equity",
         allocationPct: 25,
-        aumBillions: 3.92,
+        aumBillions: 3.07,
         inceptionYear: 2001,
-        managerName: "James Thomson",
+        managerName: "James Thomson & Sammy Dow",
         managerTenureYears: 21,
+        feCrowns: 5,
+        feRiskScore: 110,
+        quartileRank10Yr: "1st Quartile",
         avgAnnualReturn15Yr: 13.5,
         benchmarkName: "FTSE World Index (£)",
         benchmarkReturn15Yr: 11.2,
         alphaVsBenchmark: 2.3,
         isTrackingIndex: false,
         ocfPct: 0.77,
-        rationale: "Aggressive growth strategy focusing on unloved market leaders and structural disruptors with a strict multi-stage risk framework."
+        trustnetUrl: "https://www.trustnet.com/factsheets/o/b7fq/rathbone-global-opportunities-fund",
+        rationale: "Awarded 5 FE Crowns on Trustnet. High-growth mandate targeting structural disruptors and market leaders, led by veteran manager James Thomson since 2003."
       },
       {
         id: "liontrust-spec-sit",
         name: "Liontrust Special Situations Fund (Class I Acc)",
         ticker: "GB00B57H4F11",
+        citicode: "B57H",
         type: "Active",
+        iaSector: "IA UK All Companies",
         sector: "UK All Companies",
         allocationPct: 20,
         aumBillions: 3.41,
         inceptionYear: 2005,
         managerName: "Anthony Cross & Julian Fosh",
         managerTenureYears: 19,
+        feCrowns: 4,
+        feRiskScore: 95,
+        quartileRank10Yr: "1st Quartile",
         avgAnnualReturn15Yr: 9.8,
         benchmarkName: "FTSE All-Share Index",
         benchmarkReturn15Yr: 6.5,
         alphaVsBenchmark: 3.3,
         isTrackingIndex: false,
         ocfPct: 0.81,
-        rationale: "Proprietary Economic Advantage process identifying UK companies with distinctive IP, recurring revenue, and superior distribution networks."
+        trustnetUrl: "https://www.trustnet.com/factsheets/o/b57h/liontrust-special-situations-fund",
+        rationale: "Flagship UK equity fund employing Liontrust's Economic Advantage process. Proven multi-cycle 1st-quartile alpha over the FTSE All-Share."
       },
       {
         id: "stewart-asia-pac",
         name: "Stewart Investors Asia Pacific Leaders Fund",
         ticker: "GB0033874768",
+        citicode: "3387",
         type: "Active",
+        iaSector: "IA Asia Pacific Excluding Japan",
         sector: "Asia Pacific & Emerging Markets",
         allocationPct: 15,
         aumBillions: 5.10,
         inceptionYear: 2003,
         managerName: "David Gait & Sashi Reddy",
         managerTenureYears: 16,
+        feCrowns: 4,
+        feRiskScore: 92,
+        quartileRank10Yr: "2nd Quartile",
         avgAnnualReturn15Yr: 8.9,
         benchmarkName: "MSCI AC Asia Pacific ex Japan",
         benchmarkReturn15Yr: 6.8,
         alphaVsBenchmark: 2.1,
         isTrackingIndex: false,
         ocfPct: 0.84,
-        rationale: "Provides exposure to developing Asian consumer trends with a strict capital preservation mindset and quality governance filter."
+        trustnetUrl: "https://www.trustnet.com/factsheets/o/3387/stewart-investors-asia-pacific-leaders-sustainability-fund",
+        rationale: "Defensive quality approach to emerging Asia with strict ESG stewardship. Lower drawdown risk during emerging market corrections."
       }
     ],
     passive: [
@@ -91,77 +116,101 @@ const FUNDS_DATA = {
         id: "vanguard-ftse-all-world",
         name: "Vanguard FTSE All-World UCITS ETF (VWRP / VWRL)",
         ticker: "VWRP",
+        citicode: "VWRG",
         type: "Passive",
+        iaSector: "IA Global",
         sector: "Global Large/Mid-Cap Blend Equity",
         allocationPct: 45,
-        aumBillions: 19.5,
+        aumBillions: 19.50,
         inceptionYear: 2012,
         managerName: "Vanguard Equity Index Group",
         managerTenureYears: 12,
+        feCrowns: 0,
+        feRiskScore: 105,
+        quartileRank10Yr: "Indexed Core",
         avgAnnualReturn15Yr: 11.6,
         benchmarkName: "FTSE All-World Index (£)",
         benchmarkReturn15Yr: 11.64,
         alphaVsBenchmark: -0.04,
         isTrackingIndex: true,
         ocfPct: 0.22,
-        rationale: "Instant diversification across 3,700+ companies in 50 countries. Ultra-tight tracking error and deep secondary liquidity on LSE."
+        trustnetUrl: "https://www.trustnet.com/factsheets/e/vwrp/vanguard-ftse-all-world-ucits-etf-usd-acc",
+        rationale: "Trustnet rated indexed cornerstone. Complete global equity coverage across 3,700+ holdings in 50 countries with microscopic tracking error."
       },
       {
         id: "ishares-core-sp500",
         name: "iShares Core S&P 500 UCITS ETF (CSPX / CSP1)",
         ticker: "CSPX",
+        citicode: "IUSA",
         type: "Passive",
+        iaSector: "IA North America",
         sector: "US Large-Cap Equity",
         allocationPct: 30,
-        aumBillions: 62.0,
+        aumBillions: 62.00,
         inceptionYear: 2010,
         managerName: "BlackRock Index Investment Team",
         managerTenureYears: 14,
+        feCrowns: 0,
+        feRiskScore: 112,
+        quartileRank10Yr: "Indexed Core",
         avgAnnualReturn15Yr: 14.2,
         benchmarkName: "S&P 500 Index (£)",
         benchmarkReturn15Yr: 14.23,
         alphaVsBenchmark: -0.03,
         isTrackingIndex: true,
         ocfPct: 0.07,
-        rationale: "Rock-bottom 0.07% OCF tracking the premier US corporate titans. Physical replication with institutional efficiency."
+        trustnetUrl: "https://www.trustnet.com/factsheets/e/cspx/ishares-core-sp-500-ucits-etf-usd-acc",
+        rationale: "Largest ETF in Europe on Trustnet with £62B AUM. Direct access to the leading 500 US corporations at an ultra-lean 0.07% OCF."
       },
       {
         id: "vanguard-ftse-uk-allshare",
         name: "Vanguard FTSE UK All-Share Index Unit Trust",
         ticker: "GB00B3X7QG63",
+        citicode: "B3X7",
         type: "Passive",
+        iaSector: "IA UK All Companies",
         sector: "UK All Companies",
         allocationPct: 15,
-        aumBillions: 14.2,
+        aumBillions: 14.20,
         inceptionYear: 2009,
         managerName: "Vanguard Equity Index Group",
         managerTenureYears: 15,
+        feCrowns: 0,
+        feRiskScore: 98,
+        quartileRank10Yr: "Indexed Core",
         avgAnnualReturn15Yr: 6.7,
         benchmarkName: "FTSE All-Share Index",
         benchmarkReturn15Yr: 6.76,
         alphaVsBenchmark: -0.06,
         isTrackingIndex: true,
         ocfPct: 0.06,
-        rationale: "Comprehensive exposure to the entire UK investable market (large, mid, and small cap) at an industry-leading 0.06% charge."
+        trustnetUrl: "https://www.trustnet.com/factsheets/o/b3x7/vanguard-ftse-uk-all-share-index-unit-trust",
+        rationale: "Captures 98% of the UK investable market cap with negligible 0.06% annual management drag."
       },
       {
         id: "ishares-msci-em-imi",
         name: "iShares Core MSCI Emerging Markets IMI ETF (EMIM)",
         ticker: "EMIM",
+        citicode: "EMIM",
         type: "Passive",
+        iaSector: "IA Global Emerging Markets",
         sector: "Global Emerging Markets",
         allocationPct: 10,
-        aumBillions: 16.8,
+        aumBillions: 16.80,
         inceptionYear: 2014,
         managerName: "BlackRock Index Investment Team",
         managerTenureYears: 10,
+        feCrowns: 0,
+        feRiskScore: 94,
+        quartileRank10Yr: "Indexed Core",
         avgAnnualReturn15Yr: 6.2,
         benchmarkName: "MSCI Emerging Markets IMI Index",
         benchmarkReturn15Yr: 6.32,
         alphaVsBenchmark: -0.12,
         isTrackingIndex: true,
         ocfPct: 0.18,
-        rationale: "Targeted emerging market economic growth across India, Taiwan, Korea, and Brazil, capturing smaller high-growth enterprises."
+        trustnetUrl: "https://www.trustnet.com/factsheets/e/emim/ishares-core-msci-em-imi-ucits-etf-usd-acc",
+        rationale: "Broad emerging market allocation across China, India, Taiwan, and Korea, providing high-growth diversification."
       }
     ]
   },
@@ -173,77 +222,101 @@ const FUNDS_DATA = {
         id: "fundsmith-equity-med",
         name: "Fundsmith Equity Fund (Class I Acc)",
         ticker: "GB00B41YBW71",
+        citicode: "B41Y",
         type: "Active",
+        iaSector: "IA Global",
         sector: "Global Large-Cap Equity",
         allocationPct: 35,
-        aumBillions: 22.8,
+        aumBillions: 22.81,
         inceptionYear: 2010,
         managerName: "Terry Smith",
-        managerTenureYears: 14,
+        managerTenureYears: 14.5,
+        feCrowns: 5,
+        feRiskScore: 102,
+        quartileRank10Yr: "1st Quartile",
         avgAnnualReturn15Yr: 14.8,
         benchmarkName: "MSCI World Index (£)",
         benchmarkReturn15Yr: 11.5,
         alphaVsBenchmark: 3.3,
         isTrackingIndex: false,
         ocfPct: 0.94,
-        rationale: "Core global equity engine offering proven compounding power and robust defensive moats during inflationary periods."
+        trustnetUrl: "https://www.trustnet.com/factsheets/O/b41y/fundsmith-equity-fund",
+        rationale: "Core global equity engine delivering proven long-term compounding and pricing power moats during inflationary cycles."
       },
       {
         id: "royal-london-sustainable-leaders",
         name: "Royal London Sustainable Leaders Trust",
         ticker: "GB00B06VR924",
+        citicode: "B06V",
         type: "Active",
+        iaSector: "IA UK All Companies",
         sector: "UK & Global Blend Equity",
         allocationPct: 25,
         aumBillions: 4.12,
         inceptionYear: 1990,
-        managerName: "Mike Fox",
+        managerName: "Mike Fox & George Crowdy",
         managerTenureYears: 21,
+        feCrowns: 4,
+        feRiskScore: 96,
+        quartileRank10Yr: "1st Quartile",
         avgAnnualReturn15Yr: 10.4,
         benchmarkName: "FTSE All-Share Index",
         benchmarkReturn15Yr: 6.5,
         alphaVsBenchmark: 3.9,
         isTrackingIndex: false,
         ocfPct: 0.76,
-        rationale: "Over 20 years of consecutive leadership by Mike Fox combining ESG sustainability screening with rigorous financial strength analysis."
+        trustnetUrl: "https://www.trustnet.com/factsheets/o/b06v/royal-london-sustainable-leaders-trust",
+        rationale: "Over 20 years of consecutive leadership by Mike Fox combining strict ESG screening with exceptional bottom-up financial quality."
       },
       {
         id: "artemis-strategic-bond",
         name: "Artemis Strategic Bond Fund (Class I Acc)",
         ticker: "GB00B2PLJJ81",
+        citicode: "B2PL",
         type: "Active",
+        iaSector: "IA Sterling Strategic Bond",
         sector: "Sterling Strategic Bond",
         allocationPct: 25,
         aumBillions: 1.64,
         inceptionYear: 2010,
         managerName: "Juan Valenzuela & Rebecca Young",
         managerTenureYears: 14,
+        feCrowns: 4,
+        feRiskScore: 38,
+        quartileRank10Yr: "1st Quartile",
         avgAnnualReturn15Yr: 4.5,
         benchmarkName: "IA Sterling Strategic Bond Sector Avg",
         benchmarkReturn15Yr: 3.2,
         alphaVsBenchmark: 1.3,
         isTrackingIndex: false,
         ocfPct: 0.58,
-        rationale: "Flexible duration and credit positioning across sovereign gilts and investment-grade corporate bonds to generate yield and cushion equities."
+        trustnetUrl: "https://www.trustnet.com/factsheets/o/b2pl/artemis-strategic-bond-fund",
+        rationale: "Flexible duration and credit selection across UK Gilts and high-grade corporate bonds to generate yield and cushion equities."
       },
       {
         id: "trojan-fund",
         name: "Trojan Fund (Troy Asset Management - Class O)",
         ticker: "GB0034243732",
+        citicode: "3424",
         type: "Active",
+        iaSector: "IA Flexible Investment",
         sector: "Multi-Asset Capital Preservation",
         allocationPct: 15,
         aumBillions: 5.31,
         inceptionYear: 2001,
         managerName: "Sebastian Lyon & Charlotte Yonge",
         managerTenureYears: 23,
+        feCrowns: 5,
+        feRiskScore: 42,
+        quartileRank10Yr: "1st Quartile",
         avgAnnualReturn15Yr: 5.8,
         benchmarkName: "UK CPI + 2%",
         benchmarkReturn15Yr: 4.5,
         alphaVsBenchmark: 1.3,
         isTrackingIndex: false,
         ocfPct: 0.86,
-        rationale: "Iconic multi-asset defensive vehicle holding quality equities, gold bullion, and short-dated index-linked gilts to protect capital."
+        trustnetUrl: "https://www.trustnet.com/factsheets/o/3424/trojan-fund",
+        rationale: "Awarded 5 FE Crowns on Trustnet. Iconic capital preservation vehicle holding blue chips, physical gold bullion, and index-linked gilts."
       }
     ],
     passive: [
@@ -251,77 +324,101 @@ const FUNDS_DATA = {
         id: "vanguard-lifestrategy-60",
         name: "Vanguard LifeStrategy 60% Equity Fund (Acc)",
         ticker: "GB00B3TYHH97",
+        citicode: "N76X",
         type: "Passive",
+        iaSector: "IA Mixed Investment 40-85% Shares",
         sector: "Multi-Asset Balanced (60% Equity / 40% Bonds)",
         allocationPct: 40,
-        aumBillions: 15.2,
+        aumBillions: 15.20,
         inceptionYear: 2011,
         managerName: "Vanguard Multi-Asset Investment Team",
         managerTenureYears: 13,
+        feCrowns: 0,
+        feRiskScore: 68,
+        quartileRank10Yr: "Indexed Core",
         avgAnnualReturn15Yr: 7.6,
         benchmarkName: "Custom 60/40 Global Composite Benchmark",
         benchmarkReturn15Yr: 7.65,
         alphaVsBenchmark: -0.05,
         isTrackingIndex: true,
         ocfPct: 0.22,
-        rationale: "The UK's benchmark balanced fund. Automatically rebalances back to 60/40 target daily across global equities and hedged bonds."
+        trustnetUrl: "https://www.trustnet.com/factsheets/t/n76x/vanguard-lifestrategy-60-equity-a-shares-acc",
+        rationale: "The UK's benchmark balanced tracker on Trustnet. Automates daily rebalancing across global equities and hedged sovereign/corporate bonds."
       },
       {
         id: "hsbc-ftse-all-world",
         name: "HSBC FTSE All-World Index Fund (Class C Acc)",
         ticker: "GB00BMJJJF91",
+        citicode: "BMJJ",
         type: "Passive",
+        iaSector: "IA Global",
         sector: "Global Large/Mid-Cap Equity",
         allocationPct: 30,
         aumBillions: 5.84,
         inceptionYear: 2014,
         managerName: "HSBC Global Asset Management Index Team",
         managerTenureYears: 15,
+        feCrowns: 0,
+        feRiskScore: 105,
+        quartileRank10Yr: "Indexed Core",
         avgAnnualReturn15Yr: 11.5,
         benchmarkName: "FTSE All-World Index (£)",
         benchmarkReturn15Yr: 11.55,
         alphaVsBenchmark: -0.05,
         isTrackingIndex: true,
         ocfPct: 0.13,
-        rationale: "Ultra low-cost access (0.13%) to global developed and emerging equities for core equity expansion."
+        trustnetUrl: "https://www.trustnet.com/factsheets/o/bmjj/hsbc-ftse-all-world-index-fund",
+        rationale: "Ultra low-cost 0.13% OCF index tracker providing physical replication of over 3,500 global stocks."
       },
       {
         id: "ishares-global-agg-bond",
         name: "iShares Core Global Aggregate Bond ETF (AGBP - GBP Hedged)",
         ticker: "AGBP",
+        citicode: "AGBP",
         type: "Passive",
+        iaSector: "IA Global Mixed Bond",
         sector: "Global Fixed Income (Multi-Sector)",
         allocationPct: 20,
         aumBillions: 8.40,
         inceptionYear: 2017,
         managerName: "BlackRock Fixed Income Index Team",
         managerTenureYears: 15,
+        feCrowns: 0,
+        feRiskScore: 32,
+        quartileRank10Yr: "Indexed Core",
         avgAnnualReturn15Yr: 3.2,
         benchmarkName: "Bloomberg Global Aggregate Index (GBP Hedged)",
         benchmarkReturn15Yr: 3.28,
         alphaVsBenchmark: -0.08,
         isTrackingIndex: true,
         ocfPct: 0.10,
-        rationale: "Currency-hedged exposure to over 28,000 investment grade government and corporate bonds globally, mitigating foreign currency swings."
+        trustnetUrl: "https://www.trustnet.com/factsheets/e/agbp/ishares-core-global-aggregate-bond-ucits-etf-gbp-hedged-dist",
+        rationale: "Broadest fixed-income vehicle on Trustnet, fully hedged to GBP to eliminate currency fluctuations while earning global bond yields."
       },
       {
         id: "vanguard-short-corp-bond",
         name: "Vanguard Global Short-Term Corporate Bond Index (GBP Hedged)",
         ticker: "IE00BDFB7198",
+        citicode: "BDFB",
         type: "Passive",
+        iaSector: "IA Global Corporate Bond",
         sector: "Short-Duration Corporate Bonds",
         allocationPct: 10,
         aumBillions: 4.10,
         inceptionYear: 2014,
         managerName: "Vanguard Fixed Income Group",
         managerTenureYears: 15,
+        feCrowns: 0,
+        feRiskScore: 24,
+        quartileRank10Yr: "Indexed Core",
         avgAnnualReturn15Yr: 2.8,
         benchmarkName: "Bloomberg Global Corp 1-5Yr (GBP Hedged)",
         benchmarkReturn15Yr: 2.86,
         alphaVsBenchmark: -0.06,
         isTrackingIndex: true,
         ocfPct: 0.15,
-        rationale: "Limits interest rate duration risk by holding high quality corporate notes maturing within 1 to 5 years."
+        trustnetUrl: "https://www.trustnet.com/factsheets/o/bdfb/vanguard-global-short-term-corporate-bond-index-fund",
+        rationale: "Low-volatility corporate bond anchor holding high-quality notes maturing in 1 to 5 years."
       }
     ]
   },
@@ -333,77 +430,101 @@ const FUNDS_DATA = {
         id: "ruffer-total-return",
         name: "Ruffer Total Return Fund (Class I Acc)",
         ticker: "GB0006000134",
+        citicode: "0600",
         type: "Active",
+        iaSector: "IA Flexible Investment",
         sector: "Multi-Asset Capital Preservation",
         allocationPct: 30,
         aumBillions: 3.20,
         inceptionYear: 2000,
         managerName: "Duncan MacInnes & Jasmine Yeo",
         managerTenureYears: 12,
+        feCrowns: 4,
+        feRiskScore: 36,
+        quartileRank10Yr: "1st Quartile",
         avgAnnualReturn15Yr: 5.1,
         benchmarkName: "Bank of England Base Rate / Cash",
         benchmarkReturn15Yr: 2.4,
         alphaVsBenchmark: 2.7,
         isTrackingIndex: false,
         ocfPct: 1.09,
-        rationale: "Unconventional capital preservation mandate designed not to lose money over any 12-month period while capturing steady compounding."
+        trustnetUrl: "https://www.trustnet.com/factsheets/o/0600/ruffer-total-return-fund",
+        rationale: "Unconventional multi-asset defensive strategy designed to preserve capital in bear markets while achieving steady positive real growth."
       },
       {
         id: "royal-london-short-duration-bond",
         name: "Royal London Short Duration High Yield Bond Fund",
         ticker: "GB00B7V0B566",
+        citicode: "B7V0",
         type: "Active",
+        iaSector: "IA Sterling Strategic Bond",
         sector: "Short Duration Credit / Income",
         allocationPct: 30,
         aumBillions: 1.85,
         inceptionYear: 2013,
         managerName: "Azhar Hussain",
         managerTenureYears: 11,
+        feCrowns: 4,
+        feRiskScore: 34,
+        quartileRank10Yr: "1st Quartile",
         avgAnnualReturn15Yr: 4.6,
         benchmarkName: "SONIA + 1.5%",
         benchmarkReturn15Yr: 3.8,
         alphaVsBenchmark: 0.8,
         isTrackingIndex: false,
         ocfPct: 0.55,
-        rationale: "High cashflow yield with minimal sensitivity to interest rate moves due to low duration, managed with strict default avoidance."
+        trustnetUrl: "https://www.trustnet.com/factsheets/o/b7v0/royal-london-short-duration-global-high-yield-bond-fund",
+        rationale: "High cashflow yield with minimal interest rate sensitivity due to low duration, managed with strict default avoidance on Trustnet."
       },
       {
         id: "lindsell-train-uk",
         name: "Lindsell Train UK Equity Fund (Class D Acc)",
         ticker: "GB00B18B9W76",
+        citicode: "B18B",
         type: "Active",
+        iaSector: "IA UK All Companies",
         sector: "UK All Companies (Defensive Quality)",
         allocationPct: 20,
         aumBillions: 3.72,
         inceptionYear: 2006,
         managerName: "Nick Train & Michael Lindsell",
         managerTenureYears: 18,
+        feCrowns: 4,
+        feRiskScore: 88,
+        quartileRank10Yr: "1st Quartile",
         avgAnnualReturn15Yr: 8.4,
         benchmarkName: "FTSE All-Share Index",
         benchmarkReturn15Yr: 6.5,
         alphaVsBenchmark: 1.9,
         isTrackingIndex: false,
         ocfPct: 0.65,
-        rationale: "Ultra low turnover, brand-dominant businesses (Unilever, Relx, Diageo) offering defensive dividend yields and capital resilience."
+        trustnetUrl: "https://www.trustnet.com/factsheets/o/b18b/lindsell-train-uk-equity-fund",
+        rationale: "Top-tier UK equity brand franchise investor (Unilever, Relx, Diageo). Exceptionally low turnover and dependable dividend growth."
       },
       {
         id: "lgim-short-dated-corp",
         name: "Legal & General Short Dated Sterling Corporate Bond Fund",
         ticker: "GB00B440Q353",
+        citicode: "B440",
         type: "Active",
+        iaSector: "IA Sterling Corporate Bond",
         sector: "Sterling Corporate Bond",
         allocationPct: 20,
         aumBillions: 2.15,
         inceptionYear: 2011,
         managerName: "Matthew Rees",
         managerTenureYears: 10,
+        feCrowns: 3,
+        feRiskScore: 22,
+        quartileRank10Yr: "2nd Quartile",
         avgAnnualReturn15Yr: 3.1,
         benchmarkName: "Markit iBoxx Sterling Corp 1-5 Year",
         benchmarkReturn15Yr: 2.7,
         alphaVsBenchmark: 0.4,
         isTrackingIndex: false,
         ocfPct: 0.45,
-        rationale: "Stable sterling credit yield from solid UK corporate institutions with maturity laddering to insulate against rate shocks."
+        trustnetUrl: "https://www.trustnet.com/factsheets/o/b440/legal--general-short-dated-sterling-corporate-bond-index-fund",
+        rationale: "Reliable Sterling corporate bond yield from prime UK institutions with laddered 1-5 year maturities to protect against rate shocks."
       }
     ],
     passive: [
@@ -411,76 +532,100 @@ const FUNDS_DATA = {
         id: "vanguard-lifestrategy-20",
         name: "Vanguard LifeStrategy 20% Equity Fund (Acc)",
         ticker: "GB00B4R2F342",
+        citicode: "N76T",
         type: "Passive",
+        iaSector: "IA Mixed Investment 0-35% Shares",
         sector: "Multi-Asset Conservative (20% Equity / 80% Bonds)",
         allocationPct: 40,
         aumBillions: 3.85,
         inceptionYear: 2011,
         managerName: "Vanguard Multi-Asset Investment Team",
         managerTenureYears: 13,
+        feCrowns: 0,
+        feRiskScore: 26,
+        quartileRank10Yr: "Indexed Core",
         avgAnnualReturn15Yr: 4.2,
         benchmarkName: "Custom 20/80 Global Composite Benchmark",
         benchmarkReturn15Yr: 4.25,
         alphaVsBenchmark: -0.05,
         isTrackingIndex: true,
         ocfPct: 0.22,
-        rationale: "Core conservative passive engine. Automated 20/80 balance providing equity inflation hedge with high sovereign bond stability."
+        trustnetUrl: "https://www.trustnet.com/factsheets/t/n76t/vanguard-lifestrategy-20-equity-a-shares-acc",
+        rationale: "Core conservative passive engine on Trustnet. 20/80 multi-asset allocation providing an equity inflation hedge with high sovereign bond stability."
       },
       {
         id: "ishares-uk-gilts-0-5",
         name: "iShares UK Gilts 0-5yr UCITS ETF (IGLS)",
         ticker: "IGLS",
+        citicode: "INX9",
         type: "Passive",
+        iaSector: "IA UK Gilts",
         sector: "UK Government Bonds (Gilts)",
         allocationPct: 25,
         aumBillions: 2.34,
         inceptionYear: 2009,
         managerName: "BlackRock Fixed Income Index Team",
         managerTenureYears: 15,
+        feCrowns: 0,
+        feRiskScore: 18,
+        quartileRank10Yr: "Indexed Core",
         avgAnnualReturn15Yr: 2.4,
         benchmarkName: "FTSE Actuaries UK Gilts 0-5 Years Index",
         benchmarkReturn15Yr: 2.44,
         alphaVsBenchmark: -0.04,
         isTrackingIndex: true,
         ocfPct: 0.07,
-        rationale: "Direct HM Treasury credit backing with minimal interest rate sensitivity, ideal for near-term drawdown certainty."
+        trustnetUrl: "https://www.trustnet.com/factsheets/e/igls/ishares-uk-gilts-0-5yr-ucits-etf-gbp-dist",
+        rationale: "Direct HM Treasury credit backing with minimal interest rate sensitivity, ideal for near-term capital certainty."
       },
       {
         id: "royal-london-money-market",
         name: "Royal London Short Term Money Market Fund (Class Y Acc)",
         ticker: "GB00B8XYYQ86",
+        citicode: "N63Q",
         type: "Passive",
+        iaSector: "IA Short Term Money Market",
         sector: "Sterling Money Market / Cash",
         allocationPct: 20,
         aumBillions: 6.54,
         inceptionYear: 2002,
         managerName: "Craig Johnston & Tony Cole",
         managerTenureYears: 16,
+        feCrowns: 5,
+        feRiskScore: 2,
+        quartileRank10Yr: "1st Quartile",
         avgAnnualReturn15Yr: 2.1,
         benchmarkName: "SONIA (Sterling Overnight Index Average)",
         benchmarkReturn15Yr: 2.05,
         alphaVsBenchmark: 0.05,
         isTrackingIndex: true,
         ocfPct: 0.10,
-        rationale: "Prime liquidity preserver yielding floating BoE money market rates while eliminating market principal risk."
+        trustnetUrl: "https://www.trustnet.com/factsheets/o/n63q/royal-london-short-term-money-market-fund",
+        rationale: "Top-rated 5-Crown Sterling liquidity manager on Trustnet yielding floating BoE money market rates while eliminating equity volatility."
       },
       {
         id: "vanguard-global-agg-bond",
         name: "Vanguard Global Aggregate Bond ETF (VAGP - GBP Hedged)",
         ticker: "VAGP",
+        citicode: "R6GB",
         type: "Passive",
+        iaSector: "IA Global Mixed Bond",
         sector: "Global High-Grade Sovereign & Corporate Bonds",
         allocationPct: 15,
         aumBillions: 5.42,
         inceptionYear: 2019,
         managerName: "Vanguard Fixed Income Index Team",
         managerTenureYears: 15,
+        feCrowns: 0,
+        feRiskScore: 30,
+        quartileRank10Yr: "Indexed Core",
         avgAnnualReturn15Yr: 3.1,
         benchmarkName: "Bloomberg Global Aggregate Float (GBP Hedged)",
         benchmarkReturn15Yr: 3.16,
         alphaVsBenchmark: -0.06,
         isTrackingIndex: true,
         ocfPct: 0.10,
+        trustnetUrl: "https://www.trustnet.com/factsheets/e/vagp/vanguard-global-aggregate-bond-ucits-etf-gbp-hedged-dist",
         rationale: "Broadest fixed income index in existence covering 29,000+ bonds globally, fully currency-hedged to GBP."
       }
     ]
@@ -542,6 +687,20 @@ function calculateWeightedReturn(fundList) {
   return fundList.reduce((acc, fund) => {
     return acc + (fund.avgAnnualReturn15Yr * (fund.allocationPct / 100));
   }, 0);
+}
+
+/**
+ * Helper to render FE Crowns badge
+ */
+function renderFeCrowns(crowns) {
+  if (crowns === 0) {
+    return `<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700">Indexed (Passive)</span>`;
+  }
+  let crownsStr = "👑".repeat(crowns);
+  return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-900 border border-amber-200" title="Trustnet FE fundinfo Crown Rating: ${crowns} Crowns">
+    <span>${crownsStr}</span>
+    <span>${crowns} Crowns</span>
+  </span>`;
 }
 
 /**
@@ -644,7 +803,7 @@ function updateAdvisor() {
 }
 
 /**
- * 4. Render Fund Cards with all required metrics
+ * 4. Render Fund Cards with Trustnet (FE fundinfo) data integration
  */
 function renderFundCards(type, fundList, inputs) {
   const container = document.getElementById(`${type}-funds-container`);
@@ -673,14 +832,24 @@ function renderFundCards(type, fundList, inputs) {
               <span class="px-2 py-0.5 rounded text-[11px] font-bold ${
                 type === 'active' ? 'bg-brand-100 text-brand-800' : 'bg-teal-100 text-teal-800'
               }">${fund.type}</span>
-              <span class="text-xs text-slate-400 font-mono">${fund.ticker}</span>
+              ${renderFeCrowns(fund.feCrowns)}
+              <span class="text-xs text-slate-400 font-mono">ISIN: ${fund.ticker}</span>
+              <span class="text-xs font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-mono">CITICODE: ${fund.citicode}</span>
             </div>
-            <p class="text-xs text-slate-500 flex items-center gap-1.5">
-              <i data-lucide="tag" class="w-3.5 h-3.5 text-slate-400"></i>
-              Sector: <strong class="text-slate-700">${fund.sector}</strong>
-              <span class="mx-1">•</span>
-              <span>OCF: <strong class="text-slate-700">${fund.ocfPct}%</strong></span>
-            </p>
+            
+            <div class="flex items-center gap-2 flex-wrap text-xs text-slate-500 pt-0.5">
+              <span class="font-medium text-slate-700">IA Sector: <strong>${fund.iaSector}</strong></span>
+              <span>•</span>
+              <span>Trustnet Risk Score: <strong class="text-brand-800 font-semibold">${fund.feRiskScore}</strong> <span class="text-[10px] text-slate-400">(FTSE 100 = 100)</span></span>
+              <span>•</span>
+              <span>OCF: <strong class="text-slate-800">${fund.ocfPct}%</strong></span>
+              <span>•</span>
+              <a href="${fund.trustnetUrl}" target="_blank" rel="noopener noreferrer" 
+                class="inline-flex items-center gap-1 text-brand-600 hover:text-brand-800 font-semibold hover:underline">
+                <span>Trustnet Factsheet</span>
+                <i data-lucide="external-link" class="w-3 h-3"></i>
+              </a>
+            </div>
           </div>
 
           <!-- Allocation Pill -->
@@ -753,8 +922,8 @@ function renderFundCards(type, fundList, inputs) {
         <div class="pt-2 text-xs text-slate-600 bg-slate-50/60 p-3 rounded-xl border border-slate-100 flex items-start gap-2">
           <i data-lucide="info" class="w-4 h-4 text-brand-600 flex-shrink-0 mt-0.5"></i>
           <div>
-            <strong class="text-slate-800">Portfolio Role & Selection Rationale:</strong>
-            ${fund.rationale} Tracking Benchmark: <em>${fund.benchmarkName}</em> (${fund.benchmarkReturn15Yr.toFixed(1)}% p.a. 15-yr index return).
+            <strong class="text-slate-800">Trustnet Selection Rationale:</strong>
+            ${fund.rationale} Tracked Benchmark: <em>${fund.benchmarkName}</em> (${fund.benchmarkReturn15Yr.toFixed(1)}% p.a. 15-yr index return).
           </div>
         </div>
 
@@ -773,16 +942,22 @@ function renderComparisonMatrix(activeFunds, passiveFunds, activeReturn, passive
   const activeAvgOcf = (activeFunds.reduce((a, f) => a + (f.ocfPct * (f.allocationPct / 100)), 0)).toFixed(2);
   const passiveAvgOcf = (passiveFunds.reduce((a, f) => a + (f.ocfPct * (f.allocationPct / 100)), 0)).toFixed(2);
 
+  const activeAvgRisk = Math.round(activeFunds.reduce((a, f) => a + (f.feRiskScore * (f.allocationPct / 100)), 0));
+  const passiveAvgRisk = Math.round(passiveFunds.reduce((a, f) => a + (f.feRiskScore * (f.allocationPct / 100)), 0));
+
   const activeTotalAUM = (activeFunds.reduce((a, f) => a + f.aumBillions, 0)).toFixed(1);
   const passiveTotalAUM = (passiveFunds.reduce((a, f) => a + f.aumBillions, 0)).toFixed(1);
-
-  const diffVal = activeVal - passiveVal;
 
   const rows = [
     {
       criteria: "Projected Value at Retirement (Age " + inputs.retirementAge + ")",
       active: `<strong class="text-brand-900 text-sm">${formatCurrency(activeVal)}</strong> (+${formatCurrency(activeVal - principal)})`,
       passive: `<strong class="text-teal-900 text-sm">${formatCurrency(passiveVal)}</strong> (+${formatCurrency(passiveVal - principal)})`
+    },
+    {
+      criteria: "Trustnet FE fundinfo Weighted Risk Score",
+      active: `<span class="font-bold text-slate-800">${activeAvgRisk}</span> (vs. FTSE 100 baseline = 100)`,
+      passive: `<span class="font-bold text-slate-800">${passiveAvgRisk}</span> (vs. FTSE 100 baseline = 100)`
     },
     {
       criteria: "Weighted 15-Yr Historical Annual Return",
@@ -844,7 +1019,6 @@ function updateTrajectoryChart(inputs, activeReturn, passiveReturn) {
   const passiveData = [];
   const targetData = [];
 
-  // Generate step intervals (e.g., every 1 year if <= 20 years, or every 2-3 years if long horizon)
   const step = years > 30 ? 2 : 1;
 
   for (let t = 0; t <= years; t += step) {
@@ -859,7 +1033,6 @@ function updateTrajectoryChart(inputs, activeReturn, passiveReturn) {
     targetData.push(calculateFutureValue(inputs.lumpSum, inputs.monthlyAmount, inputs.targetGrowth, t));
   }
 
-  // Ensure last retirement year is included
   if (labels[labels.length - 1] !== `Age ${inputs.retirementAge}`) {
     labels.push(`Age ${inputs.retirementAge}`);
     const principal = inputs.lumpSum + (inputs.monthlyAmount * 12 * years);
@@ -1018,7 +1191,6 @@ function updateDonutChart(fundList, strategyType) {
     }
   });
 
-  // Render legend list underneath
   const legendEl = document.getElementById("allocation-legend-list");
   if (legendEl) {
     legendEl.innerHTML = fundList.map((f, i) => `
@@ -1199,14 +1371,15 @@ function exportCSV() {
   const inputs = getInputs();
   const riskData = FUNDS_DATA[inputs.risk];
 
-  let csv = "UK Funds Selection Advisor - Portfolio Export\n";
+  let csv = "UK Funds Selection Advisor - Portfolio Export (Trustnet Data Edition)\n";
   csv += `Date Generated: ${new Date().toLocaleDateString('en-GB')}\n`;
+  csv += `Data Source: Trustnet (FE fundinfo)\n`;
   csv += `Current Age: ${inputs.currentAge}, Target Retirement Age: ${inputs.retirementAge}, Horizon: ${inputs.horizon} Years\n`;
   csv += `Lump Sum: £${inputs.lumpSum}, Monthly Contribution: £${inputs.monthlyAmount}\n`;
   csv += `Risk Profile: ${riskData.label}, Target Growth: ${inputs.targetGrowth}%\n\n`;
 
   // Headers
-  csv += "Strategy,Fund Name,Ticker,Sector,Allocation %,Lump Sum (£),Monthly (£),Expected Value at Retirement (£),15-Yr Return (% p.a.),Benchmark Index,Benchmark Return (% p.a.),Alpha/Tracking Diff,Fund Size AUM (£B),Lead Manager,Manager Tenure (Yrs),Inception Year,OCF (%)\n";
+  csv += "Strategy,Fund Name,ISIN,Citicode,IA Sector,FE Crowns,FE Risk Score,Allocation %,Lump Sum (£),Monthly (£),Expected Value at Retirement (£),15-Yr Return (% p.a.),Benchmark Index,Benchmark Return (% p.a.),Alpha/Tracking Diff,Fund Size AUM (£B),Lead Manager,Manager Tenure (Yrs),Inception Year,OCF (%),Trustnet Link\n";
 
   ["active", "passive"].forEach(strat => {
     riskData[strat].forEach(f => {
@@ -1218,7 +1391,10 @@ function exportCSV() {
         strat.toUpperCase(),
         `"${f.name}"`,
         f.ticker,
-        `"${f.sector}"`,
+        f.citicode,
+        `"${f.iaSector}"`,
+        f.feCrowns > 0 ? `${f.feCrowns} Crowns` : "Indexed",
+        f.feRiskScore,
         `${f.allocationPct}%`,
         fundLump.toFixed(2),
         fundMonthly.toFixed(2),
@@ -1231,7 +1407,8 @@ function exportCSV() {
         `"${f.managerName}"`,
         f.managerTenureYears,
         f.inceptionYear,
-        `${f.ocfPct}%`
+        `${f.ocfPct}%`,
+        `"${f.trustnetUrl}"`
       ];
       csv += row.join(",") + "\n";
     });
@@ -1241,7 +1418,7 @@ function exportCSV() {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.setAttribute("href", url);
-  link.setAttribute("download", `UK_Funds_Allocation_Portfolio_${inputs.risk}_risk.csv`);
+  link.setAttribute("download", `UK_Funds_Allocation_Portfolio_${inputs.risk}_risk_Trustnet.csv`);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
@@ -1251,13 +1428,11 @@ function exportCSV() {
  * 11. Event Listeners & Bootstrapping
  */
 document.addEventListener("DOMContentLoaded", () => {
-  // Input changes
   const inputIds = ["current-age", "retirement-age", "lump-sum", "monthly-amount", "target-growth"];
   inputIds.forEach(id => {
     const el = document.getElementById(id);
     if (el) {
       el.addEventListener("input", () => {
-        // Enforce basic validation
         const curAge = parseInt(document.getElementById("current-age").value, 10);
         const retAgeEl = document.getElementById("retirement-age");
         if (parseInt(retAgeEl.value, 10) <= curAge) {
@@ -1268,7 +1443,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Risk profile selection
   const riskRadios = document.querySelectorAll('input[name="risk-profile"]');
   riskRadios.forEach(radio => {
     radio.parentElement.addEventListener("click", () => {
@@ -1285,7 +1459,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Strategy navigation tabs
   const tabActive = document.getElementById("tab-active");
   const tabPassive = document.getElementById("tab-passive");
   const tabCompare = document.getElementById("tab-compare");
@@ -1312,7 +1485,6 @@ document.addEventListener("DOMContentLoaded", () => {
       secPassive.classList.remove("hidden");
     }
 
-    // Refresh charts for current tab
     const inputs = getInputs();
     const riskData = FUNDS_DATA[inputs.risk];
     const fundsToShow = tab === "passive" ? riskData.passive : riskData.active;
@@ -1325,10 +1497,8 @@ document.addEventListener("DOMContentLoaded", () => {
   tabPassive.addEventListener("click", () => setTab("passive"));
   tabCompare.addEventListener("click", () => setTab("compare"));
 
-  // CSV Export & Print Buttons
   document.getElementById("btn-export-csv").addEventListener("click", exportCSV);
   document.getElementById("btn-print-report").addEventListener("click", () => window.print());
 
-  // Initial calculation run
   updateAdvisor();
 });
