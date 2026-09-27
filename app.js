@@ -2632,29 +2632,87 @@ document.addEventListener("DOMContentLoaded", () => {
   const secCompare = document.getElementById("section-compare");
   const secScreener = document.getElementById("section-screener");
   const secDrawdown = document.getElementById("section-drawdown");
+  const secChartsOverview = document.getElementById("section-charts-overview");
 
-  function setTab(tab) {
+  function saveAdvisorState() {
+    try {
+      const inputs = getInputs();
+      localStorage.setItem("dutta_advisor_state", JSON.stringify({
+        inputs,
+        risk: currentRisk,
+        activePortfolio: activeCustomPortfolio,
+        passivePortfolio: passiveCustomPortfolio,
+        timestamp: Date.now()
+      }));
+    } catch (e) {
+      // localStorage may be unavailable in private browsing
+    }
+  }
+
+  window.openOptionInNewTab = function(tab) {
+    saveAdvisorState();
+    const url = new URL(window.location.href);
+    url.searchParams.set("tab", tab);
+    window.open(url.toString(), "_blank");
+  };
+
+  function setTab(tab, forceSameWindow = false) {
+    const toggleNewTab = document.getElementById("toggle-new-tab-mode");
+    if (toggleNewTab && toggleNewTab.checked && !forceSameWindow && !window._isPopoutInstance) {
+      openOptionInNewTab(tab);
+      return;
+    }
+
     activeTab = tab;
-    [tabActive, tabPassive, tabCompare, tabScreener, tabDrawdown].forEach(t => t && t.classList.remove("active"));
+
+    // Update browser URL query without page reload
+    try {
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.set("tab", tab);
+      window.history.replaceState({ tab }, "", newUrl.toString());
+    } catch (e) {}
+
+    // Reset all tabs to inactive styling
+    [tabActive, tabPassive, tabCompare, tabScreener, tabDrawdown].forEach(t => {
+      if (t) {
+        t.classList.remove("active");
+        t.classList.remove("bg-white", "text-slate-900", "shadow-sm");
+        t.classList.add("text-slate-600");
+      }
+    });
+
+    // Hide all sections initially
     [secActive, secPassive, secCompare, secScreener, secDrawdown].forEach(s => s && s.classList.add("hidden"));
 
+    const activeBtn = {
+      active: tabActive,
+      passive: tabPassive,
+      compare: tabCompare,
+      screener: tabScreener,
+      drawdown: tabDrawdown
+    }[tab];
+
+    if (activeBtn) {
+      activeBtn.classList.add("active");
+      activeBtn.classList.remove("text-slate-600");
+    }
+
+    // Isolate views cleanly so each option has its own clear presentation
     if (tab === "active") {
-      tabActive.classList.add("active");
       secActive.classList.remove("hidden");
+      if (secChartsOverview) secChartsOverview.classList.remove("hidden");
     } else if (tab === "passive") {
-      tabPassive.classList.add("active");
       secPassive.classList.remove("hidden");
+      if (secChartsOverview) secChartsOverview.classList.remove("hidden");
     } else if (tab === "compare") {
-      tabCompare.classList.add("active");
       secCompare.classList.remove("hidden");
-      secActive.classList.remove("hidden");
-      secPassive.classList.remove("hidden");
+      if (secChartsOverview) secChartsOverview.classList.remove("hidden");
     } else if (tab === "screener") {
-      tabScreener.classList.add("active");
       secScreener.classList.remove("hidden");
+      if (secChartsOverview) secChartsOverview.classList.add("hidden"); // Dedicated full-width screener
     } else if (tab === "drawdown") {
-      tabDrawdown.classList.add("active");
       secDrawdown.classList.remove("hidden");
+      if (secChartsOverview) secChartsOverview.classList.add("hidden"); // Dedicated longevity simulator
       updateDrawdownCalculator();
     }
 
@@ -2663,6 +2721,10 @@ document.addEventListener("DOMContentLoaded", () => {
     updateDonutChart(currentPortfolioList, tab);
     updateFundFutureValueChart(currentPortfolioList, inputs);
     updateBenchmarkChart(currentPortfolioList);
+
+    if (window.lucide) {
+      lucide.createIcons();
+    }
   }
 
   if (tabActive) tabActive.addEventListener("click", () => setTab("active"));
@@ -2670,6 +2732,51 @@ document.addEventListener("DOMContentLoaded", () => {
   if (tabCompare) tabCompare.addEventListener("click", () => setTab("compare"));
   if (tabScreener) tabScreener.addEventListener("click", () => setTab("screener"));
   if (tabDrawdown) tabDrawdown.addEventListener("click", () => setTab("drawdown"));
+
+  // Restore saved state from localStorage if available (e.g. when opened in a new tab)
+  try {
+    const savedStateStr = localStorage.getItem("dutta_advisor_state");
+    if (savedStateStr) {
+      const saved = JSON.parse(savedStateStr);
+      if (saved.inputs) {
+        if (saved.inputs.currentAge && document.getElementById("current-age")) document.getElementById("current-age").value = saved.inputs.currentAge;
+        if (saved.inputs.retirementAge && document.getElementById("retirement-age")) document.getElementById("retirement-age").value = saved.inputs.retirementAge;
+        if (saved.inputs.lumpSum && document.getElementById("lump-sum")) document.getElementById("lump-sum").value = saved.inputs.lumpSum;
+        if (saved.inputs.monthlyAmount && document.getElementById("monthly-amount")) document.getElementById("monthly-amount").value = saved.inputs.monthlyAmount;
+        if (saved.inputs.targetGrowth && document.getElementById("target-growth")) document.getElementById("target-growth").value = saved.inputs.targetGrowth;
+      }
+      if (saved.risk) {
+        currentRisk = saved.risk;
+        const targetRadio = document.querySelector(`input[name="risk-profile"][value="${currentRisk}"]`);
+        if (targetRadio) {
+          document.querySelectorAll('input[name="risk-profile"]').forEach(r => {
+            r.checked = false;
+            r.parentElement.classList.remove("active", "border-brand-600", "border-2", "bg-brand-50/50");
+            r.parentElement.classList.add("border-slate-200", "bg-white");
+          });
+          targetRadio.checked = true;
+          targetRadio.parentElement.classList.add("active", "border-brand-600", "border-2", "bg-brand-50/50");
+          targetRadio.parentElement.classList.remove("border-slate-200", "bg-white");
+        }
+      }
+      if (saved.activePortfolio) activeCustomPortfolio = saved.activePortfolio;
+      if (saved.passivePortfolio) passiveCustomPortfolio = saved.passivePortfolio;
+    }
+  } catch (e) {}
+
+  // Handle "Open in new browser tab" preference toggle
+  const toggleNewTabMode = document.getElementById("toggle-new-tab-mode");
+  if (toggleNewTabMode) {
+    try {
+      const savedPref = localStorage.getItem("dutta_new_tab_pref");
+      if (savedPref === "true") {
+        toggleNewTabMode.checked = true;
+      }
+      toggleNewTabMode.addEventListener("change", () => {
+        localStorage.setItem("dutta_new_tab_pref", toggleNewTabMode.checked ? "true" : "false");
+      });
+    } catch (e) {}
+  }
 
   const filterSectorEl = document.getElementById("screener-filter-sector");
   const filterHouseEl = document.getElementById("screener-filter-house");
@@ -2693,8 +2800,14 @@ document.addEventListener("DOMContentLoaded", () => {
   drawdownInputIds.forEach(id => {
     const el = document.getElementById(id);
     if (el) {
-      el.addEventListener("input", updateDrawdownCalculator);
-      el.addEventListener("change", updateDrawdownCalculator);
+      el.addEventListener("input", () => {
+        updateDrawdownCalculator();
+        saveAdvisorState();
+      });
+      el.addEventListener("change", () => {
+        updateDrawdownCalculator();
+        saveAdvisorState();
+      });
     }
   });
 
@@ -2718,4 +2831,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   updateAdvisor();
   updateDrawdownCalculator();
+
+  // Check URL query parameters for deep-linking (e.g. ?tab=drawdown or ?tab=screener)
+  const urlParams = new URLSearchParams(window.location.search);
+  const requestedTab = urlParams.get("tab") || window.location.hash.replace("#", "");
+  if (requestedTab && ["active", "passive", "compare", "screener", "drawdown"].includes(requestedTab)) {
+    window._isPopoutInstance = true;
+    setTab(requestedTab, true);
+  } else {
+    setTab("active", true);
+  }
 });
