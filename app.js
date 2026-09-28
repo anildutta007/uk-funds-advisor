@@ -2924,6 +2924,646 @@ function syncAdvisorToDrawdown() {
   updateDrawdownCalculator();
 }
 
+// ==========================================
+// TARGET RETIREMENT & SAVINGS PLANNER MODULE
+// ==========================================
+
+let targetLifetimeChart = null;
+let selectedTargetRisk = "medium"; // 'low' (5.2%), 'medium' (8.8%), 'high' (12.5%)
+let targetIncomeMode = "annual";   // 'annual' or 'monthly'
+let cachedTargetSchedule = [];
+
+const TARGET_RISK_SPECS = {
+  low: {
+    label: "Low Risk",
+    fullLabel: "Low Risk (5.2% Annual Return / Conservative)",
+    rate: 0.052,
+    ratePct: "5.2"
+  },
+  medium: {
+    label: "Medium Risk",
+    fullLabel: "Medium Risk (8.8% Annual Return / Balanced)",
+    rate: 0.088,
+    ratePct: "8.8"
+  },
+  high: {
+    label: "High Risk",
+    fullLabel: "High Risk (12.5% Annual Return / Growth)",
+    rate: 0.125,
+    ratePct: "12.5"
+  }
+};
+
+/**
+ * Toggles the income input between Annual (£/year) and Monthly (£/month).
+ */
+function setTargetIncomeMode(mode) {
+  if (targetIncomeMode === mode) return;
+  targetIncomeMode = mode;
+
+  const incomeInput = document.getElementById("target-net-income");
+  const unitLabel = document.getElementById("target-income-unit");
+  const btnAnnual = document.getElementById("target-income-mode-annual");
+  const btnMonthly = document.getElementById("target-income-mode-monthly");
+
+  if (!incomeInput) return;
+
+  const currentVal = parseFloat(incomeInput.value) || 0;
+
+  if (mode === "monthly") {
+    incomeInput.value = Math.max(500, Math.round(currentVal / 12));
+    if (unitLabel) unitLabel.textContent = "/ month";
+    if (btnAnnual) {
+      btnAnnual.className = "px-2 py-0.5 rounded text-slate-500 hover:text-slate-800";
+    }
+    if (btnMonthly) {
+      btnMonthly.className = "px-2 py-0.5 rounded bg-white text-slate-900 shadow-xs font-bold";
+    }
+  } else {
+    incomeInput.value = Math.max(5000, Math.round(currentVal * 12));
+    if (unitLabel) unitLabel.textContent = "/ year";
+    if (btnAnnual) {
+      btnAnnual.className = "px-2 py-0.5 rounded bg-white text-slate-900 shadow-xs font-bold";
+    }
+    if (btnMonthly) {
+      btnMonthly.className = "px-2 py-0.5 rounded text-slate-500 hover:text-slate-800";
+    }
+  }
+
+  updateTargetRetirementPlanner();
+}
+
+/**
+ * Selects an accumulation risk profile (low, medium, high) and refreshes visuals.
+ */
+function selectTargetRiskProfile(riskKey) {
+  if (!TARGET_RISK_SPECS[riskKey]) return;
+  selectedTargetRisk = riskKey;
+  trackGAEvent("target_risk_selected", { risk_tier: riskKey });
+
+  // Update card border & active state classes
+  const cards = {
+    low: document.getElementById("target-card-low"),
+    medium: document.getElementById("target-card-medium"),
+    high: document.getElementById("target-card-high")
+  };
+
+  Object.entries(cards).forEach(([k, card]) => {
+    if (!card) return;
+    if (k === riskKey) {
+      card.className = "target-risk-card p-3 rounded-xl border-2 border-brand-500 bg-brand-50/60 cursor-pointer transition space-y-1 text-center relative shadow-xs";
+    } else {
+      card.className = "target-risk-card p-3 rounded-xl border border-slate-200 hover:border-slate-400 cursor-pointer transition bg-white space-y-1 text-center";
+    }
+  });
+
+  const selectedStrategyEl = document.getElementById("target-selected-strategy-name");
+  if (selectedStrategyEl) {
+    selectedStrategyEl.textContent = TARGET_RISK_SPECS[riskKey].fullLabel;
+  }
+
+  updateTargetRetirementPlanner();
+}
+
+/**
+ * Solves UK gross withdrawal from net income considering UFPLS / ISA wrapper.
+ */
+function solveUKGrossForTarget(netAnnual, taxWrapper) {
+  const wrapperKey = taxWrapper === "isa" ? "isa_tax_free" : "pension_ufpls";
+  const gross = findGrossWithdrawalForNet(netAnnual, 0, wrapperKey);
+  const taxRes = calculateUkTaxOnGross(gross, 0, wrapperKey);
+  return {
+    gross,
+    tax: taxRes.incomeTax,
+    net: taxRes.netIncome
+  };
+}
+
+/**
+ * Calculates target retirement pot, required monthly savings, lifetime schedule,
+ * and updates chart and DOM KPI cards.
+ */
+function updateTargetRetirementPlanner() {
+  const incomeInput = document.getElementById("target-net-income");
+  const retireAgeInput = document.getElementById("target-retire-age");
+  const lifeExpInput = document.getElementById("target-life-expectancy");
+  const postGrowthInput = document.getElementById("target-post-growth");
+  const taxWrapperInput = document.getElementById("target-tax-wrapper");
+  const curAgeInput = document.getElementById("target-current-age");
+  const lumpInput = document.getElementById("target-current-lump");
+
+  if (!incomeInput || !retireAgeInput || !lifeExpInput) return;
+
+  const currentAge = Math.max(18, Math.min(80, parseInt(curAgeInput ? curAgeInput.value : 45, 10) || 45));
+  let retireAge = Math.max(currentAge + 1, Math.min(85, parseInt(retireAgeInput.value, 10) || 65));
+  let lifeExpectancy = Math.max(retireAge + 1, Math.min(105, parseInt(lifeExpInput.value, 10) || 90));
+
+  if (retireAgeInput.value != retireAge) retireAgeInput.value = retireAge;
+  if (lifeExpInput.value != lifeExpectancy) lifeExpInput.value = lifeExpectancy;
+
+  const rawIncome = Math.max(1000, parseFloat(incomeInput.value) || 30000);
+  const desiredNetAnnualToday = targetIncomeMode === "monthly" ? rawIncome * 12 : rawIncome;
+  const currentLumpSum = Math.max(0, parseFloat(lumpInput ? lumpInput.value : 50000) || 0);
+  const postGrowthRate = Math.max(0.01, (parseFloat(postGrowthInput ? postGrowthInput.value : 5.5) || 5.5) / 100);
+  const taxWrapper = taxWrapperInput ? taxWrapperInput.value : "sipp";
+  const inflationRate = 0.03; // 3% per annum compound
+
+  const yearsToRetire = Math.max(1, retireAge - currentAge);
+  const yearsInRetire = Math.max(1, lifeExpectancy - retireAge);
+
+  // Update dynamic timeline labels in inputs
+  const horizonLabel = document.getElementById("target-horizon-label");
+  if (horizonLabel) horizonLabel.textContent = `${yearsToRetire} years to retirement`;
+
+  const durationLabel = document.getElementById("target-retire-duration-label");
+  if (durationLabel) durationLabel.textContent = `${yearsInRetire} years of retirement`;
+
+  document.querySelectorAll(".schedule-current-age-text").forEach(el => el.textContent = currentAge);
+  document.querySelectorAll(".schedule-life-age-text").forEach(el => el.textContent = lifeExpectancy);
+  document.querySelectorAll(".kpi-retire-age-text").forEach(el => el.textContent = retireAge);
+  const chartRetireAge = document.getElementById("chart-retire-age-text");
+  if (chartRetireAge) chartRetireAge.textContent = retireAge;
+  const chartLifeAge = document.getElementById("chart-life-age-text");
+  if (chartLifeAge) chartLifeAge.textContent = lifeExpectancy;
+  const displayRetireAge = document.getElementById("target-display-retire-age");
+  if (displayRetireAge) displayRetireAge.textContent = retireAge;
+  const kpiHorizonText = document.getElementById("kpi-horizon-text");
+  if (kpiHorizonText) kpiHorizonText.textContent = yearsToRetire;
+
+  // ----------------------------------------------------
+  // Phase 1: Post-Retirement Target Pot Solver
+  // ----------------------------------------------------
+  // Year 1 Net Income in nominal terms (inflated at 3% for yearsToRetire)
+  const netYear1Nominal = desiredNetAnnualToday * Math.pow(1 + inflationRate, yearsToRetire);
+
+  const decumulationWithdrawals = [];
+  let totalNetPayout = 0;
+  for (let y = 0; y < yearsInRetire; y++) {
+    const net_y = netYear1Nominal * Math.pow(1 + inflationRate, y);
+    const taxRes = solveUKGrossForTarget(net_y, taxWrapper);
+    totalNetPayout += net_y;
+    decumulationWithdrawals.push({
+      yearIndex: y,
+      age: retireAge + y,
+      net: net_y,
+      gross: taxRes.gross,
+      tax: taxRes.tax
+    });
+  }
+
+  // Backward recurrence solver:
+  // Balance_{y-1} = Gross_y + (Balance_y / (1 + postGrowthRate))
+  let targetPotNeeded = 0;
+  for (let y = yearsInRetire - 1; y >= 0; y--) {
+    const gross_y = decumulationWithdrawals[y].gross;
+    targetPotNeeded = gross_y + (targetPotNeeded / (1 + postGrowthRate));
+  }
+  targetPotNeeded = Math.round(targetPotNeeded);
+
+  // Target pot in Today's World (deflated at 3% for yearsToRetire)
+  const targetPotToday = Math.round(targetPotNeeded / Math.pow(1 + inflationRate, yearsToRetire));
+
+  // ----------------------------------------------------
+  // Phase 2: Pre-Retirement Accumulation Solver
+  // ----------------------------------------------------
+  const riskCalculations = {};
+  const totalMonths = yearsToRetire * 12;
+
+  Object.entries(TARGET_RISK_SPECS).forEach(([k, spec]) => {
+    const mr = spec.rate / 12;
+    const fvLump = Math.round(currentLumpSum * Math.pow(1 + mr, totalMonths));
+    const gap = Math.max(0, targetPotNeeded - fvLump);
+    let monthlyNeeded = 0;
+    if (gap > 0 && mr > 0) {
+      monthlyNeeded = Math.round(gap * (mr / (Math.pow(1 + mr, totalMonths) - 1)));
+    }
+    const totalDeposited = currentLumpSum + (monthlyNeeded * totalMonths);
+
+    riskCalculations[k] = {
+      spec,
+      fvLump,
+      gap,
+      monthlyNeeded,
+      totalDeposited
+    };
+  });
+
+  // Update Low, Medium, High cards in DOM
+  const lowCalc = riskCalculations.low;
+  const medCalc = riskCalculations.medium;
+  const highCalc = riskCalculations.high;
+
+  const monthlyLowEl = document.getElementById("target-monthly-low");
+  const monthlyMedEl = document.getElementById("target-monthly-medium");
+  const monthlyHighEl = document.getElementById("target-monthly-high");
+  if (monthlyLowEl) monthlyLowEl.textContent = `£${lowCalc.monthlyNeeded.toLocaleString()}`;
+  if (monthlyMedEl) monthlyMedEl.textContent = `£${medCalc.monthlyNeeded.toLocaleString()}`;
+  if (monthlyHighEl) monthlyHighEl.textContent = `£${highCalc.monthlyNeeded.toLocaleString()}`;
+
+  const lumpLowEl = document.getElementById("target-lump-grow-low");
+  const lumpMedEl = document.getElementById("target-lump-grow-medium");
+  const lumpHighEl = document.getElementById("target-lump-grow-high");
+  if (lumpLowEl) lumpLowEl.textContent = `Lump sum grows to £${formatCompactNumber(lowCalc.fvLump)}`;
+  if (lumpMedEl) lumpMedEl.textContent = `Lump sum grows to £${formatCompactNumber(medCalc.fvLump)}`;
+  if (lumpHighEl) lumpHighEl.textContent = `Lump sum grows to £${formatCompactNumber(highCalc.fvLump)}`;
+
+  const activePlan = riskCalculations[selectedTargetRisk] || medCalc;
+
+  // Update Strategy & Out-of-pocket callout
+  const totalOutOfPocketEl = document.getElementById("target-total-out-of-pocket");
+  if (totalOutOfPocketEl) {
+    totalOutOfPocketEl.textContent = `£${Math.round(activePlan.totalDeposited).toLocaleString()}`;
+  }
+
+  // Update Callout Box in Phase 1
+  const potNominalEl = document.getElementById("target-pot-nominal-display");
+  const potRealEl = document.getElementById("target-pot-real-display");
+  const year1NetEl = document.getElementById("target-year1-net-display");
+  if (potNominalEl) potNominalEl.textContent = `£${targetPotNeeded.toLocaleString()}`;
+  if (potRealEl) potRealEl.textContent = `£${targetPotToday.toLocaleString()}`;
+  if (year1NetEl) year1NetEl.textContent = `£${Math.round(netYear1Nominal).toLocaleString()} / yr`;
+
+  // ----------------------------------------------------
+  // Update 4 Executive KPI Cards
+  // ----------------------------------------------------
+  const kpiTargetFund = document.getElementById("kpi-target-fund");
+  const kpiTargetToday = document.getElementById("kpi-target-today");
+  if (kpiTargetFund) kpiTargetFund.textContent = `£${targetPotNeeded.toLocaleString()}`;
+  if (kpiTargetToday) kpiTargetToday.textContent = `£${targetPotToday.toLocaleString()}`;
+
+  const kpiMonthlySavings = document.getElementById("kpi-monthly-savings");
+  const kpiRiskLabel = document.getElementById("kpi-risk-label");
+  if (kpiMonthlySavings) kpiMonthlySavings.textContent = `£${activePlan.monthlyNeeded.toLocaleString()}`;
+  if (kpiRiskLabel) kpiRiskLabel.textContent = `${activePlan.spec.label}`;
+
+  const kpiLumpFuture = document.getElementById("kpi-lump-future");
+  const kpiLumpSubtext = document.getElementById("kpi-lump-subtext");
+  const kpiLumpPct = document.getElementById("kpi-lump-pct");
+  if (kpiLumpFuture) kpiLumpFuture.textContent = `£${activePlan.fvLump.toLocaleString()}`;
+  if (kpiLumpSubtext) kpiLumpSubtext.textContent = `Starting from £${Math.round(currentLumpSum).toLocaleString()} today`;
+  if (kpiLumpPct) {
+    const pct = targetPotNeeded > 0 ? (activePlan.fvLump / targetPotNeeded * 100).toFixed(1) : "0.0";
+    kpiLumpPct.textContent = `${pct}%`;
+  }
+
+  const kpiLifetimePayout = document.getElementById("kpi-lifetime-payout");
+  if (kpiLifetimePayout) kpiLifetimePayout.textContent = `£${Math.round(totalNetPayout).toLocaleString()}`;
+
+  // ----------------------------------------------------
+  // Build Lifetime Schedule (Accumulation + Decumulation)
+  // ----------------------------------------------------
+  const calendarStartYear = new Date().getFullYear();
+  const schedule = [];
+
+  // Milestone Row at Current Age (Year 0)
+  schedule.push({
+    age: currentAge,
+    year: calendarStartYear,
+    phase: "Starting Point",
+    startBalance: currentLumpSum,
+    growthEarned: 0,
+    annualDeposit: 0,
+    grossWithdrawal: 0,
+    ukTaxPaid: 0,
+    netWithdrawal: 0,
+    endBalanceNominal: currentLumpSum,
+    endBalanceReal: currentLumpSum,
+    isInitial: true
+  });
+
+  // Accumulation Phase: Current Age -> Retirement Age
+  const accumMr = activePlan.spec.rate / 12;
+  let accumBal = currentLumpSum;
+
+  for (let y = 0; y < yearsToRetire; y++) {
+    const age = currentAge + y + 1;
+    const year = calendarStartYear + y + 1;
+    const startBal = accumBal;
+    let yearGrowth = 0;
+
+    for (let m = 0; m < 12; m++) {
+      const interest = accumBal * accumMr;
+      yearGrowth += interest;
+      accumBal += interest + activePlan.monthlyNeeded;
+    }
+
+    // Anchor the retirement year exact end balance to targetPotNeeded
+    const endBalNominal = (y === yearsToRetire - 1) ? targetPotNeeded : accumBal;
+    const endBalReal = endBalNominal / Math.pow(1 + inflationRate, y + 1);
+
+    schedule.push({
+      age,
+      year,
+      phase: "Accumulation",
+      startBalance: startBal,
+      growthEarned: yearGrowth,
+      annualDeposit: activePlan.monthlyNeeded * 12,
+      grossWithdrawal: 0,
+      ukTaxPaid: 0,
+      netWithdrawal: 0,
+      endBalanceNominal: endBalNominal,
+      endBalanceReal: endBalReal,
+      isInitial: false
+    });
+  }
+
+  // Decumulation Phase: Retirement Age -> Life Expectancy Age
+  let decumBal = targetPotNeeded;
+
+  for (let y = 0; y < yearsInRetire; y++) {
+    const age = retireAge + y + 1;
+    const year = calendarStartYear + yearsToRetire + y + 1;
+    const startBal = decumBal;
+    const w = decumulationWithdrawals[y];
+
+    // Withdrawal taken at start of year, remaining pot compounds
+    const remaining = Math.max(0, startBal - w.gross);
+    const yrGrowth = remaining * postGrowthRate;
+    let endBalNominal = remaining + yrGrowth;
+
+    if (y === yearsInRetire - 1) {
+      endBalNominal = 0; // Final target horizon reached
+    }
+
+    decumBal = endBalNominal;
+    const totalElapsedYears = yearsToRetire + y + 1;
+    const endBalReal = endBalNominal / Math.pow(1 + inflationRate, totalElapsedYears);
+
+    schedule.push({
+      age,
+      year,
+      phase: "Retirement",
+      startBalance: startBal,
+      growthEarned: yrGrowth,
+      annualDeposit: 0,
+      grossWithdrawal: w.gross,
+      ukTaxPaid: w.tax,
+      netWithdrawal: w.net,
+      endBalanceNominal: endBalNominal,
+      endBalanceReal: endBalReal,
+      isInitial: false
+    });
+  }
+
+  cachedTargetSchedule = schedule;
+
+  // ----------------------------------------------------
+  // Render Lifetime Schedule Table Body
+  // ----------------------------------------------------
+  const tbody = document.getElementById("target-schedule-body");
+  if (tbody) {
+    tbody.innerHTML = schedule.filter(r => !r.isInitial).map(r => {
+      const isRetire = r.phase === "Retirement";
+      const isRetirePeak = r.age === retireAge;
+      return `
+        <tr class="hover:bg-slate-50 transition ${isRetirePeak ? 'bg-brand-50/70 font-bold border-y-2 border-brand-300' : (isRetire ? 'bg-emerald-50/20' : '')}">
+          <td class="py-2.5 px-3 font-bold text-slate-900">${r.age} ${isRetirePeak ? '<span class="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-brand-600 text-white font-extrabold">Retire</span>' : ''}</td>
+          <td class="py-2.5 px-3 text-slate-500 font-mono text-[11px]">${r.year}</td>
+          <td class="py-2.5 px-3">
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ${isRetire ? 'bg-emerald-100 text-emerald-800' : 'bg-brand-100 text-brand-800'}">
+              ${isRetire ? 'Drawdown' : 'Accumulation'}
+            </span>
+          </td>
+          <td class="py-2.5 px-3 text-slate-700">£${Math.round(r.startBalance).toLocaleString()}</td>
+          <td class="py-2.5 px-3 font-semibold text-emerald-600">+£${Math.round(r.growthEarned).toLocaleString()}</td>
+          <td class="py-2.5 px-3 font-semibold ${r.annualDeposit > 0 ? 'text-brand-700 font-bold' : 'text-slate-400'}">${r.annualDeposit > 0 ? '£' + Math.round(r.annualDeposit).toLocaleString() : '-'}</td>
+          <td class="py-2.5 px-3 font-semibold ${r.grossWithdrawal > 0 ? 'text-amber-700' : 'text-slate-400'}">${r.grossWithdrawal > 0 ? '£' + Math.round(r.grossWithdrawal).toLocaleString() : '-'}</td>
+          <td class="py-2.5 px-3 font-bold ${r.netWithdrawal > 0 ? 'text-emerald-800 font-extrabold' : 'text-slate-400'}">${r.netWithdrawal > 0 ? '£' + Math.round(r.netWithdrawal).toLocaleString() : '-'}</td>
+          <td class="py-2.5 px-3 font-extrabold ${isRetirePeak ? 'text-brand-900 text-sm' : 'text-slate-900'}">£${Math.round(r.endBalanceNominal).toLocaleString()}</td>
+          <td class="py-2.5 px-3 font-extrabold text-emerald-900 bg-emerald-50/60">£${Math.round(r.endBalanceReal).toLocaleString()}</td>
+        </tr>
+      `;
+    }).join("");
+  }
+
+  // ----------------------------------------------------
+  // Render Lifetime Wealth Arc Chart
+  // ----------------------------------------------------
+  renderTargetLifetimeChart(schedule, retireAge);
+
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+}
+
+/**
+ * Renders the Lifetime Wealth Arc Chart spanning Accumulation through Decumulation.
+ */
+function renderTargetLifetimeChart(schedule, retireAge) {
+  const ctx = document.getElementById("targetLifetimeChart");
+  if (!ctx) return;
+
+  if (targetLifetimeChart) {
+    targetLifetimeChart.destroy();
+  }
+
+  const labels = schedule.map(r => `Age ${r.age}`);
+
+  // Split into Accumulation and Decumulation datasets for distinctive colors
+  const accumData = schedule.map(r => {
+    if (r.age <= retireAge) {
+      return Math.round(r.endBalanceNominal);
+    }
+    return null;
+  });
+
+  const decumData = schedule.map(r => {
+    if (r.age >= retireAge) {
+      return Math.round(r.endBalanceNominal);
+    }
+    return null;
+  });
+
+  const realData = schedule.map(r => Math.round(r.endBalanceReal));
+
+  targetLifetimeChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: "Accumulation Pot (Saving £)",
+          data: accumData,
+          borderColor: "#4f46e5",
+          backgroundColor: "rgba(79, 70, 229, 0.10)",
+          fill: "origin",
+          tension: 0.25,
+          borderWidth: 3,
+          pointRadius: (ctx) => {
+            const index = ctx.dataIndex;
+            return schedule[index] && schedule[index].age === retireAge ? 6 : 2;
+          },
+          pointBackgroundColor: "#4f46e5",
+          pointHoverRadius: 6
+        },
+        {
+          label: "Retirement Pot (Spending £)",
+          data: decumData,
+          borderColor: "#059669",
+          backgroundColor: "rgba(5, 150, 105, 0.10)",
+          fill: "origin",
+          tension: 0.25,
+          borderWidth: 3,
+          pointRadius: (ctx) => {
+            const index = ctx.dataIndex;
+            return schedule[index] && schedule[index].age === retireAge ? 6 : 2;
+          },
+          pointBackgroundColor: "#059669",
+          pointHoverRadius: 6
+        },
+        {
+          label: "Real Value in Today's World (£)",
+          data: realData,
+          borderColor: "#d97706",
+          borderDash: [5, 4],
+          borderWidth: 2,
+          pointRadius: 1,
+          pointHoverRadius: 4,
+          fill: false,
+          tension: 0.2
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: {
+          display: true,
+          position: "top",
+          labels: {
+            font: { size: 11, weight: "bold" },
+            color: "#334155",
+            boxWidth: 14,
+            usePointStyle: true
+          }
+        },
+        tooltip: {
+          backgroundColor: "#0f172a",
+          padding: 12,
+          callbacks: {
+            title: (items) => {
+              const r = schedule[items[0].dataIndex];
+              return `Age ${r.age} (Year ${r.year}) - ${r.phase}`;
+            },
+            label: (ctx) => {
+              if (ctx.raw === null || ctx.raw === undefined) return "";
+              return ` ${ctx.dataset.label}: ${formatCurrency(ctx.raw)}`;
+            },
+            afterBody: (items) => {
+              const r = schedule[items[0].dataIndex];
+              if (!r || r.isInitial) return [];
+              if (r.phase === "Accumulation") {
+                return [
+                  `Annual Savings: £${Math.round(r.annualDeposit).toLocaleString()} (£${Math.round(r.annualDeposit / 12).toLocaleString()}/mo)`,
+                  `Yearly Growth: +£${Math.round(r.growthEarned).toLocaleString()}`
+                ];
+              } else {
+                return [
+                  `Net in Hand: £${Math.round(r.netWithdrawal).toLocaleString()}/yr`,
+                  `Gross Withdrawal: £${Math.round(r.grossWithdrawal).toLocaleString()}/yr`,
+                  `UK Tax Deducted: £${Math.round(r.ukTaxPaid).toLocaleString()}/yr`
+                ];
+              }
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { font: { size: 10 }, color: "#64748b", maxRotation: 45 }
+        },
+        y: {
+          grid: { color: "#f1f5f9" },
+          ticks: {
+            font: { size: 10 },
+            color: "#64748b",
+            callback: (v) => v >= 1000000 ? `£${(v/1000000).toFixed(1)}M` : (v >= 1000 ? `£${(v/1000).toFixed(0)}k` : `£${v}`)
+          }
+        }
+      }
+    }
+  });
+}
+
+/**
+ * Exports the Target Retirement Accumulation & Decumulation Schedule as a CSV.
+ */
+function exportTargetScheduleCSV() {
+  trackGAEvent("target_csv_exported");
+  if (!cachedTargetSchedule || cachedTargetSchedule.length === 0) return;
+
+  const incomeInput = document.getElementById("target-net-income");
+  const retireAgeInput = document.getElementById("target-retire-age");
+  const lifeExpInput = document.getElementById("target-life-expectancy");
+  const curAgeInput = document.getElementById("target-current-age");
+  const lumpInput = document.getElementById("target-current-lump");
+  const postGrowthInput = document.getElementById("target-post-growth");
+
+  let csv = "Dutta UK Funds Selection Advisor - How Much Money Do I Need to Retire? Schedule\n";
+  csv += `Date Generated: ${new Date().toLocaleDateString('en-GB')}\n`;
+  csv += `Desired Net Income: £${incomeInput ? incomeInput.value : ''} (${targetIncomeMode})\n`;
+  csv += `Current Age: ${curAgeInput ? curAgeInput.value : ''}\n`;
+  csv += `Target Retirement Age: ${retireAgeInput ? retireAgeInput.value : ''}\n`;
+  csv += `Life Expectancy Age: ${lifeExpInput ? lifeExpInput.value : ''}\n`;
+  csv += `Current Lump Sum Invested: £${lumpInput ? lumpInput.value : ''}\n`;
+  csv += `Selected Accumulation Strategy: ${TARGET_RISK_SPECS[selectedTargetRisk].fullLabel}\n`;
+  csv += `Post-Retirement Growth Rate: ${postGrowthInput ? postGrowthInput.value : ''}%\n`;
+  csv += `Inflation Assumption: 3.0% per annum compound\n\n`;
+
+  csv += "Age,Calendar Year,Phase,Start Balance (£),Growth Earned (£),Annual Deposit (£),Gross Withdrawal (£),UK Tax Paid (£),Net in Hand (£),End Balance Nominal (£),End Balance Real (Today's Money £)\n";
+
+  cachedTargetSchedule.forEach(r => {
+    csv += [
+      r.age,
+      r.year,
+      r.phase,
+      Math.round(r.startBalance),
+      Math.round(r.growthEarned),
+      Math.round(r.annualDeposit),
+      Math.round(r.grossWithdrawal),
+      Math.round(r.ukTaxPaid),
+      Math.round(r.netWithdrawal),
+      Math.round(r.endBalanceNominal),
+      Math.round(r.endBalanceReal)
+    ].join(",") + "\n";
+  });
+
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", `Dutta_UK_Target_Retirement_Accumulation_Schedule.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+/**
+ * Synchronizes inputs from the main advisor tab into the Target Retirement Planner.
+ */
+function syncAdvisorToTarget() {
+  const inputs = getInputs();
+  const curAgeInput = document.getElementById("target-current-age");
+  const retireAgeInput = document.getElementById("target-retire-age");
+  const lumpInput = document.getElementById("target-current-lump");
+
+  if (curAgeInput) curAgeInput.value = inputs.currentAge;
+  if (retireAgeInput) retireAgeInput.value = inputs.retirementAge;
+  if (lumpInput) lumpInput.value = inputs.lumpSum;
+
+  updateTargetRetirementPlanner();
+}
+
+// Expose globals for inline event handlers in HTML
+window.setTargetIncomeMode = setTargetIncomeMode;
+window.selectTargetRiskProfile = selectTargetRiskProfile;
+window.exportTargetScheduleCSV = exportTargetScheduleCSV;
+window.syncAdvisorToTarget = syncAdvisorToTarget;
+window.updateTargetRetirementPlanner = updateTargetRetirementPlanner;
+
 document.addEventListener("DOMContentLoaded", () => {
   const inputIds = ["current-age", "retirement-age", "lump-sum", "monthly-amount", "target-growth"];
   inputIds.forEach(id => {
@@ -2938,6 +3578,8 @@ document.addEventListener("DOMContentLoaded", () => {
         updateAdvisor();
         if (activeTab === "drawdown") {
           updateDrawdownCalculator();
+        } else if (activeTab === "target") {
+          updateTargetRetirementPlanner();
         }
       });
     }
@@ -2962,6 +3604,8 @@ document.addEventListener("DOMContentLoaded", () => {
       updateAdvisor();
       if (activeTab === "drawdown") {
         updateDrawdownCalculator();
+      } else if (activeTab === "target") {
+        updateTargetRetirementPlanner();
       }
     });
   });
@@ -2971,12 +3615,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const tabCompare = document.getElementById("tab-compare");
   const tabScreener = document.getElementById("tab-screener");
   const tabDrawdown = document.getElementById("tab-drawdown");
+  const tabTarget = document.getElementById("tab-target");
 
   const secActive = document.getElementById("section-active");
   const secPassive = document.getElementById("section-passive");
   const secCompare = document.getElementById("section-compare");
   const secScreener = document.getElementById("section-screener");
   const secDrawdown = document.getElementById("section-drawdown");
+  const secTarget = document.getElementById("section-target");
   const secChartsOverview = document.getElementById("section-charts-overview");
 
   function saveAdvisorState() {
@@ -3019,7 +3665,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (e) {}
 
     // Reset all tabs to inactive styling
-    [tabActive, tabPassive, tabCompare, tabScreener, tabDrawdown].forEach(t => {
+    [tabActive, tabPassive, tabCompare, tabScreener, tabDrawdown, tabTarget].forEach(t => {
       if (t) {
         t.classList.remove("active");
         t.classList.remove("bg-white", "text-slate-900", "shadow-sm");
@@ -3028,14 +3674,15 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // Hide all sections initially
-    [secActive, secPassive, secCompare, secScreener, secDrawdown].forEach(s => s && s.classList.add("hidden"));
+    [secActive, secPassive, secCompare, secScreener, secDrawdown, secTarget].forEach(s => s && s.classList.add("hidden"));
 
     const activeBtn = {
       active: tabActive,
       passive: tabPassive,
       compare: tabCompare,
       screener: tabScreener,
-      drawdown: tabDrawdown
+      drawdown: tabDrawdown,
+      target: tabTarget
     }[tab];
 
     if (activeBtn) {
@@ -3060,6 +3707,10 @@ document.addEventListener("DOMContentLoaded", () => {
       secDrawdown.classList.remove("hidden");
       if (secChartsOverview) secChartsOverview.classList.add("hidden"); // Dedicated longevity simulator
       updateDrawdownCalculator();
+    } else if (tab === "target") {
+      if (secTarget) secTarget.classList.remove("hidden");
+      if (secChartsOverview) secChartsOverview.classList.add("hidden"); // Dedicated target planner
+      updateTargetRetirementPlanner();
     }
 
     const inputs = getInputs();
@@ -3078,6 +3729,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (tabCompare) tabCompare.addEventListener("click", () => setTab("compare"));
   if (tabScreener) tabScreener.addEventListener("click", () => setTab("screener"));
   if (tabDrawdown) tabDrawdown.addEventListener("click", () => setTab("drawdown"));
+  if (tabTarget) tabTarget.addEventListener("click", () => setTab("target"));
 
   // Restore saved state from localStorage if available (e.g. when opened in a new tab)
   try {
@@ -3172,16 +3824,49 @@ document.addEventListener("DOMContentLoaded", () => {
     btnExportDrawdown.addEventListener("click", exportDrawdownCSV);
   }
 
+  // Target Retirement & Savings Planner Event Listeners
+  const targetInputIds = [
+    "target-net-income",
+    "target-retire-age",
+    "target-life-expectancy",
+    "target-post-growth",
+    "target-tax-wrapper",
+    "target-current-age",
+    "target-current-lump"
+  ];
+  targetInputIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener("input", () => {
+        updateTargetRetirementPlanner();
+      });
+      el.addEventListener("change", () => {
+        updateTargetRetirementPlanner();
+      });
+    }
+  });
+
+  const btnSyncTarget = document.getElementById("btn-sync-advisor-to-target");
+  if (btnSyncTarget) {
+    btnSyncTarget.addEventListener("click", syncAdvisorToTarget);
+  }
+
+  const btnExportTargetCsv = document.getElementById("btn-export-target-csv");
+  if (btnExportTargetCsv) {
+    btnExportTargetCsv.addEventListener("click", exportTargetScheduleCSV);
+  }
+
   document.getElementById("btn-export-csv").addEventListener("click", exportCSV);
   document.getElementById("btn-print-report").addEventListener("click", () => window.print());
 
   updateAdvisor();
   updateDrawdownCalculator();
+  updateTargetRetirementPlanner();
 
-  // Check URL query parameters for deep-linking (e.g. ?tab=drawdown or ?tab=screener)
+  // Check URL query parameters for deep-linking (e.g. ?tab=drawdown or ?tab=screener or ?tab=target)
   const urlParams = new URLSearchParams(window.location.search);
   const requestedTab = urlParams.get("tab") || window.location.hash.replace("#", "");
-  if (requestedTab && ["active", "passive", "compare", "screener", "drawdown"].includes(requestedTab)) {
+  if (requestedTab && ["active", "passive", "compare", "screener", "drawdown", "target"].includes(requestedTab)) {
     window._isPopoutInstance = true;
     setTab(requestedTab, true);
   } else {

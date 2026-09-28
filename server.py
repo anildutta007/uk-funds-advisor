@@ -1101,6 +1101,121 @@ class AdvisorRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.wfile.write(json.dumps({"error": str(e)}).encode("utf-8"))
                 return
 
+        if parsed.path == "/api/target-retirement":
+            content_length = int(self.headers.get("Content-Length", 0))
+            body = self.rfile.read(content_length)
+            try:
+                data = json.loads(body.decode("utf-8"))
+                current_age = int(data.get("current_age", 45))
+                retire_age = int(data.get("retire_age", 65))
+                life_expectancy = int(data.get("life_expectancy", 90))
+                desired_net = float(data.get("desired_net_annual", 30000))
+                current_lump = float(data.get("current_lump_sum", 50000))
+                inflation_rate = float(data.get("inflation_rate", 0.03))
+                post_growth = float(data.get("post_growth_rate", 0.055))
+                wrapper = str(data.get("wrapper", "sipp"))
+
+                years_to_retire = max(1, retire_age - current_age)
+                years_in_retire = max(1, life_expectancy - retire_age)
+
+                def uk_tax(gross):
+                    if wrapper == "isa" or gross <= 0:
+                        return 0.0
+                    taxable = gross * 0.75
+                    pa = 12570.0 if taxable <= 100000 else max(0.0, 12570.0 - (taxable - 100000.0) / 2.0)
+                    after_pa = max(0.0, taxable - pa)
+                    if after_pa <= 0: return 0.0
+                    basic = min(after_pa, 37700.0) * 0.20
+                    higher = 0.0
+                    add = 0.0
+                    if after_pa > 37700.0:
+                        h_max = max(0.0, 125140.0 - pa - 37700.0)
+                        higher = min(after_pa - 37700.0, h_max) * 0.40
+                        if after_pa > 37700.0 + h_max:
+                            add = (after_pa - 37700.0 - h_max) * 0.45
+                    return basic + higher + add
+
+                def find_gross(target_net):
+                    if target_net <= 0 or wrapper == "isa":
+                        return target_net
+                    low = target_net
+                    high = target_net * 2.5
+                    for _ in range(35):
+                        mid = (low + high) / 2.0
+                        tax = uk_tax(mid)
+                        net = mid - tax
+                        if abs(net - target_net) < 0.01:
+                            return mid
+                        if net < target_net:
+                            low = mid
+                        else:
+                            high = mid
+                    return (low + high) / 2.0
+
+                net_yr1 = desired_net * ((1.0 + inflation_rate) ** years_to_retire)
+                withdrawals = []
+                total_net = 0.0
+
+                for y in range(years_in_retire):
+                    net_y = net_yr1 * ((1.0 + inflation_rate) ** y)
+                    gross_y = find_gross(net_y)
+                    tax_y = uk_tax(gross_y)
+                    total_net += net_y
+                    withdrawals.append({"net": net_y, "gross": gross_y, "tax": tax_y})
+
+                target_pot = 0.0
+                for y in range(years_in_retire - 1, -1, -1):
+                    target_pot = withdrawals[y]["gross"] + (target_pot / (1.0 + post_growth))
+                target_pot = round(target_pot)
+
+                target_pot_today = round(target_pot / ((1.0 + inflation_rate) ** years_to_retire))
+
+                risk_rates = {
+                    "low": {"label": "Low Risk", "rate": 0.052},
+                    "medium": {"label": "Medium Risk", "rate": 0.088},
+                    "high": {"label": "High Risk", "rate": 0.125}
+                }
+
+                total_months = years_to_retire * 12
+                plans = {}
+                for k, v in risk_rates.items():
+                    mr = v["rate"] / 12.0
+                    fv_lump = round(current_lump * ((1.0 + mr) ** total_months))
+                    gap = max(0, target_pot - fv_lump)
+                    monthly = 0
+                    if gap > 0 and mr > 0:
+                        monthly = round(gap * (mr / (((1.0 + mr) ** total_months) - 1.0)))
+                    plans[k] = {
+                        "annual_rate": round(v["rate"] * 100, 1),
+                        "fv_lump_sum": fv_lump,
+                        "gap": gap,
+                        "monthly_needed": monthly,
+                        "total_contributions": current_lump + (monthly * total_months)
+                    }
+
+                res_obj = {
+                    "years_to_retire": years_to_retire,
+                    "years_in_retire": years_in_retire,
+                    "year1_net_nominal": round(net_yr1),
+                    "target_pot_needed": target_pot,
+                    "target_pot_today": target_pot_today,
+                    "lifetime_net_payout": round(total_net),
+                    "accumulation_plans": plans
+                }
+
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                self.wfile.write(json.dumps(res_obj).encode("utf-8"))
+                return
+            except Exception as e:
+                self.send_response(400)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode("utf-8"))
+                return
+
         return super().do_GET()
 
 def start_server():

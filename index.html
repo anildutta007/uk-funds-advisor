@@ -443,6 +443,15 @@
             <i data-lucide="external-link" class="w-3 h-3"></i>
           </span>
         </button>
+
+        <!-- Tab 6: How Much Do I Need to Retire? -->
+        <button id="tab-target" type="button" class="strategy-tab px-3.5 py-2 text-xs font-bold rounded-lg transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5" title="How Much Money Do I Need to Retire? Target Nest Egg & Savings Planner">
+          <i data-lucide="target" class="w-4 h-4 text-brand-600 flex-shrink-0"></i>
+          <span>How Much Do I Need to Retire?</span>
+          <span onclick="event.stopPropagation(); openOptionInNewTab('target')" class="popout-btn ml-1 p-0.5 rounded hover:bg-slate-200 text-slate-400 hover:text-slate-700 transition cursor-pointer" title="Open Retirement Planner in a new browser tab">
+            <i data-lucide="external-link" class="w-3 h-3"></i>
+          </span>
+        </button>
       </div>
 
       <!-- New Tab Toggle Switch -->
@@ -988,6 +997,354 @@
               </tr>
             </thead>
             <tbody id="drawdown-schedule-body" class="divide-y divide-slate-100 font-medium">
+              <!-- Dynamically populated via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Strategy Section: How Much Money Do I Need to Retire? (Target Nest Egg & Savings Planner) -->
+    <section id="section-target" class="strategy-section hidden space-y-6">
+      
+      <!-- Top Banner / Explainer -->
+      <div class="bg-gradient-to-r from-brand-950 via-slate-900 to-indigo-950 rounded-2xl p-6 text-white shadow-md border border-brand-800/40 relative overflow-hidden">
+        <div class="relative z-10 flex flex-wrap items-center justify-between gap-4">
+          <div class="space-y-1.5 max-w-2xl">
+            <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-brand-500/20 border border-brand-400/30 text-brand-300 text-xs font-semibold">
+              <i data-lucide="target" class="w-3.5 h-3.5 text-brand-400"></i>
+              <span>Target Nest Egg & Monthly Savings Accumulation Planner</span>
+            </div>
+            <h3 class="text-xl font-extrabold tracking-tight">How Much Money Do I Need to Retire?</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Find out the exact nest egg needed to provide your desired retirement income for life with 3% annual inflation protection. Then see how much you need to save monthly based on your current lump sum and risk profile (Low, Medium, or High Risk).
+            </p>
+          </div>
+          <div class="flex items-center gap-3">
+            <button id="btn-sync-advisor-to-target" type="button"
+              class="px-4 py-2.5 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-2 border border-brand-400/40">
+              <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+              <span>Sync Current Age & Lump Sum</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Two-Phase Input Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Left Column: Phase 1 - Retirement Income Goal -->
+        <div class="lg:col-span-6 bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center font-bold text-xs">1</span>
+              <h4 class="text-sm font-bold text-slate-900">Your Retirement Lifestyle Goal</h4>
+            </div>
+            <span class="text-[11px] text-slate-400 font-medium">Post-Retirement</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            
+            <!-- Desired Net Income -->
+            <div class="space-y-1 sm:col-span-2">
+              <div class="flex items-center justify-between">
+                <label for="target-net-income" class="text-xs font-bold text-slate-700">
+                  Desired Net Clean Income (in Today's Money):
+                </label>
+                <div class="inline-flex rounded-lg bg-slate-100 p-0.5 text-[11px] font-semibold">
+                  <button type="button" id="target-income-mode-annual" onclick="setTargetIncomeMode('annual')" class="px-2 py-0.5 rounded bg-white text-slate-900 shadow-xs font-bold">Annual (£/yr)</button>
+                  <button type="button" id="target-income-mode-monthly" onclick="setTargetIncomeMode('monthly')" class="px-2 py-0.5 rounded text-slate-500 hover:text-slate-800">Monthly (£/mo)</button>
+                </div>
+              </div>
+              <div class="relative">
+                <span class="absolute left-3 top-2 text-sm text-slate-400 font-bold">£</span>
+                <input type="number" id="target-net-income" min="5000" step="1000" value="30000"
+                  class="w-full pl-8 pr-16 py-2 text-sm rounded-xl border border-slate-300 font-extrabold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
+                <span id="target-income-unit" class="absolute right-3 top-2.5 text-xs text-slate-400 font-medium">/ year</span>
+              </div>
+              <p class="text-[11px] text-slate-500">The take-home cash you want in your bank account, indexed to 3% annual inflation.</p>
+            </div>
+
+            <!-- Target Retirement Age -->
+            <div class="space-y-1">
+              <label for="target-retire-age" class="text-xs font-bold text-slate-700">Target Retirement Age:</label>
+              <input type="number" id="target-retire-age" min="50" max="80" value="65"
+                class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 font-bold text-slate-800 focus:ring-2 focus:ring-brand-500">
+              <span class="text-[11px] text-slate-400 block">When you plan to stop working</span>
+            </div>
+
+            <!-- Life Expectancy Age -->
+            <div class="space-y-1">
+              <label for="target-life-expectancy" class="text-xs font-bold text-slate-700">Life Expectancy Age:</label>
+              <input type="number" id="target-life-expectancy" min="70" max="105" value="90"
+                class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 font-bold text-slate-800 focus:ring-2 focus:ring-brand-500">
+              <span id="target-retire-duration-label" class="text-[11px] text-emerald-600 font-semibold block">25 years of retirement</span>
+            </div>
+
+            <!-- Post-Retirement Growth Rate -->
+            <div class="space-y-1">
+              <label for="target-post-growth" class="text-xs font-bold text-slate-700">Retirement Growth Rate (%):</label>
+              <input type="number" id="target-post-growth" min="1" max="12" step="0.5" value="5.5"
+                class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 font-bold text-slate-800 focus:ring-2 focus:ring-brand-500">
+              <span class="text-[11px] text-slate-400 block">Prudent return in drawdown</span>
+            </div>
+
+            <!-- Tax Wrapper Structure -->
+            <div class="space-y-1">
+              <label for="target-tax-wrapper" class="text-xs font-bold text-slate-700">Tax Wrapper:</label>
+              <select id="target-tax-wrapper" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 font-semibold text-slate-800 focus:ring-2 focus:ring-brand-500">
+                <option value="sipp" selected>SIPP / Pension (25% tax-free + UK tax)</option>
+                <option value="isa">ISA (100% Tax-Free)</option>
+              </select>
+              <span class="text-[11px] text-slate-400 block">UFPLS gross-up engine</span>
+            </div>
+
+          </div>
+
+          <!-- Target Pot Callout Box -->
+          <div class="mt-3 p-4 rounded-xl bg-gradient-to-br from-brand-50 to-indigo-50/60 border border-brand-200">
+            <span class="text-[11px] text-brand-700 font-bold uppercase tracking-wider block mb-1">Target Pot Needed at Retirement</span>
+            <div class="flex items-baseline justify-between gap-2 flex-wrap">
+              <span id="target-pot-nominal-display" class="text-2xl font-black text-brand-900">£1,222,210</span>
+              <span class="text-xs font-semibold text-slate-500">at Age <span id="target-display-retire-age">65</span></span>
+            </div>
+            <div class="mt-2 pt-2 border-t border-brand-200/80 flex items-center justify-between text-xs">
+              <span class="text-slate-600 font-medium">In Today's World (@ 3% infl.):</span>
+              <span id="target-pot-real-display" class="font-extrabold text-emerald-700">£676,708</span>
+            </div>
+            <div class="mt-1 flex items-center justify-between text-[11px] text-slate-500">
+              <span>Year 1 Net Income Needed:</span>
+              <span id="target-year1-net-display" class="font-bold text-slate-800">£54,183 / yr</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Phase 2 - Current Savings & Accumulation Gap -->
+        <div class="lg:col-span-6 bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs">2</span>
+              <h4 class="text-sm font-bold text-slate-900">Your Current Savings & Timeline</h4>
+            </div>
+            <span class="text-[11px] text-slate-400 font-medium">Pre-Retirement</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            
+            <!-- Current Age -->
+            <div class="space-y-1">
+              <label for="target-current-age" class="text-xs font-bold text-slate-700">Your Current Age:</label>
+              <input type="number" id="target-current-age" min="18" max="75" value="45"
+                class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500">
+              <span id="target-horizon-label" class="text-[11px] text-brand-600 font-semibold block">20 years to retirement</span>
+            </div>
+
+            <!-- Current Lump Sum Saved -->
+            <div class="space-y-1">
+              <label for="target-current-lump" class="text-xs font-bold text-slate-700">Current Lump Sum Invested:</label>
+              <div class="relative">
+                <span class="absolute left-3 top-2 text-sm text-slate-400 font-bold">£</span>
+                <input type="number" id="target-current-lump" min="0" step="5000" value="50000"
+                  class="w-full pl-7 pr-3 py-2 text-sm rounded-xl border border-slate-300 font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500">
+              </div>
+              <span class="text-[11px] text-slate-400 block">Existing ISA, SIPP or cash pot</span>
+            </div>
+
+          </div>
+
+          <!-- Risk Profile Cards (Interactive Low, Medium, High Risk Selection) -->
+          <div class="space-y-2 pt-1">
+            <label class="text-xs font-bold text-slate-700 block">Select Your Risk Profile to See Monthly Savings Required:</label>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              
+              <!-- Low Risk Card -->
+              <div id="target-card-low" onclick="selectTargetRiskProfile('low')"
+                class="target-risk-card p-3 rounded-xl border border-slate-200 hover:border-emerald-500 cursor-pointer transition bg-white space-y-1 text-center">
+                <div class="flex items-center justify-center gap-1 text-[11px] font-bold text-emerald-800">
+                  <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                  <span>Low Risk (5.2%)</span>
+                </div>
+                <div id="target-monthly-low" class="text-lg font-black text-slate-900">£2,570</div>
+                <span class="text-[10px] text-slate-400 block">/ month needed</span>
+                <span id="target-lump-grow-low" class="text-[9px] text-slate-500 block pt-0.5 border-t border-slate-100">Lump sum grows to £141k</span>
+              </div>
+
+              <!-- Medium Risk Card (Recommended) -->
+              <div id="target-card-medium" onclick="selectTargetRiskProfile('medium')"
+                class="target-risk-card p-3 rounded-xl border-2 border-brand-500 bg-brand-50/60 cursor-pointer transition space-y-1 text-center relative shadow-xs">
+                <span class="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.2 rounded-full bg-brand-600 text-white text-[9px] font-bold">Recommended</span>
+                <div class="flex items-center justify-center gap-1 text-[11px] font-bold text-brand-900 pt-1">
+                  <span class="w-2 h-2 rounded-full bg-brand-500"></span>
+                  <span>Medium Risk (8.8%)</span>
+                </div>
+                <div id="target-monthly-medium" class="text-lg font-black text-brand-900">£1,434</div>
+                <span class="text-[10px] text-brand-700 block font-medium">/ month needed</span>
+                <span id="target-lump-grow-medium" class="text-[9px] text-slate-500 block pt-0.5 border-t border-brand-200">Lump sum grows to £289k</span>
+              </div>
+
+              <!-- High Risk Card -->
+              <div id="target-card-high" onclick="selectTargetRiskProfile('high')"
+                class="target-risk-card p-3 rounded-xl border border-slate-200 hover:border-purple-500 cursor-pointer transition bg-white space-y-1 text-center">
+                <div class="flex items-center justify-center gap-1 text-[11px] font-bold text-purple-900">
+                  <span class="w-2 h-2 rounded-full bg-purple-500"></span>
+                  <span>High Risk (12.5%)</span>
+                </div>
+                <div id="target-monthly-high" class="text-lg font-black text-slate-900">£587</div>
+                <span class="text-[10px] text-slate-400 block">/ month needed</span>
+                <span id="target-lump-grow-high" class="text-[9px] text-slate-500 block pt-0.5 border-t border-slate-100">Lump sum grows to £601k</span>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Active Selection Summary Callout -->
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
+            <div>
+              <span class="text-[11px] text-slate-500 block">Selected Strategy Plan:</span>
+              <strong id="target-selected-strategy-name" class="text-slate-900 font-bold">Medium Risk (8.8% Annual Return)</strong>
+            </div>
+            <div class="text-right">
+              <span class="text-[10px] text-slate-400 block">Total Out-of-Pocket:</span>
+              <strong id="target-total-out-of-pocket" class="text-slate-800 font-extrabold">£394,160</strong>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- 4 Executive KPI Metric Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- Card 1: Target Fund Size -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Target Fund Needed</span>
+            <div class="w-8 h-8 rounded-lg bg-brand-100 text-brand-700 flex items-center justify-center">
+              <i data-lucide="target" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div>
+            <div id="kpi-target-fund" class="text-2xl font-black text-brand-900">£1,222,210</div>
+            <div class="inline-flex items-center gap-1 text-xs font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 mt-1">
+              <i data-lucide="coins" class="w-3 h-3 text-emerald-600"></i>
+              <span>Today: <strong id="kpi-target-today">£676,708</strong></span>
+            </div>
+          </div>
+          <span class="text-[11px] text-slate-400 block">At Age <span class="kpi-retire-age-text">65</span> for 25-yr retirement</span>
+        </div>
+
+        <!-- Card 2: Required Monthly Savings -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Required Monthly Savings</span>
+            <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
+              <i data-lucide="piggy-bank" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div>
+            <div id="kpi-monthly-savings" class="text-2xl font-black text-emerald-600">£1,434</div>
+            <p id="kpi-monthly-subtext" class="text-xs text-slate-600 font-medium mt-1">For <span id="kpi-horizon-text">20</span> Years until Retirement</p>
+          </div>
+          <span class="text-[11px] text-slate-400 block">Based on <span id="kpi-risk-label">Medium Risk</span> compounding</span>
+        </div>
+
+        <!-- Card 3: Current Lump Sum Growth -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Lump Sum Value at 65</span>
+            <div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center">
+              <i data-lucide="trending-up" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div>
+            <div id="kpi-lump-future" class="text-2xl font-black text-purple-900">£288,761</div>
+            <p id="kpi-lump-subtext" class="text-xs text-purple-700 font-semibold mt-1">Starting from £50,000 today</p>
+          </div>
+          <span class="text-[11px] text-slate-400 block">Covers <span id="kpi-lump-pct">23.6%</span> of your target goal!</span>
+        </div>
+
+        <!-- Card 4: Total Retirement Income Paid -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Lifetime Net Payout</span>
+            <div class="w-8 h-8 rounded-lg bg-cyan-100 text-cyan-700 flex items-center justify-center">
+              <i data-lucide="wallet" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div>
+            <div id="kpi-lifetime-payout" class="text-2xl font-black text-cyan-900">£1,974,500</div>
+            <p class="text-xs text-cyan-700 font-semibold mt-1">Protected against 3% inflation</p>
+          </div>
+          <span class="text-[11px] text-slate-400 block">Clean cash in hand across retirement</span>
+        </div>
+
+      </div>
+
+      <!-- Lifetime Trajectory Chart (Accumulation & Decumulation) -->
+      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h4 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+              <i data-lucide="activity" class="w-4 h-4 text-brand-600"></i>
+              <span>Lifetime Wealth Arc: Accumulation Phase (Saving) to Decumulation Phase (Living)</span>
+            </h4>
+            <p class="text-xs text-slate-500">
+              Watch your fund compound up to your peak target pot at age <span id="chart-retire-age-text">65</span>, then safely sustain your inflation-adjusted lifestyle through age <span id="chart-life-age-text">90</span>.
+            </p>
+          </div>
+          <div class="flex items-center gap-4 text-xs">
+            <span class="flex items-center gap-1.5 font-semibold text-brand-700">
+              <span class="w-3 h-3 rounded-full bg-brand-500 inline-block"></span> Accumulation Phase (Saving)
+            </span>
+            <span class="flex items-center gap-1.5 font-semibold text-emerald-700">
+              <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> Retirement Phase (Spending)
+            </span>
+          </div>
+        </div>
+
+        <div class="h-80 w-full relative">
+          <canvas id="targetLifetimeChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Full Year-by-Year Lifetime Schedule Table -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3 bg-slate-50/60">
+          <div>
+            <h4 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+              <i data-lucide="calendar" class="w-4 h-4 text-brand-600"></i>
+              <span>Year-by-Year Lifetime Schedule (Accumulation & Retirement Drawdown)</span>
+            </h4>
+            <p class="text-xs text-slate-500 mt-0.5">
+              Comprehensive cash flow from Current Age <span class="schedule-current-age-text">45</span> through Life Expectancy Age <span class="schedule-life-age-text">90</span>.
+            </p>
+          </div>
+          <button id="btn-export-target-csv" onclick="exportTargetScheduleCSV()"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 shadow-xs transition">
+            <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5 text-emerald-600"></i>
+            <span>Export Lifetime Schedule (CSV)</span>
+          </button>
+        </div>
+
+        <div class="overflow-x-auto max-h-[460px] overflow-y-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead class="sticky top-0 bg-slate-100 z-10 text-slate-700 border-b border-slate-200">
+              <tr>
+                <th class="py-2.5 px-3 font-bold">Age</th>
+                <th class="py-2.5 px-3 font-bold">Year</th>
+                <th class="py-2.5 px-3 font-bold">Phase</th>
+                <th class="py-2.5 px-3 font-bold">Start Balance (£)</th>
+                <th class="py-2.5 px-3 font-bold text-emerald-700">Growth (£)</th>
+                <th class="py-2.5 px-3 font-bold text-brand-700">Annual Deposit (£)</th>
+                <th class="py-2.5 px-3 font-bold text-amber-700">Gross Withdrawal (£)</th>
+                <th class="py-2.5 px-3 font-bold text-emerald-800">Net in Hand (£)</th>
+                <th class="py-2.5 px-3 font-bold text-slate-900">End Balance (Nominal)</th>
+                <th class="py-2.5 px-3 font-bold text-emerald-900 bg-emerald-50/60">End Balance (Today's Money £)</th>
+              </tr>
+            </thead>
+            <tbody id="target-schedule-body" class="divide-y divide-slate-100 font-medium">
               <!-- Dynamically populated via JS -->
             </tbody>
           </table>
