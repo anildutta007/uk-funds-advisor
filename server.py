@@ -969,48 +969,77 @@ class AdvisorRequestHandler(http.server.SimpleHTTPRequestHandler):
                 growth_rate = float(data.get("growth_rate", 5.5)) / 100.0
                 inflation_rate = float(data.get("inflation_rate", 3.0)) / 100.0
                 wrapper = str(data.get("wrapper", "pension_ufpls"))
+                include_state_pension = bool(data.get("include_state_pension", True))
+                state_pension_age = int(data.get("state_pension_age", 67))
+                state_pension_annual = float(data.get("state_pension_annual", 11973.0))
                 other_income = float(data.get("other_income", 0))
                 adjust_inflation = bool(data.get("adjust_inflation", True))
 
-                def uk_tax(gross, other=0.0):
-                    if wrapper == "isa_tax_free" or gross <= 0:
-                        return 0.0
-                    taxable = gross * 0.75 if wrapper == "pension_ufpls" else gross
-                    tot = taxable + other
-                    def tax_for(inc):
-                        if inc <= 0: return 0.0
-                        pa = 12570.0 if inc <= 100000 else max(0.0, 12570.0 - (inc - 100000.0) / 2.0)
-                        after_pa = max(0.0, inc - pa)
-                        if after_pa <= 0: return 0.0
-                        basic = min(after_pa, 37700.0) * 0.20
-                        higher = 0.0
-                        add = 0.0
-                        if after_pa > 37700.0:
-                            h_max = max(0.0, 125140.0 - pa - 37700.0)
-                            higher = min(after_pa - 37700.0, h_max) * 0.40
-                            if after_pa > 37700.0 + h_max:
-                                add = (after_pa - 37700.0 - h_max) * 0.45
-                        return basic + higher + add
-                    return max(0.0, tax_for(tot) - tax_for(other))
+                def uk_tax_on_income(inc):
+                    if inc <= 0: return 0.0
+                    pa = 12570.0 if inc <= 100000 else max(0.0, 12570.0 - (inc - 100000.0) / 2.0)
+                    after_pa = max(0.0, inc - pa)
+                    if after_pa <= 0: return 0.0
+                    basic = min(after_pa, 37700.0) * 0.20
+                    higher = 0.0
+                    add = 0.0
+                    if after_pa > 37700.0:
+                        h_max = max(0.0, 125140.0 - pa - 37700.0)
+                        higher = min(after_pa - 37700.0, h_max) * 0.40
+                        if after_pa > 37700.0 + h_max:
+                            add = (after_pa - 37700.0 - h_max) * 0.45
+                    return basic + higher + add
 
-                def find_gross(target_net, other=0.0):
-                    if target_net <= 0 or wrapper == "isa_tax_free":
-                        return target_net
-                    low = target_net
-                    high = target_net * 2.5
+                def solve_withdrawal(target_net, sp_amt=0.0, other=0.0):
+                    base_taxable = sp_amt + other
+                    base_tax = uk_tax_on_income(base_taxable)
+                    net_base = max(0.0, base_taxable - base_tax)
+                    if target_net <= 0 or net_base >= target_net:
+                        return {"gross": 0.0, "total_tax": base_tax, "tax_on_fund": 0.0, "net_from_fund": 0.0, "total_net": net_base}
+
+                    if wrapper == "isa_tax_free":
+                        needed = max(0.0, target_net - net_base)
+                        return {"gross": needed, "total_tax": base_tax, "tax_on_fund": 0.0, "net_from_fund": needed, "total_net": net_base + needed}
+
+                    alpha = 0.75 if wrapper == "pension_ufpls" else 1.0
+
+                    def net_for(g):
+                        tot_taxable = base_taxable + (alpha * g)
+                        return (base_taxable + g) - uk_tax_on_income(tot_taxable)
+
+                    low = 0.0
+                    high = max(target_net * 2.5, 50000.0)
+                    while net_for(high) < target_net:
+                        high *= 1.5
+                        if high > 1e9: break
+
                     for _ in range(35):
                         mid = (low + high) / 2.0
-                        if abs(mid - uk_tax(mid, other) - target_net) < 0.01:
-                            return mid
-                        if mid - uk_tax(mid, other) < target_net:
+                        n_mid = net_for(mid)
+                        if abs(n_mid - target_net) < 0.01:
+                            low = mid
+                            break
+                        if n_mid < target_net:
                             low = mid
                         else:
                             high = mid
-                    return (low + high) / 2.0
 
-                year1_net = net_monthly * 12
-                year1_gross = find_gross(year1_net, other_income)
-                year1_tax = uk_tax(year1_gross, other_income)
+                    gross_w = (low + high) / 2.0
+                    tot_tax = uk_tax_on_income(base_taxable + alpha * gross_w)
+                    tax_fund = max(0.0, tot_tax - base_tax)
+                    return {
+                        "gross": gross_w,
+                        "total_tax": tot_tax,
+                        "tax_on_fund": tax_fund,
+                        "net_from_fund": max(0.0, gross_w - tax_fund),
+                        "total_net": (base_taxable + gross_w) - tot_tax
+                    }
+
+                year1_net = net_monthly * 12.0
+                year1_sp = state_pension_annual if (include_state_pension and retire_age >= state_pension_age) else 0.0
+                year1_solve = solve_withdrawal(year1_net, year1_sp, other_income)
+                year1_gross = year1_solve["gross"]
+                year1_tax = year1_solve["total_tax"]
 
                 balance = fund_val
                 m_rate = (1.0 + growth_rate) ** (1.0 / 12.0) - 1.0
@@ -1029,10 +1058,13 @@ class AdvisorRequestHandler(http.server.SimpleHTTPRequestHandler):
                             depletion_age = age_start
                         break
                     inf_factor = (1.0 + inflation_rate) ** yr
-                    target_net = year1_net * inf_factor if adjust_inflation else year1_net
+                    is_sp = include_state_pension and (age_start >= state_pension_age)
+                    sp_yr = (state_pension_annual * inf_factor if adjust_inflation else state_pension_annual) if is_sp else 0.0
                     other_y = other_income * inf_factor if adjust_inflation else other_income
-                    gross_y = find_gross(target_net, other_y)
-                    tax_y = uk_tax(gross_y, other_y)
+                    target_net = year1_net * inf_factor if adjust_inflation else year1_net
+
+                    solve_y = solve_withdrawal(target_net, sp_yr, other_y)
+                    gross_y = solve_y["gross"]
                     m_gross = gross_y / 12.0
 
                     y_growth = 0.0
@@ -1053,10 +1085,13 @@ class AdvisorRequestHandler(http.server.SimpleHTTPRequestHandler):
                             break
 
                     ratio = actual_gross / gross_y if gross_y > 0 else 1.0
-                    actual_tax = tax_y * ratio
-                    actual_net = actual_gross - actual_tax
-                    total_tax += actual_tax
-                    total_net += actual_net
+                    actual_tax_fund = solve_y["tax_on_fund"] * ratio
+                    actual_tot_tax = (solve_y["total_tax"] - solve_y["tax_on_fund"]) + actual_tax_fund
+                    actual_net_fund = max(0.0, actual_gross - actual_tax_fund)
+                    actual_tot_net = actual_net_fund + max(0.0, sp_yr + other_y - (solve_y["total_tax"] - solve_y["tax_on_fund"]))
+
+                    total_tax += actual_tot_tax
+                    total_net += actual_tot_net
 
                     real_b = balance / ((1.0 + inflation_rate) ** (yr + 1))
                     schedule.append({
@@ -1065,8 +1100,10 @@ class AdvisorRequestHandler(http.server.SimpleHTTPRequestHandler):
                         "start_balance": round(start_b),
                         "growth": round(y_growth),
                         "gross_drawn": round(actual_gross),
-                        "tax_paid": round(actual_tax),
-                        "net_in_hand": round(actual_net),
+                        "state_pension": round(sp_yr),
+                        "tax_paid": round(actual_tot_tax),
+                        "net_from_fund": round(actual_net_fund),
+                        "total_net_in_hand": round(actual_tot_net),
                         "end_balance_nominal": round(balance),
                         "end_balance_real": round(real_b)
                     })
@@ -1082,7 +1119,7 @@ class AdvisorRequestHandler(http.server.SimpleHTTPRequestHandler):
                     "year1_gross_annual": round(year1_gross),
                     "year1_tax_monthly": round(year1_tax / 12.0),
                     "year1_tax_annual": round(year1_tax),
-                    "year1_effective_tax_pct": round((year1_tax / year1_gross * 100), 2) if year1_gross > 0 else 0,
+                    "year1_effective_tax_pct": round((year1_tax / (year1_gross + year1_sp) * 100), 2) if (year1_gross + year1_sp) > 0 else 0,
                     "lifetime_tax_paid": round(total_tax),
                     "lifetime_net_withdrawn": round(total_net),
                     "schedule_count": len(schedule)

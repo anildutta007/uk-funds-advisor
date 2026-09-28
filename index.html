@@ -814,14 +814,14 @@
         </div>
 
         <!-- UK Tax & Inflation Settings Strip -->
-        <div class="mt-5 pt-4 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+        <div class="mt-5 pt-4 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
           
           <!-- Tax Wrapper Type -->
           <div class="space-y-1">
             <label for="drawdown-tax-wrapper" class="block text-[11px] font-bold text-slate-700">
               Account / Tax Structure:
             </label>
-            <select id="drawdown-tax-wrapper" class="w-full py-1.5 px-2.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-800 focus:ring-1 focus:ring-emerald-500">
+            <select id="drawdown-tax-wrapper" class="w-full py-1.5 px-2.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-800 focus:ring-1 focus:ring-emerald-500 bg-white">
               <option value="pension_ufpls" selected>UK SIPP / Pension (25% Tax-Free UFPLS)</option>
               <option value="pension_full_taxable">UK Pension (100% Taxable Drawdown)</option>
               <option value="isa_tax_free">Stocks & Shares ISA (100% Tax-Free)</option>
@@ -835,20 +835,8 @@
             </label>
             <div class="relative">
               <input type="number" id="drawdown-inflation-rate" min="0" max="15" step="0.5" value="3.0"
-                class="w-full pl-3 pr-8 py-1.5 text-xs rounded-lg border border-slate-300 font-semibold text-slate-800 focus:ring-1 focus:ring-emerald-500">
+                class="w-full pl-3 pr-8 py-1.5 text-xs rounded-lg border border-slate-300 font-semibold text-slate-800 focus:ring-1 focus:ring-emerald-500 bg-white">
               <span class="absolute right-3 top-1.5 text-[11px] text-slate-400 font-medium">%</span>
-            </div>
-          </div>
-
-          <!-- Other Taxable Income (e.g. State Pension) -->
-          <div class="space-y-1">
-            <label for="drawdown-other-income" class="block text-[11px] font-bold text-slate-700">
-              Other Income / State Pension (£/yr):
-            </label>
-            <div class="relative">
-              <span class="absolute left-2.5 top-1.5 text-xs text-slate-400 font-semibold">£</span>
-              <input type="number" id="drawdown-other-income" min="0" step="500" value="0"
-                class="w-full pl-6 pr-3 py-1.5 text-xs rounded-lg border border-slate-300 font-semibold text-slate-800 focus:ring-1 focus:ring-emerald-500">
             </div>
           </div>
 
@@ -861,6 +849,73 @@
             </label>
           </div>
 
+        </div>
+
+        <!-- UK State Pension (gov.uk rules) Integration Card -->
+        <div class="mt-4 p-4 rounded-xl bg-gradient-to-r from-emerald-50/70 via-slate-50 to-indigo-50/50 border border-emerald-200/80 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <input type="checkbox" id="drawdown-include-state-pension" checked
+                class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300 cursor-pointer">
+              <label for="drawdown-include-state-pension" class="text-xs font-bold text-slate-800 cursor-pointer flex items-center gap-1.5">
+                <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
+                Include UK State Pension (Reduces Required Fund Drawdown)
+              </label>
+            </div>
+            <a href="https://www.gov.uk/state-pension-age" target="_blank" rel="noopener noreferrer" 
+               class="text-[11px] font-semibold text-emerald-700 hover:text-emerald-800 hover:underline flex items-center gap-1">
+              <span>Verify your exact age on gov.uk</span>
+              <i data-lucide="external-link" class="w-3 h-3"></i>
+            </a>
+          </div>
+
+          <div id="drawdown-state-pension-controls" class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end pt-1">
+            <!-- State Pension Age (gov.uk) -->
+            <div class="space-y-1">
+              <label for="drawdown-state-pension-age" class="block text-[11px] font-bold text-slate-700">
+                State Pension Age (gov.uk):
+              </label>
+              <select id="drawdown-state-pension-age" class="w-full py-1.5 px-2.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-800 focus:ring-1 focus:ring-emerald-500 bg-white">
+                <option value="66">Age 66 (Born before 6 April 1960)</option>
+                <option value="67" selected>Age 67 (Born 6 Apr 1960 – 5 Apr 1977)</option>
+                <option value="68">Age 68 (Born after 5 April 1977)</option>
+              </select>
+            </div>
+
+            <!-- Full New State Pension Amount -->
+            <div class="space-y-1">
+              <label for="drawdown-state-pension-amount" class="block text-[11px] font-bold text-slate-700">
+                Full State Pension (£/yr):
+              </label>
+              <div class="relative">
+                <span class="absolute left-2.5 top-1.5 text-xs text-slate-400 font-semibold">£</span>
+                <input type="number" id="drawdown-state-pension-amount" min="0" step="100" value="11973"
+                  class="w-full pl-6 pr-3 py-1.5 text-xs rounded-lg border border-slate-300 font-semibold text-slate-800 focus:ring-1 focus:ring-emerald-500 bg-white">
+              </div>
+              <p class="text-[10px] text-slate-500">2025/26: £230.25/wk (~£998/mo) + 3% inflation</p>
+            </div>
+
+            <!-- Other Additional Taxable Income (e.g. Defined Benefit) -->
+            <div class="space-y-1">
+              <label for="drawdown-other-income" class="block text-[11px] font-bold text-slate-700">
+                Other Taxable Income (£/yr):
+              </label>
+              <div class="relative">
+                <span class="absolute left-2.5 top-1.5 text-xs text-slate-400 font-semibold">£</span>
+                <input type="number" id="drawdown-other-income" min="0" step="500" value="0"
+                  class="w-full pl-6 pr-3 py-1.5 text-xs rounded-lg border border-slate-300 font-semibold text-slate-800 focus:ring-1 focus:ring-emerald-500 bg-white">
+              </div>
+              <p class="text-[10px] text-slate-500">DB Pension, Annuity, Rental profits</p>
+            </div>
+          </div>
+
+          <!-- Dynamic Relief Impact Callout -->
+          <div id="drawdown-state-pension-relief-banner" class="text-[11px] font-medium text-emerald-800 bg-emerald-100/70 border border-emerald-300/60 rounded-lg px-3 py-1.5 flex items-center gap-2">
+            <i data-lucide="info" class="w-3.5 h-3.5 text-emerald-700 flex-shrink-0"></i>
+            <span id="drawdown-state-pension-relief-text">
+              From Age 67, UK State Pension covers part of your net income, reducing private fund drawdown from £2,695/mo to £1,756/mo (saving £11,269/yr from your pot).
+            </span>
+          </div>
         </div>
       </div>
 
@@ -986,15 +1041,17 @@
           <table class="w-full text-left border-collapse text-xs">
             <thead class="sticky top-0 bg-slate-100 z-10 text-slate-700 border-b border-slate-200">
               <tr>
-                <th class="py-2.5 px-3 font-bold">Age</th>
-                <th class="py-2.5 px-3 font-bold">Year</th>
-                <th class="py-2.5 px-3 font-bold">Start Balance (£)</th>
-                <th class="py-2.5 px-3 font-bold text-emerald-700">Growth (£)</th>
-                <th class="py-2.5 px-3 font-bold text-amber-800">Gross Drawn (£)</th>
-                <th class="py-2.5 px-3 font-bold text-rose-700">UK Tax (£)</th>
-                <th class="py-2.5 px-3 font-bold text-brand-700">Net in Hand (£)</th>
-                <th class="py-2.5 px-3 font-bold text-indigo-900">End Balance (Nominal)</th>
-                <th class="py-2.5 px-3 font-bold text-emerald-900 bg-emerald-50/60">End Balance (Real - Today's £)</th>
+                <th class="py-2.5 px-2.5 font-bold">Age</th>
+                <th class="py-2.5 px-2.5 font-bold">Year</th>
+                <th class="py-2.5 px-2.5 font-bold text-slate-700">Start Balance (£)</th>
+                <th class="py-2.5 px-2.5 font-bold text-emerald-700">Growth (£)</th>
+                <th class="py-2.5 px-2.5 font-bold text-amber-800">Fund Gross Drawn (£)</th>
+                <th class="py-2.5 px-2.5 font-bold text-sky-700 bg-sky-50/70">State Pension (£)</th>
+                <th class="py-2.5 px-2.5 font-bold text-rose-700">UK Tax (£)</th>
+                <th class="py-2.5 px-2.5 font-bold text-amber-900">Net from Fund (£)</th>
+                <th class="py-2.5 px-2.5 font-bold text-emerald-800 bg-emerald-50/70">Total Net in Hand (£)</th>
+                <th class="py-2.5 px-2.5 font-bold text-indigo-900">End Balance (Nominal)</th>
+                <th class="py-2.5 px-2.5 font-bold text-emerald-900 bg-emerald-100/50">End Balance (Real - Today's £)</th>
               </tr>
             </thead>
             <tbody id="drawdown-schedule-body" class="divide-y divide-slate-100 font-medium">
@@ -1683,10 +1740,10 @@
           <div class="p-4 rounded-xl bg-purple-50/50 border border-purple-200/80 space-y-2">
             <div class="flex items-center gap-2 text-purple-900 font-bold">
               <i data-lucide="hourglass" class="w-4 h-4 text-purple-600"></i>
-              <span>"How Long Will My Fund Last?" (Drawdown)</span>
+              <span>"How Long Will My Fund Last?" (Drawdown & State Pension)</span>
             </div>
             <p class="text-[11px] text-slate-700">
-              Switch to the <strong>Drawdown tab</strong>, type in the clean cash you want in your bank account each month after retiring, and our UK tax engine calculates your 25% tax-free lump sum and standard HMRC tax bands to show you the exact age your fund lasts to!
+              Switch to the <strong>Drawdown tab</strong>, type in the clean cash you want in your bank account each month after retiring, and our UK tax engine calculates your 25% tax-free lump sum, standard HMRC tax bands, and integrates your <strong>UK State Pension</strong> (using official gov.uk age rules) to show you the exact age your fund lasts to!
             </p>
           </div>
 

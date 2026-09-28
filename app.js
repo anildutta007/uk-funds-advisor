@@ -2469,7 +2469,44 @@ const formatCompactNumber = (val) => {
 };
 
 /**
- * Computes UK income tax on gross pension income according to current HMRC tax bands (2026/27).
+ * Computes standard UK income tax according to HMRC tax bands (2025/26 - 2026/27).
+ * Standard Personal Allowance: £12,570 (tapers £1 for every £2 earned above £100,000, zero at £125,140).
+ * Basic rate (20%): £12,571 to £50,270 (next £37,700).
+ * Higher rate (40%): £50,271 to £125,140.
+ * Additional rate (45%): Over £125,140.
+ */
+function computeUkIncomeTax(income) {
+  if (income <= 0) return 0;
+  let pa = 12570;
+  if (income > 100000) {
+    pa = Math.max(0, 12570 - (income - 100000) / 2);
+  }
+  const taxableAfterPa = Math.max(0, income - pa);
+  if (taxableAfterPa <= 0) return 0;
+
+  const basicBandMax = 37700; // £50,270 - £12,570
+  const basicTaxable = Math.min(taxableAfterPa, basicBandMax);
+  const basicTax = basicTaxable * 0.20;
+
+  let higherTax = 0;
+  let addTax = 0;
+
+  if (taxableAfterPa > basicBandMax) {
+    const higherBandMax = Math.max(0, 125140 - pa - basicBandMax);
+    const higherTaxable = Math.min(taxableAfterPa - basicBandMax, higherBandMax);
+    higherTax = higherTaxable * 0.40;
+
+    if (taxableAfterPa > basicBandMax + higherBandMax) {
+      const addTaxable = taxableAfterPa - basicBandMax - higherBandMax;
+      addTax = addTaxable * 0.45;
+    }
+  }
+
+  return basicTax + higherTax + addTax;
+}
+
+/**
+ * Computes UK income tax on gross pension income according to current HMRC tax bands.
  * Accounts for 25% tax-free UFPLS lump sum, standard Personal Allowance (£12,570), 
  * basic rate (20%), higher rate (40%), and additional rate (45%) with tapering over £100,000.
  */
@@ -2494,39 +2531,8 @@ function calculateUkTaxOnGross(grossPensionIncome, otherTaxableIncome = 0, taxWr
   }
 
   const totalTaxable = taxablePensionPortion + otherTaxableIncome;
-
-  function computeStandardTax(income) {
-    if (income <= 0) return 0;
-    let pa = 12570;
-    if (income > 100000) {
-      pa = Math.max(0, 12570 - (income - 100000) / 2);
-    }
-    const taxableAfterPa = Math.max(0, income - pa);
-    if (taxableAfterPa <= 0) return 0;
-
-    const basicBandMax = 37700; // £50,270 - £12,570
-    const basicTaxable = Math.min(taxableAfterPa, basicBandMax);
-    const basicTax = basicTaxable * 0.20;
-
-    let higherTax = 0;
-    let addTax = 0;
-
-    if (taxableAfterPa > basicBandMax) {
-      const higherBandMax = Math.max(0, 125140 - pa - basicBandMax);
-      const higherTaxable = Math.min(taxableAfterPa - basicBandMax, higherBandMax);
-      higherTax = higherTaxable * 0.40;
-
-      if (taxableAfterPa > basicBandMax + higherBandMax) {
-        const addTaxable = taxableAfterPa - basicBandMax - higherBandMax;
-        addTax = addTaxable * 0.45;
-      }
-    }
-
-    return basicTax + higherTax + addTax;
-  }
-
-  const taxOnOtherOnly = computeStandardTax(otherTaxableIncome);
-  const totalTaxWithPension = computeStandardTax(totalTaxable);
+  const taxOnOtherOnly = computeUkIncomeTax(otherTaxableIncome);
+  const totalTaxWithPension = computeUkIncomeTax(totalTaxable);
   const marginalTaxOnPension = Math.max(0, totalTaxWithPension - taxOnOtherOnly);
 
   const netIncome = grossPensionIncome - marginalTaxOnPension;
@@ -2573,8 +2579,88 @@ function findGrossWithdrawalForNet(targetNetAnnual, otherTaxableIncome = 0, taxW
 }
 
 /**
+ * Solves for the exact Gross Fund Withdrawal required such that total net cash in hand
+ * (Fund Net + State Pension Net + Other Income Net) matches the target net income.
+ * Integrates UK State Pension as taxable income consuming the standard Personal Allowance.
+ */
+function solveFundWithdrawalForTotalNet(targetTotalNet, statePension = 0, otherTaxableIncome = 0, taxWrapper = "pension_ufpls") {
+  const baseTaxable = statePension + otherTaxableIncome;
+  const baseTax = computeUkIncomeTax(baseTaxable);
+  const netBase = Math.max(0, baseTaxable - baseTax);
+
+  if (targetTotalNet <= 0 || netBase >= targetTotalNet) {
+    return {
+      grossWithdrawal: 0,
+      totalTax: baseTax,
+      taxOnFund: 0,
+      netFromFund: 0,
+      totalNetReceived: netBase
+    };
+  }
+
+  // Stocks & Shares ISA (100% Tax-Free withdrawals)
+  if (taxWrapper === "isa_tax_free") {
+    const netNeededFromFund = Math.max(0, targetTotalNet - netBase);
+    return {
+      grossWithdrawal: netNeededFromFund,
+      totalTax: baseTax,
+      taxOnFund: 0,
+      netFromFund: netNeededFromFund,
+      totalNetReceived: netBase + netNeededFromFund
+    };
+  }
+
+  // UK SIPP / Pension (UFPLS 25% tax-free, or 100% Taxable Drawdown)
+  const alpha = (taxWrapper === "pension_ufpls") ? 0.75 : 1.0;
+
+  function netForGross(g) {
+    const totalTaxable = baseTaxable + (alpha * g);
+    const tax = computeUkIncomeTax(totalTaxable);
+    return (baseTaxable + g) - tax;
+  }
+
+  let low = 0;
+  let high = Math.max(targetTotalNet * 2.5, 50000);
+
+  while (netForGross(high) < targetTotalNet) {
+    high *= 1.5;
+    if (high > 1e9) break;
+  }
+
+  for (let i = 0; i < 35; i++) {
+    const mid = (low + high) / 2;
+    const netMid = netForGross(mid);
+    if (Math.abs(netMid - targetTotalNet) < 0.01) {
+      low = mid;
+      break;
+    }
+    if (netMid < targetTotalNet) {
+      low = mid;
+    } else {
+      high = mid;
+    }
+  }
+
+  const grossWithdrawal = (low + high) / 2;
+  const totalTaxable = baseTaxable + (alpha * grossWithdrawal);
+  const totalTax = computeUkIncomeTax(totalTaxable);
+  const taxOnFund = Math.max(0, totalTax - baseTax);
+  const netFromFund = Math.max(0, grossWithdrawal - taxOnFund);
+  const totalNetReceived = (baseTaxable + grossWithdrawal) - totalTax;
+
+  return {
+    grossWithdrawal,
+    totalTax,
+    taxOnFund,
+    netFromFund,
+    totalNetReceived
+  };
+}
+
+/**
  * Runs the full retirement fund longevity simulation, calculates nominal & real balances,
- * updates KPI statistics, updates the Chart.js graph, and populates the schedule table.
+ * incorporates UK State Pension under gov.uk age rules, updates KPI statistics,
+ * updates the Chart.js graph, and populates the schedule table.
  */
 function updateDrawdownCalculator() {
   const fundValueEl = document.getElementById("drawdown-fund-value");
@@ -2583,8 +2669,11 @@ function updateDrawdownCalculator() {
   const fundGrowthEl = document.getElementById("drawdown-fund-growth");
   const taxWrapperEl = document.getElementById("drawdown-tax-wrapper");
   const inflationRateEl = document.getElementById("drawdown-inflation-rate");
-  const otherIncomeEl = document.getElementById("drawdown-other-income");
   const inflationAdjustEl = document.getElementById("drawdown-inflation-adjust");
+  const includeSPEl = document.getElementById("drawdown-include-state-pension");
+  const spAgeEl = document.getElementById("drawdown-state-pension-age");
+  const spAmountEl = document.getElementById("drawdown-state-pension-amount");
+  const otherIncomeEl = document.getElementById("drawdown-other-income");
 
   if (!fundValueEl || !retireAgeEl || !netMonthlyEl || !fundGrowthEl) return;
 
@@ -2594,19 +2683,31 @@ function updateDrawdownCalculator() {
   const annualGrowthPct = parseFloat(fundGrowthEl.value) || 0;
   const taxWrapper = taxWrapperEl ? taxWrapperEl.value : "pension_ufpls";
   const inflationPct = parseFloat(inflationRateEl ? inflationRateEl.value : 3.0) || 3.0;
-  const otherIncome = parseFloat(otherIncomeEl ? otherIncomeEl.value : 0) || 0;
   const adjustForInflation = inflationAdjustEl ? inflationAdjustEl.checked : true;
+  const includeStatePension = includeSPEl ? includeSPEl.checked : true;
+  const statePensionAge = parseInt(spAgeEl ? spAgeEl.value : 67, 10) || 67;
+  const statePensionAnnual = Math.max(0, parseFloat(spAmountEl ? spAmountEl.value : 11973) || 11973);
+  const otherIncome = Math.max(0, parseFloat(otherIncomeEl ? otherIncomeEl.value : 0) || 0);
 
   const annualGrowthRate = annualGrowthPct / 100;
   const annualInflationRate = inflationPct / 100;
   const monthlyGrowthRate = Math.pow(1 + annualGrowthRate, 1 / 12) - 1;
+  const annualTargetNet = netMonthly * 12;
 
   // Compute Year 1 Gross & Tax metrics for top cards
-  const year1TargetNetAnnual = netMonthly * 12;
-  const year1GrossAnnual = findGrossWithdrawalForNet(year1TargetNetAnnual, otherIncome, taxWrapper);
-  const year1TaxRes = calculateUkTaxOnGross(year1GrossAnnual, otherIncome, taxWrapper);
+  const isYear1SPEligible = includeStatePension && (retireAge >= statePensionAge);
+  const year1SP = isYear1SPEligible ? statePensionAnnual : 0;
+  const year1Solve = solveFundWithdrawalForTotalNet(annualTargetNet, year1SP, otherIncome, taxWrapper);
+  const year1GrossAnnual = year1Solve.grossWithdrawal;
   const year1GrossMonthly = year1GrossAnnual / 12;
-  const year1TaxMonthly = year1TaxRes.incomeTax / 12;
+  const year1TaxAnnual = year1Solve.totalTax;
+  const year1TaxMonthly = year1TaxAnnual / 12;
+
+  // Compute metrics after State Pension kicks in (e.g. at Age 67 in today's money)
+  const postSPSolve = solveFundWithdrawalForTotalNet(annualTargetNet, statePensionAnnual, otherIncome, taxWrapper);
+  const postSPGrossMonthly = postSPSolve.grossWithdrawal / 12;
+  const postSPGrossAnnual = postSPSolve.grossWithdrawal;
+  const postSPAnnualSavings = Math.max(0, year1GrossAnnual - postSPGrossAnnual);
 
   // Run Simulation
   let balance = initialFund;
@@ -2627,8 +2728,10 @@ function updateDrawdownCalculator() {
     startBalance: initialFund,
     growthEarned: 0,
     grossWithdrawal: 0,
+    statePension: 0,
     ukTaxPaid: 0,
-    netWithdrawal: 0,
+    netFromFund: 0,
+    totalNetReceived: 0,
     endBalanceNominal: initialFund,
     endBalanceReal: initialFund,
     isInitial: true
@@ -2648,11 +2751,13 @@ function updateDrawdownCalculator() {
     }
 
     const inflationFactor = Math.pow(1 + annualInflationRate, yr);
-    const targetNetThisYear = adjustForInflation ? (year1TargetNetAnnual * inflationFactor) : year1TargetNetAnnual;
+    const isSPEligible = includeStatePension && (ageAtStart >= statePensionAge);
+    const statePensionThisYear = isSPEligible ? (adjustForInflation ? (statePensionAnnual * inflationFactor) : statePensionAnnual) : 0;
     const otherIncomeThisYear = adjustForInflation ? (otherIncome * inflationFactor) : otherIncome;
+    const targetNetThisYear = adjustForInflation ? (annualTargetNet * inflationFactor) : annualTargetNet;
 
-    const grossThisYear = findGrossWithdrawalForNet(targetNetThisYear, otherIncomeThisYear, taxWrapper);
-    const taxResThisYear = calculateUkTaxOnGross(grossThisYear, otherIncomeThisYear, taxWrapper);
+    const solveRes = solveFundWithdrawalForTotalNet(targetNetThisYear, statePensionThisYear, otherIncomeThisYear, taxWrapper);
+    const grossThisYear = solveRes.grossWithdrawal;
     const monthlyGrossThisYear = grossThisYear / 12;
 
     let yearGrowth = 0;
@@ -2678,12 +2783,14 @@ function updateDrawdownCalculator() {
     }
 
     const drawRatio = grossThisYear > 0 ? (actualGrossDrawn / grossThisYear) : 1;
-    const actualTaxDeducted = taxResThisYear.incomeTax * drawRatio;
-    const actualNetReceived = actualGrossDrawn - actualTaxDeducted;
+    const actualTaxOnFund = solveRes.taxOnFund * drawRatio;
+    const actualTotalTax = (solveRes.totalTax - solveRes.taxOnFund) + actualTaxOnFund;
+    const actualNetFromFund = Math.max(0, actualGrossDrawn - actualTaxOnFund);
+    const actualTotalNet = actualNetFromFund + Math.max(0, statePensionThisYear + otherIncomeThisYear - (solveRes.totalTax - solveRes.taxOnFund));
 
     totalGrossWithdrawn += actualGrossDrawn;
-    totalNetWithdrawn += actualNetReceived;
-    totalTaxPaid += actualTaxDeducted;
+    totalNetWithdrawn += actualTotalNet;
+    totalTaxPaid += actualTotalTax;
 
     const endOfYrInflationFactor = Math.pow(1 + annualInflationRate, yr + 1);
     const endBalanceReal = balance / endOfYrInflationFactor;
@@ -2694,8 +2801,10 @@ function updateDrawdownCalculator() {
       startBalance: startBalance,
       growthEarned: yearGrowth,
       grossWithdrawal: actualGrossDrawn,
-      ukTaxPaid: actualTaxDeducted,
-      netWithdrawal: actualNetReceived,
+      statePension: statePensionThisYear,
+      ukTaxPaid: actualTotalTax,
+      netFromFund: actualNetFromFund,
+      totalNetReceived: actualTotalNet,
       endBalanceNominal: balance,
       endBalanceReal: endBalanceReal,
       isInitial: false
@@ -2734,14 +2843,38 @@ function updateDrawdownCalculator() {
     }
   }
 
+  // KPI Card 2: Gross Monthly Withdrawal & UK Tax
   const statGrossMonthly = document.getElementById("stat-gross-monthly");
   const statGrossAnnual = document.getElementById("stat-gross-annual");
   const statTaxDeducted = document.getElementById("stat-tax-deducted");
   if (statGrossMonthly && statGrossAnnual && statTaxDeducted) {
     statGrossMonthly.textContent = `£${Math.round(year1GrossMonthly).toLocaleString()} / mo`;
-    statGrossAnnual.textContent = `£${Math.round(year1GrossAnnual).toLocaleString()} Gross / Year`;
-    const effTaxRate = year1GrossAnnual > 0 ? (year1TaxRes.incomeTax / year1GrossAnnual * 100).toFixed(1) : "0.0";
-    statTaxDeducted.textContent = `UK Tax: £${Math.round(year1TaxMonthly).toLocaleString()}/mo (£${Math.round(year1TaxRes.incomeTax).toLocaleString()}/yr) | ${effTaxRate}% Effective Rate`;
+    if (includeStatePension && retireAge < statePensionAge) {
+      statGrossAnnual.textContent = `Pre-State Pension (Ages ${retireAge}–${statePensionAge - 1}) | Drops to £${Math.round(postSPGrossMonthly).toLocaleString()}/mo at Age ${statePensionAge}`;
+      statTaxDeducted.textContent = `UK Tax: £${Math.round(year1TaxMonthly).toLocaleString()}/mo | Saves £${Math.round(postSPAnnualSavings).toLocaleString()}/yr from private pot from Age ${statePensionAge}`;
+    } else if (includeStatePension) {
+      statGrossAnnual.textContent = `£${Math.round(year1GrossAnnual).toLocaleString()} Gross / Year (State Pension active)`;
+      const effTaxRate = (year1GrossAnnual + year1SP) > 0 ? (year1TaxAnnual / (year1GrossAnnual + year1SP) * 100).toFixed(1) : "0.0";
+      statTaxDeducted.textContent = `UK Tax: £${Math.round(year1TaxMonthly).toLocaleString()}/mo | Combined with £${Math.round(statePensionAnnual).toLocaleString()}/yr State Pension (${effTaxRate}%)`;
+    } else {
+      statGrossAnnual.textContent = `£${Math.round(year1GrossAnnual).toLocaleString()} Gross / Year`;
+      const effTaxRate = year1GrossAnnual > 0 ? (year1TaxAnnual / year1GrossAnnual * 100).toFixed(1) : "0.0";
+      statTaxDeducted.textContent = `UK Tax: £${Math.round(year1TaxMonthly).toLocaleString()}/mo (£${Math.round(year1TaxAnnual).toLocaleString()}/yr) | ${effTaxRate}% Effective Rate`;
+    }
+  }
+
+  // Relief Banner Callout
+  const reliefText = document.getElementById("drawdown-state-pension-relief-text");
+  if (reliefText) {
+    if (includeStatePension) {
+      if (retireAge < statePensionAge) {
+        reliefText.textContent = `From Age ${statePensionAge}, UK State Pension (£${Math.round(statePensionAnnual).toLocaleString()}/yr) starts, reducing private fund drawdown from £${Math.round(year1GrossMonthly).toLocaleString()}/mo to £${Math.round(postSPGrossMonthly).toLocaleString()}/mo (saving £${Math.round(postSPAnnualSavings).toLocaleString()}/yr from being drained from your pot!).`;
+      } else {
+        reliefText.textContent = `At Age ${retireAge}, UK State Pension (£${Math.round(statePensionAnnual).toLocaleString()}/yr) is already active, reducing private fund drawdown to £${Math.round(year1GrossMonthly).toLocaleString()}/mo to deliver your £${Math.round(netMonthly).toLocaleString()}/mo net target!`;
+      }
+    } else {
+      reliefText.textContent = `UK State Pension excluded. Full £${Math.round(netMonthly).toLocaleString()}/mo net income will be funded solely by your private investment portfolio.`;
+    }
   }
 
   // 10-Year Purchasing Power Card
@@ -2764,7 +2897,7 @@ function updateDrawdownCalculator() {
   const statTotalWithdrawn = document.getElementById("stat-total-withdrawn");
   if (statTotalTax && statTotalWithdrawn) {
     statTotalTax.textContent = `£${Math.round(totalTaxPaid).toLocaleString()}`;
-    statTotalWithdrawn.textContent = `Total Net Withdrawn: £${Math.round(totalNetWithdrawn).toLocaleString()}`;
+    statTotalWithdrawn.textContent = `Total Net Received: £${Math.round(totalNetWithdrawn).toLocaleString()}`;
   }
 
   // Render Schedule Table Body
@@ -2772,17 +2905,22 @@ function updateDrawdownCalculator() {
   if (tbody) {
     tbody.innerHTML = schedule.filter(r => !r.isInitial).map(r => {
       const isDepletedRow = r.endBalanceNominal <= 0;
+      const spBadge = r.statePension > 0 
+        ? `<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-sky-100 text-sky-800">£${Math.round(r.statePension).toLocaleString()}</span>` 
+        : `<span class="text-slate-400">-</span>`;
       return `
         <tr class="hover:bg-slate-50 transition ${isDepletedRow ? 'bg-rose-50/40 text-rose-900' : ''}">
-          <td class="py-2 px-3 font-bold text-slate-900">${r.age}</td>
-          <td class="py-2 px-3 text-slate-500 font-mono text-[11px]">${r.year}</td>
-          <td class="py-2 px-3 text-slate-700">£${Math.round(r.startBalance).toLocaleString()}</td>
-          <td class="py-2 px-3 font-semibold text-emerald-600">+£${Math.round(r.growthEarned).toLocaleString()}</td>
-          <td class="py-2 px-3 font-semibold text-amber-800">£${Math.round(r.grossWithdrawal).toLocaleString()}</td>
-          <td class="py-2 px-3 font-semibold text-rose-600">£${Math.round(r.ukTaxPaid).toLocaleString()}</td>
-          <td class="py-2 px-3 font-bold text-brand-700">£${Math.round(r.netWithdrawal).toLocaleString()}</td>
-          <td class="py-2 px-3 font-extrabold ${isDepletedRow ? 'text-rose-600' : 'text-indigo-900'}">£${Math.round(r.endBalanceNominal).toLocaleString()}</td>
-          <td class="py-2 px-3 font-extrabold text-emerald-900 bg-emerald-50/50">£${Math.round(r.endBalanceReal).toLocaleString()}</td>
+          <td class="py-2 px-2.5 font-bold text-slate-900">${r.age}</td>
+          <td class="py-2 px-2.5 text-slate-500 font-mono text-[11px]">${r.year}</td>
+          <td class="py-2 px-2.5 text-slate-700">£${Math.round(r.startBalance).toLocaleString()}</td>
+          <td class="py-2 px-2.5 font-semibold text-emerald-600">+£${Math.round(r.growthEarned).toLocaleString()}</td>
+          <td class="py-2 px-2.5 font-semibold text-amber-800">£${Math.round(r.grossWithdrawal).toLocaleString()}</td>
+          <td class="py-2 px-2.5 font-semibold text-sky-700 bg-sky-50/30">${spBadge}</td>
+          <td class="py-2 px-2.5 font-semibold text-rose-600">£${Math.round(r.ukTaxPaid).toLocaleString()}</td>
+          <td class="py-2 px-2.5 font-semibold text-amber-900">£${Math.round(r.netFromFund).toLocaleString()}</td>
+          <td class="py-2 px-2.5 font-bold text-emerald-800 bg-emerald-50/60">£${Math.round(r.totalNetReceived).toLocaleString()}</td>
+          <td class="py-2 px-2.5 font-extrabold ${isDepletedRow ? 'text-rose-600' : 'text-indigo-900'}">£${Math.round(r.endBalanceNominal).toLocaleString()}</td>
+          <td class="py-2 px-2.5 font-extrabold text-emerald-900 bg-emerald-100/40">£${Math.round(r.endBalanceReal).toLocaleString()}</td>
         </tr>
       `;
     }).join("");
@@ -2790,6 +2928,17 @@ function updateDrawdownCalculator() {
 
   // Render Drawdown Chart
   renderDrawdownChart(schedule, inflationPct);
+
+  trackGAEvent("drawdown_calculated", {
+    fund_value: initialFund,
+    retire_age: retireAge,
+    net_monthly: netMonthly,
+    fund_growth: annualGrowthPct,
+    include_state_pension: includeStatePension,
+    state_pension_age: statePensionAge,
+    is_depleted: isDepleted,
+    depletion_age: depletionAge
+  });
 
   if (window.lucide) {
     lucide.createIcons();
@@ -2852,10 +3001,15 @@ function renderDrawdownChart(schedule, inflationPct) {
             afterBody: (items) => {
               const row = schedule[items[0].dataIndex];
               if (!row || row.isInitial) return [];
+              const spLine = row.statePension > 0 
+                ? `UK State Pension: ${formatCurrency(row.statePension)}/yr`
+                : `State Pension: None (Pre-age requirement)`;
               return [
-                `Gross Withdrawal: ${formatCurrency(row.grossWithdrawal)}/yr`,
-                `Net Cash in Hand: ${formatCurrency(row.netWithdrawal)}/yr`,
-                `UK Income Tax: ${formatCurrency(row.ukTaxPaid)}/yr`
+                `Fund Gross Drawn: ${formatCurrency(row.grossWithdrawal)}/yr`,
+                spLine,
+                `UK Income Tax: ${formatCurrency(row.ukTaxPaid)}/yr`,
+                `Net from Fund: ${formatCurrency(row.netFromFund)}/yr`,
+                `Total Net in Hand: ${formatCurrency(row.totalNetReceived)}/yr`
               ];
             }
           }
@@ -2877,15 +3031,6 @@ function renderDrawdownChart(schedule, inflationPct) {
       }
     }
   });
-
-  trackGAEvent("drawdown_calculated", {
-    fund_value: pot,
-    retire_age: retireAge,
-    net_monthly: netMonthly,
-    fund_growth: fundGrowth,
-    is_depleted: isDepleted,
-    depletion_age: depletionAge
-  });
 }
 
 function exportDrawdownCSV() {
@@ -2896,16 +3041,24 @@ function exportDrawdownCSV() {
   const retireAgeEl = document.getElementById("drawdown-retire-age");
   const netMonthlyEl = document.getElementById("drawdown-net-monthly");
   const fundGrowthEl = document.getElementById("drawdown-fund-growth");
+  const includeSPEl = document.getElementById("drawdown-include-state-pension");
+  const spAgeEl = document.getElementById("drawdown-state-pension-age");
+  const spAmountEl = document.getElementById("drawdown-state-pension-amount");
+
+  const includeSP = includeSPEl ? includeSPEl.checked : true;
+  const spAge = spAgeEl ? spAgeEl.value : "67";
+  const spAmount = spAmountEl ? spAmountEl.value : "11973";
 
   let csv = "Dutta UK Funds Selection Advisor - Retirement Drawdown & Longevity Schedule\n";
   csv += `Date Generated: ${new Date().toLocaleDateString('en-GB')}\n`;
   csv += `Starting Fund Value: £${fundValueEl ? fundValueEl.value : ''}\n`;
   csv += `Retirement Age: ${retireAgeEl ? retireAgeEl.value : ''}\n`;
-  csv += `Net Monthly Withdrawal: £${netMonthlyEl ? netMonthlyEl.value : ''}\n`;
+  csv += `Net Monthly Target: £${netMonthlyEl ? netMonthlyEl.value : ''} in hand\n`;
   csv += `Expected Fund Growth: ${fundGrowthEl ? fundGrowthEl.value : ''}%\n`;
-  csv += `Inflation Assumption: 3.0% per annum\n\n`;
+  csv += `Inflation Assumption: 3.0% per annum compound\n`;
+  csv += `UK State Pension: ${includeSP ? `Included from Age ${spAge} (£${spAmount}/yr indexed to inflation)` : 'Excluded'}\n\n`;
 
-  csv += "Age,Calendar Year,Start Balance (£),Growth Earned (£),Gross Withdrawal (£),UK Income Tax Paid (£),Net in Hand (£),End Balance Nominal (£),End Balance Real (Today's Money £)\n";
+  csv += "Age,Calendar Year,Start Balance (£),Growth Earned (£),Fund Gross Drawn (£),State Pension (£),UK Tax Paid (£),Net from Fund (£),Total Net in Hand (£),End Balance Nominal (£),End Balance Real (Today's Money £)\n";
 
   cachedDrawdownSchedule.forEach(r => {
     csv += [
@@ -2914,8 +3067,10 @@ function exportDrawdownCSV() {
       Math.round(r.startBalance),
       Math.round(r.growthEarned),
       Math.round(r.grossWithdrawal),
+      Math.round(r.statePension || 0),
       Math.round(r.ukTaxPaid),
-      Math.round(r.netWithdrawal),
+      Math.round(r.netFromFund || r.netWithdrawal || 0),
+      Math.round(r.totalNetReceived || r.netWithdrawal || 0),
       Math.round(r.endBalanceNominal),
       Math.round(r.endBalanceReal)
     ].join(",") + "\n";
@@ -3832,6 +3987,8 @@ document.addEventListener("DOMContentLoaded", () => {
     "drawdown-fund-growth",
     "drawdown-tax-wrapper",
     "drawdown-inflation-rate",
+    "drawdown-state-pension-age",
+    "drawdown-state-pension-amount",
     "drawdown-other-income"
   ];
   drawdownInputIds.forEach(id => {
@@ -3847,6 +4004,21 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
   });
+
+  const includeSPEl = document.getElementById("drawdown-include-state-pension");
+  if (includeSPEl) {
+    includeSPEl.addEventListener("change", () => {
+      const controls = document.getElementById("drawdown-state-pension-controls");
+      if (controls) {
+        controls.style.opacity = includeSPEl.checked ? "1" : "0.45";
+        controls.querySelectorAll("select, input").forEach(inp => {
+          inp.disabled = !includeSPEl.checked;
+        });
+      }
+      updateDrawdownCalculator();
+      saveAdvisorState();
+    });
+  }
 
   const inflationAdjustEl = document.getElementById("drawdown-inflation-adjust");
   if (inflationAdjustEl) {

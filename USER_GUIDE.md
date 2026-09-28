@@ -41,9 +41,10 @@ Seeing £1,000,000 in 30 years sounds amazing — but a loaf of bread will also 
 
 ### 2. ⏳ The Longevity Simulator: "How Long Will My Money Last?"
 Click the **"How Long Will My Fund Last?"** tab:
-1. Put in your expected retirement fund (e.g. £400,000) and age.
-2. Put in the **clean cash you want in your bank account each month** (e.g. £2,000 net).
-3. **The app calculates UK taxes automatically**: It accounts for your 25% tax-free lump sum and standard HMRC tax bands, then draws an age-by-age graph showing whether your fund lasts until age 85, 95, or forever!
+1. Put in your expected retirement fund (e.g. £400,000) and retirement age.
+2. Put in the **clean cash you want in your bank account each month** (e.g. £2,500 net).
+3. **UK State Pension Integration**: Toggle your eligibility and select your State Pension age (Age 66, 67, or 68 per official **gov.uk** rules). When your State Pension starts, your private fund withdrawals automatically reduce, preserving your capital and extending your fund's life by years!
+4. **Automatic UK Tax Engine**: It factors in your 25% tax-free lump sum (UFPLS) and standard HMRC income tax bands, drawing an age-by-age graph and year-by-year schedule showing whether your fund lasts until age 85, 95, or forever!
 
 ---
 
