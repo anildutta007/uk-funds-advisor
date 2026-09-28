@@ -32,7 +32,7 @@ Pick one of 3 simple risk profiles:
 
 ---
 
-## 🌟 Three Game-Changing Features Built Just for You
+## 🌟 Four Game-Changing Features Built Just for You
 
 ### 1. 🪙 "Today's World" Money (Defeating the Inflation Monster)
 Seeing £1,000,000 in 30 years sounds amazing — but a loaf of bread will also cost more in 2056!
@@ -45,21 +45,27 @@ Seeing £1,000,000 in 30 years sounds amazing — but a loaf of bread will also 
 * **UK State Pension Integration**: Toggle your eligibility and select your State Pension age (Age 66, 67, or 68 per official **gov.uk** rules). When your State Pension starts, your private fund withdrawals automatically reduce, preserving your capital and extending your fund's life by years!
 * **Automatic UK Tax Engine**: Factors in your 25% tax-free lump sum (UFPLS) and HMRC income tax bands, drawing an age-by-age graph and year-by-year schedule showing whether your fund lasts until age 85, 95, or forever!
 
-### 3. 🎯 Target Nest Egg & Savings Planner: "How Much Do I Need to Retire?" (Tab 4)
+### 3. 🎯 Target Nest Egg & Savings Planner: "How Much Do I Need to Retire?" (Tab 4 - NEW)
 Work backwards from your dream retirement lifestyle:
 * Enter your desired **net spendable income** (e.g. £30,000/yr), your target retirement age, and life expectancy.
-* **State Pension Relief**: Automatically integrates your UK State Pension from Age 66/67/68, showing you **exactly how many hundreds of thousands of pounds it knocks off your required nest egg**!
+* **State Pension Relief**: Automatically integrates your UK State Pension from Age 66/67/68, showing you **exactly how many hundreds of thousands of pounds it knocks off your required nest egg** (typically saving over £300,000+)!
 * **Monthly Savings Calculator**: Compares Low, Medium, and High Risk investment routes to tell you exactly how much you need to save each month (including how your current lump sum will grow) to hit your goal on time.
+
+### 4. 🧭 Master Trustnet Fund Screener: "Explore All Trustnet Funds" (Tab 5 - NEW)
+Browse and filter top-performing UK mutual funds and ETFs:
+* Institutional-grade factsheet data powered by **Trustnet.com (FE fundinfo)**.
+* Filter by **IA Sector** (Global Equities, UK Equities, Technology, Corporate Bonds, Cash), **Fund House** (Vanguard, Fidelity, Fundsmith, BlackRock, etc.), FE Crown ratings, alpha, and fee drag (OCF).
 
 ---
 
-## 🗂️ App Navigation & Tabs
-The clean top bar gives you 5 clear tools:
+## 🗂️ App Navigation & Tools
+The clean top bar gives you 6 dedicated tools:
 1. **Active Fund Strategy**: Hand-picked portfolio by world-class fund managers.
 2. **Passive Fund Strategy**: Low-cost index tracker portfolio mimicking global market returns.
 3. **How Long Will My Fund Last?**: Post-retirement decumulation simulator with UK tax & State Pension.
 4. **How Much Do I Need to Retire?**: Target pot and required monthly savings calculator with State Pension relief.
 5. **Explore All Trustnet Funds**: Full database browser with sector, house, risk, and fee filters.
+6. **Regulatory Info**: Transparent fund selection criteria, Modern Portfolio Theory allocation models, and FCA non-advice compliance notice (viewable on demand via the Regulatory Info tab).
 
 💡 *Pro Tip*: Use the **"Open options in new browser tab"** toggle or the pop-out icon (↗) on any tab to run multiple scenarios side-by-side!
 

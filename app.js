@@ -3854,12 +3854,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const tabDrawdown = document.getElementById("tab-drawdown");
   const tabTarget = document.getElementById("tab-target");
   const tabScreener = document.getElementById("tab-screener");
+  const tabRegulatory = document.getElementById("tab-regulatory");
 
   const secActive = document.getElementById("section-active");
   const secPassive = document.getElementById("section-passive");
   const secDrawdown = document.getElementById("section-drawdown");
   const secTarget = document.getElementById("section-target");
   const secScreener = document.getElementById("section-screener");
+  const secCompliance = document.getElementById("compliance");
   const secChartsOverview = document.getElementById("section-charts-overview");
   const secInvestorProfile = document.getElementById("section-investor-profile");
   const secMetricsSummary = document.getElementById("section-metrics-summary");
@@ -3904,7 +3906,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (e) {}
 
     // Reset all tabs to inactive styling
-    [tabActive, tabPassive, tabDrawdown, tabTarget, tabScreener].forEach(t => {
+    [tabActive, tabPassive, tabDrawdown, tabTarget, tabScreener, tabRegulatory].forEach(t => {
       if (t) {
         t.classList.remove("active");
         t.classList.remove("bg-white", "text-slate-900", "shadow-sm");
@@ -3912,15 +3914,16 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // Hide all sections initially
-    [secActive, secPassive, secDrawdown, secTarget, secScreener].forEach(s => s && s.classList.add("hidden"));
+    // Hide all sections initially (including regulatory compliance)
+    [secActive, secPassive, secDrawdown, secTarget, secScreener, secCompliance].forEach(s => s && s.classList.add("hidden"));
 
     const activeBtn = {
       active: tabActive,
       passive: tabPassive,
       drawdown: tabDrawdown,
       target: tabTarget,
-      screener: tabScreener
+      screener: tabScreener,
+      regulatory: tabRegulatory
     }[tab];
 
     if (activeBtn) {
@@ -3956,6 +3959,12 @@ document.addEventListener("DOMContentLoaded", () => {
       if (secChartsOverview) secChartsOverview.classList.add("hidden"); // Dedicated full-width screener
       if (secInvestorProfile) secInvestorProfile.classList.add("hidden");
       if (secMetricsSummary) secMetricsSummary.classList.add("hidden");
+    } else if (tab === "regulatory") {
+      if (secCompliance) secCompliance.classList.remove("hidden"); // Only show when user presses Regulatory Info
+      if (secChartsOverview) secChartsOverview.classList.add("hidden");
+      if (secInvestorProfile) secInvestorProfile.classList.add("hidden");
+      if (secMetricsSummary) secMetricsSummary.classList.add("hidden");
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
     const inputs = getInputs();
@@ -3974,6 +3983,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (tabDrawdown) tabDrawdown.addEventListener("click", () => setTab("drawdown"));
   if (tabTarget) tabTarget.addEventListener("click", () => setTab("target"));
   if (tabScreener) tabScreener.addEventListener("click", () => setTab("screener"));
+  if (tabRegulatory) tabRegulatory.addEventListener("click", () => setTab("regulatory"));
 
   // Restore saved state from localStorage if available (e.g. when opened in a new tab)
   try {
@@ -4140,10 +4150,10 @@ document.addEventListener("DOMContentLoaded", () => {
   updateDrawdownCalculator();
   updateTargetRetirementPlanner();
 
-  // Check URL query parameters for deep-linking (e.g. ?tab=drawdown or ?tab=target or ?tab=screener)
+  // Check URL query parameters for deep-linking (e.g. ?tab=drawdown or ?tab=target or ?tab=screener or ?tab=regulatory)
   const urlParams = new URLSearchParams(window.location.search);
   const requestedTab = urlParams.get("tab") || window.location.hash.replace("#", "");
-  if (requestedTab && ["active", "passive", "drawdown", "target", "screener"].includes(requestedTab)) {
+  if (requestedTab && ["active", "passive", "drawdown", "target", "screener", "regulatory"].includes(requestedTab)) {
     window._isPopoutInstance = true;
     setTab(requestedTab, true);
   } else {
