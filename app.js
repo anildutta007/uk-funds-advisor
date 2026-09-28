@@ -1230,6 +1230,19 @@ function getInputs() {
   };
 }
 
+/**
+ * Google Analytics 4 (GA4) Custom Event Dispatcher
+ */
+function trackGAEvent(eventName, eventParams = {}) {
+  if (typeof window.gtag === "function" && window.GA_MEASUREMENT_ID && window.GA_MEASUREMENT_ID !== "G-XXXXXXXXXX") {
+    try {
+      window.gtag("event", eventName, eventParams);
+    } catch (e) {
+      // Non-blocking
+    }
+  }
+}
+
 function updateAdvisor() {
   const inputs = getInputs();
 
@@ -1313,6 +1326,14 @@ function updateAdvisor() {
   if (window.lucide) {
     window.lucide.createIcons();
   }
+
+  trackGAEvent("portfolio_updated", {
+    horizon_years: inputs.horizon,
+    retirement_age: inputs.retirementAge,
+    risk_profile: currentRisk,
+    lump_sum: inputs.lumpSum,
+    monthly_amount: inputs.monthlyAmount
+  });
 }
 
 /**
@@ -2320,9 +2341,16 @@ window.selectSwappedFund = function(newFundId) {
   portfolio[slotIndex].fundId = newFundId;
   closeSwapModal();
   updateAdvisor();
+
+  trackGAEvent("fund_swapped", {
+    strategy_type: strategyType,
+    slot_index: slotIndex,
+    new_fund_id: newFundId
+  });
 };
 
 function exportCSV() {
+  trackGAEvent("csv_exported");
   const inputs = getInputs();
 
   let csv = "Dutta UK Funds Selection Advisor - Master Trustnet Export (With 2026 YTD)\n";
@@ -2804,9 +2832,19 @@ function renderDrawdownChart(schedule, inflationPct) {
       }
     }
   });
+
+  trackGAEvent("drawdown_calculated", {
+    fund_value: pot,
+    retire_age: retireAge,
+    net_monthly: netMonthly,
+    fund_growth: fundGrowth,
+    is_depleted: isDepleted,
+    depletion_age: depletionAge
+  });
 }
 
 function exportDrawdownCSV() {
+  trackGAEvent("drawdown_csv_exported");
   if (!cachedDrawdownSchedule || cachedDrawdownSchedule.length === 0) return;
 
   const fundValueEl = document.getElementById("drawdown-fund-value");
@@ -2951,6 +2989,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     activeTab = tab;
+    trackGAEvent("tab_view", { tab_name: tab });
 
     // Update browser URL query without page reload
     try {
