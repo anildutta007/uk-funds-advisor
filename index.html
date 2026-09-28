@@ -977,23 +977,174 @@
     </section>
 
     <!-- Methodology & Compliance Section -->
-    <section id="compliance" class="bg-slate-100 rounded-2xl p-6 border border-slate-200 text-xs text-slate-600 space-y-3">
-      <div class="flex items-center gap-2 text-slate-900 font-bold text-sm">
-        <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
-        <span>Advisory Methodology & UK Regulatory Disclosures</span>
-      </div>
+    <section id="compliance" class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm text-xs text-slate-600 space-y-6">
       
-      <p class="leading-relaxed">
-        <strong>1. Performance & Growth Calculations:</strong> The expected future values displayed are computed using compound growth formulas based on the average annualised compound growth rate (CAGR) of each fund over the last 15 years (or since fund inception if operational for fewer years). Historical returns are calculated net of ongoing charges (OCF) in Sterling (£ GBP). Past performance is not a reliable indicator or guarantee of future returns.
-      </p>
+      <!-- Section Header -->
+      <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-100">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold flex-shrink-0">
+            <i data-lucide="shield-check" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h2 class="text-base font-extrabold text-slate-900 tracking-tight">Fund Selection Methodology, Scoring Criteria & UK Regulatory Disclosures</h2>
+            <p class="text-[11px] text-slate-500">Transparent quantitative and qualitative screening criteria powered by Trustnet.com (FE fundinfo) institutional data</p>
+          </div>
+        </div>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+          <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-600"></i>
+          <span>Strict FCA Educational Alignment</span>
+        </span>
+      </div>
 
-      <p class="leading-relaxed">
-        <strong>2. Trustnet (FE fundinfo) Data & Platform Accessibility:</strong> Fund metrics including Total Fund Size (AUM), Inception Dates, Lead Manager Tenure, Citicodes, FE Crown Ratings (1 to 5 Crowns), and FE fundinfo Risk Scores (relative to FTSE 100 benchmark = 100) are compiled from authentic fund factsheets on <a href="https://www.trustnet.com" target="_blank" rel="noopener noreferrer" class="text-brand-600 underline font-semibold">Trustnet.com</a> and official Investment Association (IA) sector benchmarks. These funds are liquid, regulated, and widely accessible via major UK investment platforms including Hargreaves Lansdown, AJ Bell, Interactive Investor, and Fidelity.
-      </p>
+      <!-- Fund Selection Screening Criteria (Active vs. Passive Grid) -->
+      <div class="space-y-3">
+        <div class="flex items-center gap-2">
+          <i data-lucide="filter" class="w-4 h-4 text-brand-600"></i>
+          <h3 class="text-sm font-bold text-slate-900">1. Fund Selection & Screening Criteria (How Active and Passive Funds Are Chosen)</h3>
+        </div>
+        <p class="text-xs text-slate-600 leading-relaxed">
+          From over 4,000 UK mutual funds and ETFs available on Trustnet.com, the advisor applies a strict multi-factor screen to select top-tier active managers and best-in-class passive trackers:
+        </p>
 
-      <p class="leading-relaxed">
-        <strong>3. Non-Advice Notice:</strong> This software is an analytical planning tool designed strictly for financial education and self-directed investor research. It does not consider individual tax status, debt obligations, or personal financial hardship. For bespoke advice, consult an Independent Financial Adviser (IFA) authorised and regulated by the Financial Conduct Authority (FCA).
-      </p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+          
+          <!-- Active Fund Selection Criteria Card -->
+          <div class="p-4 rounded-xl bg-brand-50/40 border border-brand-200/80 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="inline-flex items-center gap-1.5 font-bold text-brand-900 text-xs">
+                <i data-lucide="sparkles" class="w-4 h-4 text-brand-600"></i>
+                <span>Active Fund Selection Criteria</span>
+              </span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-brand-100 text-brand-800">Alpha & Outperformance</span>
+            </div>
+
+            <ul class="space-y-2 text-[11px] text-slate-700">
+              <li class="flex items-start gap-2">
+                <i data-lucide="award" class="w-3.5 h-3.5 text-amber-500 flex-shrink-0 mt-0.5"></i>
+                <span><strong class="text-slate-900">4 or 5 FE Crown Rating:</strong> Reserved for the top 10%–25% of all funds, reflecting superior historical alpha generation, return consistency, and downside risk management across 3, 5, and 10-year rolling windows.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <i data-lucide="trending-up" class="w-3.5 h-3.5 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+                <span><strong class="text-slate-900">Statistically Positive Alpha (&alpha; > 0):</strong> Proven long-term outperformance over official benchmark indices net of fees (e.g. Mark Slater +5.7% alpha, Terry Smith +3.3% alpha, James Thomson +2.3% alpha).</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <i data-lucide="user-check" class="w-3.5 h-3.5 text-brand-600 flex-shrink-0 mt-0.5"></i>
+                <span><strong class="text-slate-900">Veteran Lead Manager Tenure (10–20+ Years):</strong> Requires seasoned managers with unbroken tenure across economic cycles (e.g. Sebastian Lyon 23 yrs, James Thomson 21 yrs, Terry Smith 14.5 yrs, Mark Slater 19 yrs).</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <i data-lucide="bar-chart-2" class="w-3.5 h-3.5 text-teal-600 flex-shrink-0 mt-0.5"></i>
+                <span><strong class="text-slate-900">1st Quartile 15-Year Standing:</strong> Top 25% ranking against peer groups within respective Investment Association (IA) sectors across 2011–2025 full market cycles.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <i data-lucide="shield" class="w-3.5 h-3.5 text-indigo-600 flex-shrink-0 mt-0.5"></i>
+                <span><strong class="text-slate-900">Downside Mitigation & Volatility Defense:</strong> For balanced/cautious strategies, mandates that can hold cash, pivot sectors, or hedge (e.g. Trojan Fund FE Risk Score 42, Ruffer FE Risk Score 36 vs. FTSE 100 = 100).</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+                <span><strong class="text-slate-900">Institutional Liquidity & Platform Availability:</strong> Multi-million to multi-billion pound fund scale accessible on major UK platforms (Hargreaves Lansdown, AJ Bell, Interactive Investor, Fidelity).</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Passive Fund Selection Criteria Card -->
+          <div class="p-4 rounded-xl bg-teal-50/40 border border-teal-200/80 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="inline-flex items-center gap-1.5 font-bold text-teal-900 text-xs">
+                <i data-lucide="layers" class="w-4 h-4 text-teal-600"></i>
+                <span>Passive Fund Selection Criteria</span>
+              </span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-teal-100 text-teal-800">Beta & Low Fee Drag</span>
+            </div>
+
+            <ul class="space-y-2 text-[11px] text-slate-700">
+              <li class="flex items-start gap-2">
+                <i data-lucide="percent" class="w-3.5 h-3.5 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+                <span><strong class="text-slate-900">Ultra-Low Ongoing Charges (OCF):</strong> Minimal fee drag between 0.06% and 0.22% p.a. (e.g. Fidelity UK Index 0.06%, iShares S&P 500 0.07%, Fidelity World Index 0.12%, Vanguard All-World 0.22%).</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <i data-lucide="target" class="w-3.5 h-3.5 text-teal-600 flex-shrink-0 mt-0.5"></i>
+                <span><strong class="text-slate-900">Minimal Tracking Difference & Error:</strong> Precise replication of benchmark indices (S&P 500, MSCI World, FTSE All-World) with tracking differences typically within &plusmn;0.05% of the benchmark.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <i data-lucide="database" class="w-3.5 h-3.5 text-brand-600 flex-shrink-0 mt-0.5"></i>
+                <span><strong class="text-slate-900">Physical Full Replication:</strong> Prioritising direct physical ownership of underlying shares and bonds rather than synthetic derivative swap structures with counterparty exposure.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <i data-lucide="pie-chart" class="w-3.5 h-3.5 text-purple-600 flex-shrink-0 mt-0.5"></i>
+                <span><strong class="text-slate-900">Mega-Cap Scale & Liquidity (£3.5B to £8.4B+):</strong> Institutional scale managed by global leaders (Vanguard, BlackRock, LGIM, HSBC) guaranteeing tight bid-ask spreads and liquidity.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <i data-lucide="globe" class="w-3.5 h-3.5 text-cyan-600 flex-shrink-0 mt-0.5"></i>
+                <span><strong class="text-slate-900">GBP Currency Hedging on Debt:</strong> International bond index vehicles (e.g., iShares Global Aggregate Bond ETF AGBP) are fully hedged back to Sterling to eliminate currency fluctuation drag.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+                <span><strong class="text-slate-900">Zero Manager Key-Person Risk:</strong> Systematic, rules-based market exposure unaffected by manager retirements, style drift, or fund turnover.</span>
+              </li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Modern Portfolio Theory & Asset Allocation -->
+      <div class="space-y-3 pt-2 border-t border-slate-100">
+        <div class="flex items-center gap-2">
+          <i data-lucide="pie-chart" class="w-4 h-4 text-purple-600"></i>
+          <h3 class="text-sm font-bold text-slate-900">2. Portfolio Construction & Risk-Profile Matching (Modern Portfolio Theory)</h3>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-[11px]">
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+            <span class="font-bold text-slate-900 block mb-1">High Risk (Maximum Growth)</span>
+            <span class="text-slate-600 block mb-1.5"><strong>95–100% Equity</strong> targeting long-term compounding over 15–30+ years.</span>
+            <span class="text-slate-500 block"><strong>Active:</strong> Fidelity Tech (30%), Slater Growth (25%), Fundsmith (25%), BlackRock Europe (20%).</span>
+            <span class="text-slate-500 block"><strong>Passive:</strong> LGIM Tech Index (35%), iShares S&P 500 (30%), Fidelity World (20%), Fidelity UK (15%).</span>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+            <span class="font-bold text-slate-900 block mb-1">Medium Risk (Balanced Core)</span>
+            <span class="text-slate-600 block mb-1.5"><strong>60% Equity / 40% Defensive</strong> for balanced growth with drawdown dampening.</span>
+            <span class="text-slate-500 block"><strong>Active:</strong> JPMorgan Global (30%), Rathbone Global (25%), Artemis Bond (25%), Trojan (20%).</span>
+            <span class="text-slate-500 block"><strong>Passive:</strong> Vanguard LifeStrategy 60% (40%), Fidelity World (25%), iShares Agg Bond (25%), LGIM Gilts (10%).</span>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+            <span class="font-bold text-slate-900 block mb-1">Low Risk (Capital Preservation)</span>
+            <span class="text-slate-600 block mb-1.5"><strong>20–30% Equity / 70–80% Bonds & Cash</strong> targeting inflation-beating capital preservation.</span>
+            <span class="text-slate-500 block"><strong>Active:</strong> Ruffer Total Return (35%), Trojan (25%), Artemis Bond (25%), Lindsell Train (15%).</span>
+            <span class="text-slate-500 block"><strong>Passive:</strong> Royal London Money Market (40%), LGIM Gilts (30%), iShares Agg Bond (20%), Fidelity World (10%).</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Growth Formula & Inflation Discounting Math -->
+      <div class="space-y-3 pt-2 border-t border-slate-100">
+        <div class="flex items-center gap-2">
+          <i data-lucide="calculator" class="w-4 h-4 text-emerald-600"></i>
+          <h3 class="text-sm font-bold text-slate-900">3. Performance, Compounding & "Today's World" Real Inflation Calculations</h3>
+        </div>
+        <p class="leading-relaxed">
+          <strong>Compound Annual Growth Rate (CAGR):</strong> Projected balances are computed using standard annuity compounding formulas based on each fund's 15-year annualised compound growth rate (or inception track record). Calculations incorporate initial lump sums, regular monthly contributions, and are calculated net of ongoing charges (OCF) in Sterling (£ GBP).
+        </p>
+        <p class="leading-relaxed">
+          <strong>Real Terms Purchasing Power (3.0% Compound Inflation):</strong> Because nominal future amounts lose purchasing power over time due to inflation, the application computes the real value in today's money using the formula:
+          <span class="font-mono font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded border">Real Value = Nominal Value / (1 + 0.03)^Years</span>. This displays what your retirement pot will actually buy in today's goods and services.
+        </p>
+      </div>
+
+      <!-- Trustnet Source & FCA Non-Advice Notice -->
+      <div class="space-y-3 pt-2 border-t border-slate-100">
+        <div class="flex items-center gap-2">
+          <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-600"></i>
+          <h3 class="text-sm font-bold text-slate-900">4. Trustnet (FE fundinfo) Data Integrity & FCA Non-Advice Regulatory Notice</h3>
+        </div>
+        <p class="leading-relaxed">
+          <strong>Data Source & Accessibility:</strong> Fund metrics including Total Fund Size (AUM), Inception Dates, Lead Manager Tenure, Citicodes, FE Crown Ratings, and FE Risk Scores (relative to FTSE 100 baseline = 100) are sourced from authentic fund factsheets on <a href="https://www.trustnet.com" target="_blank" rel="noopener noreferrer" class="text-brand-600 underline font-semibold">Trustnet.com</a> and official Investment Association (IA) sector benchmarks.
+        </p>
+        <div class="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 text-amber-950 text-[11px] leading-relaxed">
+          <strong class="font-bold block mb-0.5">UK Regulatory Compliance & Non-Advice Declaration:</strong>
+          This software is an analytical planning tool designed strictly for financial education and self-directed investor research. It does not provide personalized investment, tax, or pension advice and does not take into account your individual financial position, debt obligations, or tax residency. Past performance is no guarantee of future returns; fund values can fall as well as rise. For bespoke financial planning, consult an Independent Financial Adviser (IFA) authorized and regulated by the Financial Conduct Authority (FCA).
+        </div>
+      </div>
+
     </section>
 
   </main>
