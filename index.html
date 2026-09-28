@@ -101,6 +101,10 @@
 
       <!-- Quick Action Buttons -->
       <div class="flex items-center gap-2.5 print:hidden">
+        <button id="btn-user-guide" onclick="openUserGuideModal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 shadow-sm transition">
+          <i data-lucide="book-open" class="w-4 h-4 text-brand-600"></i>
+          <span>Beginner's Guide</span>
+        </button>
         <button id="btn-export-csv" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 shadow-sm transition">
           <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-600"></i>
           <span>Export CSV</span>
@@ -1236,6 +1240,125 @@
         </span>
         <button onclick="closeSwapModal()" class="px-4 py-2 font-semibold rounded-lg bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 transition shadow-sm">
           Cancel
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Beginner's Quick User Guide Modal Dialog -->
+  <div id="user-guide-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4 overflow-y-auto">
+    <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
+      
+      <!-- Modal Header -->
+      <div class="p-5 border-b border-slate-100 bg-gradient-to-r from-brand-50/80 via-white to-emerald-50/80 flex items-start justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-brand-600 text-white flex items-center justify-center font-bold shadow-md shadow-brand-500/20 flex-shrink-0">
+            <i data-lucide="book-open" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+              <span>Beginner's Guide: Investing Made Simple</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-brand-100 text-brand-800">1-Page Overview</span>
+            </h3>
+            <p class="text-xs text-slate-600 mt-0.5">
+              New to investing? Don't know where to start or worried whether your money will last? Here's everything in plain English.
+            </p>
+          </div>
+        </div>
+        <button onclick="closeUserGuideModal()" class="w-8 h-8 rounded-lg bg-slate-200/80 hover:bg-slate-300 flex items-center justify-center text-slate-600 transition flex-shrink-0">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body (The Plain English Guide) -->
+      <div class="p-6 overflow-y-auto space-y-5 flex-1 text-xs text-slate-600 leading-relaxed">
+        
+        <!-- Card 1: What is a Fund? -->
+        <div class="p-4 rounded-xl bg-brand-50/40 border border-brand-200/80 space-y-2">
+          <div class="flex items-center gap-2 text-brand-900 font-bold text-sm">
+            <i data-lucide="shopping-bag" class="w-4 h-4 text-brand-600"></i>
+            <span>1. What is a "Fund"? (The Fruit Basket Analogy)</span>
+          </div>
+          <p>
+            Think of investing like buying fruit:
+          </p>
+          <ul class="list-disc list-inside space-y-1 text-slate-700 pl-1">
+            <li><strong>Buying single shares</strong> is like trying to guess which single apple on a tree won't go bad. If that company stumbles, your money takes a hit.</li>
+            <li><strong>Buying a fund</strong> is like buying a pre-made basket of hundreds of the world's best companies (Apple, Microsoft, AstraZeneca, Shell) and government bonds. Even if one company has a bad year, the others balance it out.</li>
+          </ul>
+        </div>
+
+        <!-- Card 2: 3 Easy Steps to Plan -->
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+          <div class="flex items-center gap-2 text-slate-900 font-bold text-sm">
+            <i data-lucide="zap" class="w-4 h-4 text-amber-500"></i>
+            <span>2. Three Simple Steps to Plan Your Wealth (Under 60 Seconds)</span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div class="bg-white p-3 rounded-lg border border-slate-200">
+              <span class="font-bold text-slate-900 block mb-1">Step 1: Your Life Stage</span>
+              <span class="text-slate-600 block text-[11px]">Enter your Current Age, Target Retirement Age, any starting lump sum, and how much you can tuck away each month.</span>
+            </div>
+            <div class="bg-white p-3 rounded-lg border border-slate-200">
+              <span class="font-bold text-slate-900 block mb-1">Step 2: Comfort Level (Risk)</span>
+              <span class="text-slate-600 block text-[11px]">Pick <strong>Low</strong> (capital preservation/safety), <strong>Medium</strong> (balanced 60/40 mix), or <strong>High</strong> (100% global shares for maximum growth).</span>
+            </div>
+            <div class="bg-white p-3 rounded-lg border border-slate-200">
+              <span class="font-bold text-slate-900 block mb-1">Step 3: Active vs. Passive</span>
+              <span class="text-slate-600 block text-[11px]">Choose <strong>Active</strong> (veteran human managers hand-picking stocks) or <strong>Passive</strong> (ultra-cheap automated index trackers like Vanguard).</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Two Superpowers (Inflation & Longevity) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          
+          <div class="p-4 rounded-xl bg-emerald-50/50 border border-emerald-200/80 space-y-2">
+            <div class="flex items-center gap-2 text-emerald-900 font-bold">
+              <i data-lucide="coins" class="w-4 h-4 text-emerald-600"></i>
+              <span>"Today's World" Money (Beat Inflation!)</span>
+            </div>
+            <p class="text-[11px] text-slate-700">
+              £1,000,000 in 30 years won't buy the same as £1,000,000 today. Alongside every future figure, our app shows you a green badge: <strong class="text-emerald-800">"Today's World: £X (@ 3% infl.)"</strong>. This shows what your future pot is <em>actually worth in today's grocery and bill prices</em>!
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-purple-50/50 border border-purple-200/80 space-y-2">
+            <div class="flex items-center gap-2 text-purple-900 font-bold">
+              <i data-lucide="hourglass" class="w-4 h-4 text-purple-600"></i>
+              <span>"How Long Will My Fund Last?" (Drawdown)</span>
+            </div>
+            <p class="text-[11px] text-slate-700">
+              Switch to the <strong>Drawdown tab</strong>, type in the clean cash you want in your bank account each month after retiring, and our UK tax engine calculates your 25% tax-free lump sum and standard HMRC tax bands to show you the exact age your fund lasts to!
+            </p>
+          </div>
+
+        </div>
+
+        <!-- Card 4: Swap Fund Safety & Next Steps -->
+        <div class="p-4 rounded-xl bg-cyan-50/40 border border-cyan-200/80 space-y-2">
+          <div class="flex items-center gap-2 text-cyan-900 font-bold">
+            <i data-lucide="refresh-cw" class="w-4 h-4 text-cyan-700"></i>
+            <span>Don't Worry About Picking Wrong: The "Swap Fund" Feature</span>
+          </div>
+          <p class="text-[11px] text-slate-700">
+            Want to explore an alternative fund? Simply click <strong>"Swap Fund"</strong> on any holding. The app automatically screens 25 top Trustnet funds and <strong>only shows sister funds with matching risk appetite and growth expectations</strong> so you can customize with confidence.
+          </p>
+        </div>
+
+        <div class="text-[11px] text-slate-500 bg-slate-100 p-3 rounded-lg border border-slate-200">
+          <strong>Where can you hold these funds?</strong> All funds in this advisor are standard, regulated UK funds accessible inside tax-free <strong>Stocks & Shares ISAs</strong> or personal pensions (<strong>SIPPs</strong>) through major UK investment platforms like Hargreaves Lansdown, AJ Bell, Interactive Investor, and Fidelity.
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between text-xs text-slate-500">
+        <span>Ready to discover your retirement trajectory?</span>
+        <button onclick="closeUserGuideModal()" class="px-5 py-2 font-bold rounded-lg bg-brand-600 hover:bg-brand-700 text-white transition shadow-sm flex items-center gap-1.5">
+          <span>Let's Get Started</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
         </button>
       </div>
 

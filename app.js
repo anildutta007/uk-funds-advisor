@@ -2335,6 +2335,26 @@ window.closeSwapModal = function() {
   }
 };
 
+window.openUserGuideModal = function() {
+  const modalEl = document.getElementById("user-guide-modal");
+  if (modalEl) {
+    modalEl.classList.remove("hidden");
+    modalEl.classList.add("flex");
+    trackGAEvent("user_guide_opened");
+    if (window.lucide) {
+      window.lucide.createIcons();
+    }
+  }
+};
+
+window.closeUserGuideModal = function() {
+  const modalEl = document.getElementById("user-guide-modal");
+  if (modalEl) {
+    modalEl.classList.add("hidden");
+    modalEl.classList.remove("flex");
+  }
+};
+
 window.selectSwappedFund = function(newFundId) {
   const { strategyType, slotIndex } = pendingSwap;
   const portfolio = strategyType === "active" ? activeCustomPortfolio : passiveCustomPortfolio;
