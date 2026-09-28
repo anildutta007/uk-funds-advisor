@@ -1165,32 +1165,57 @@
 
   <!-- Swap Fund Modal Dialog -->
   <div id="swap-fund-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4 overflow-y-auto">
-    <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh]">
+    <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[88vh]">
       
       <!-- Modal Header -->
-      <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/60">
-        <div>
-          <h4 class="text-base font-bold text-slate-900 flex items-center gap-2">
-            <i data-lucide="refresh-cw" class="w-4 h-4 text-brand-600"></i>
-            <span>Select Alternative Trustnet Fund</span>
-          </h4>
-          <p id="swap-modal-slot-title" class="text-xs text-slate-500 mt-0.5">
-            Choose a top-ranked fund from our multi-house Trustnet database to replace this holding.
-          </p>
+      <div class="p-5 border-b border-slate-100 bg-slate-50/80">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <h4 class="text-base font-bold text-slate-900 flex items-center gap-2">
+              <i data-lucide="refresh-cw" class="w-4 h-4 text-brand-600"></i>
+              <span>Swap Fund Holding</span>
+            </h4>
+            <p id="swap-modal-slot-title" class="text-xs text-slate-500 mt-0.5">
+              Select an alternative fund matching your risk appetite and growth expectations.
+            </p>
+          </div>
+          <button onclick="closeSwapModal()" class="w-8 h-8 rounded-lg bg-slate-200/80 hover:bg-slate-300 flex items-center justify-center text-slate-600 transition flex-shrink-0">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
         </div>
-        <button onclick="closeSwapModal()" class="w-8 h-8 rounded-lg bg-slate-200/80 hover:bg-slate-300 flex items-center justify-center text-slate-600 transition">
-          <i data-lucide="x" class="w-4 h-4"></i>
-        </button>
+
+        <!-- Currently Selected Fund Info Banner -->
+        <div id="swap-modal-current-banner" class="mt-3 p-3 rounded-xl bg-white border border-slate-200 shadow-xs text-xs">
+          <!-- Populated dynamically via JS -->
+        </div>
+
+        <!-- Filter Tabs: Similar vs All -->
+        <div class="mt-3 flex items-center justify-between gap-2 flex-wrap">
+          <div class="inline-flex p-1 rounded-xl bg-slate-200/80 text-xs font-semibold">
+            <button id="swap-tab-similar" onclick="setSwapModalFilter('similar')" class="px-3 py-1.5 rounded-lg bg-white text-slate-900 shadow-xs transition flex items-center gap-1.5">
+              <i data-lucide="target" class="w-3.5 h-3.5 text-emerald-600"></i>
+              <span>Similar Growth & Risk (Recommended)</span>
+            </button>
+            <button id="swap-tab-all" onclick="setSwapModalFilter('all')" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5">
+              <i data-lucide="list" class="w-3.5 h-3.5 text-slate-500"></i>
+              <span id="swap-tab-all-label">All Available Funds</span>
+            </button>
+          </div>
+          <span id="swap-results-count" class="text-[11px] text-slate-500 font-medium"></span>
+        </div>
       </div>
 
-      <!-- Modal Body (List of eligible funds) -->
+      <!-- Modal Body (List of eligible / similar funds) -->
       <div id="swap-modal-fund-list" class="p-5 overflow-y-auto space-y-2.5 flex-1">
         <!-- Injected via JS -->
       </div>
 
       <!-- Modal Footer -->
-      <div class="p-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between text-xs text-slate-500">
-        <span>Click any fund to swap it into your portfolio and update all charts instantly.</span>
+      <div class="p-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between text-xs text-slate-500 flex-wrap gap-2">
+        <span class="flex items-center gap-1">
+          <i data-lucide="info" class="w-3.5 h-3.5 text-slate-400"></i>
+          <span>Click any fund to swap it into your portfolio and update all charts instantly.</span>
+        </span>
         <button onclick="closeSwapModal()" class="px-4 py-2 font-semibold rounded-lg bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 transition shadow-sm">
           Cancel
         </button>

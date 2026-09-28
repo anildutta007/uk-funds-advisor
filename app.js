@@ -2045,53 +2045,273 @@ function updateBenchmarkChart(portfolioItems) {
   });
 }
 
-let pendingSwap = { strategyType: "active", slotIndex: 0 };
+let pendingSwap = { strategyType: "active", slotIndex: 0, currentFundId: "" };
+let swapModalFilter = "similar"; // 'similar' | 'all'
+
+/**
+ * Computes profile similarity between candidate and currently selected fund
+ * Based on 15-Year Annualised Compound Return (Growth) and FE Risk Score (Volatility/Risk Appetite)
+ */
+function computeFundSimilarity(candidateFund, currentFund) {
+  const returnDiff = Math.abs(candidateFund.avgAnnualReturn15Yr - currentFund.avgAnnualReturn15Yr);
+  const riskDiff = Math.abs(candidateFund.feRiskScore - currentFund.feRiskScore);
+
+  // Normalize return difference (max expected range ~15% p.a.)
+  const normReturn = Math.min(returnDiff / 15, 1);
+  // Normalize risk difference (max expected range ~80 risk points)
+  const normRisk = Math.min(riskDiff / 80, 1);
+
+  // Balanced 50/50 weighting of growth and risk appetite
+  const distance = (normReturn * 0.5) + (normRisk * 0.5);
+  const similarityScore = Math.max(10, Math.round((1 - distance) * 100));
+
+  return {
+    similarityScore,
+    returnDiff,
+    riskDiff,
+    returnDiffSigned: candidateFund.avgAnnualReturn15Yr - currentFund.avgAnnualReturn15Yr,
+    riskDiffSigned: candidateFund.feRiskScore - currentFund.feRiskScore
+  };
+}
 
 window.openSwapFundModal = function(strategyType, slotIndex) {
-  pendingSwap = { strategyType, slotIndex };
-  const currentSlot = (strategyType === "active" ? activeCustomPortfolio : passiveCustomPortfolio)[slotIndex];
+  const portfolio = strategyType === "active" ? activeCustomPortfolio : passiveCustomPortfolio;
+  const currentSlot = portfolio[slotIndex];
   const currentFund = getFundById(currentSlot.fundId);
+
+  pendingSwap = { strategyType, slotIndex, currentFundId: currentFund.id };
+  swapModalFilter = "similar"; // Default to similar funds per user feedback
 
   const modalEl = document.getElementById("swap-fund-modal");
   const modalSlotTitle = document.getElementById("swap-modal-slot-title");
-  const modalList = document.getElementById("swap-modal-fund-list");
+  const bannerEl = document.getElementById("swap-modal-current-banner");
 
-  modalSlotTitle.textContent = `Swap Slot ${slotIndex + 1} (${currentFund.name} - ${currentSlot.allocationPct}%)`;
+  modalSlotTitle.textContent = `Swapping Slot ${slotIndex + 1}: ${currentFund.name} (${currentSlot.allocationPct}% Allocation)`;
 
+  if (bannerEl) {
+    bannerEl.innerHTML = `
+      <div class="flex items-center justify-between gap-3 flex-wrap w-full">
+        <div class="space-y-0.5">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Current Holding:</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-900 text-white">${currentFund.house}</span>
+            <h5 class="text-xs font-bold text-slate-900">${currentFund.name}</h5>
+          </div>
+          <div class="text-[11px] text-slate-500">
+            Sector: <strong class="text-slate-700">${currentFund.iaSector}</strong> • OCF: <strong>${currentFund.ocfPct}%</strong> • CITICODE: <strong class="font-mono text-slate-700">${currentFund.citicode}</strong>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200 text-right">
+            <span class="text-[10px] text-slate-400 block">Growth (15y)</span>
+            <span class="text-xs font-black text-emerald-600">${currentFund.avgAnnualReturn15Yr.toFixed(1)}% p.a.</span>
+          </div>
+          <div class="bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200 text-right">
+            <span class="text-[10px] text-slate-400 block">FE Risk</span>
+            <span class="text-xs font-black text-brand-900">${currentFund.feRiskScore}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  updateSwapModalTabs();
+  renderSwapModalList();
+
+  modalEl.classList.remove("hidden");
+  modalEl.classList.add("flex");
+
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
+};
+
+window.setSwapModalFilter = function(filterType) {
+  swapModalFilter = filterType;
+  updateSwapModalTabs();
+  renderSwapModalList();
+};
+
+function updateSwapModalTabs() {
+  const tabSimilar = document.getElementById("swap-tab-similar");
+  const tabAll = document.getElementById("swap-tab-all");
+  if (!tabSimilar || !tabAll) return;
+
+  if (swapModalFilter === "similar") {
+    tabSimilar.className = "px-3 py-1.5 rounded-lg bg-white text-slate-900 shadow-xs transition flex items-center gap-1.5 font-bold";
+    tabAll.className = "px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5 font-semibold";
+  } else {
+    tabSimilar.className = "px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5 font-semibold";
+    tabAll.className = "px-3 py-1.5 rounded-lg bg-white text-slate-900 shadow-xs transition flex items-center gap-1.5 font-bold";
+  }
+}
+
+function renderSwapModalList() {
+  const { strategyType, currentFundId } = pendingSwap;
+  const currentFund = getFundById(currentFundId);
   const targetType = strategyType === "active" ? "Active" : "Passive";
-  const eligibleFunds = TRUSTNET_MASTER_FUNDS.filter(f => f.type === targetType);
+  const modalList = document.getElementById("swap-modal-fund-list");
+  const countEl = document.getElementById("swap-results-count");
+  const allLabelEl = document.getElementById("swap-tab-all-label");
 
-  modalList.innerHTML = eligibleFunds.map(f => {
+  if (!modalList) return;
+
+  // Get eligible funds of the same type (Active or Passive)
+  const allEligible = TRUSTNET_MASTER_FUNDS.filter(f => f.type === targetType);
+  if (allLabelEl) {
+    allLabelEl.textContent = `All ${targetType} Funds (${allEligible.length})`;
+  }
+
+  // Calculate similarity for all candidates
+  const scoredFunds = allEligible.map(f => {
     const isCurrent = f.id === currentFund.id;
+    const similarity = computeFundSimilarity(f, currentFund);
+    return {
+      fund: f,
+      isCurrent,
+      ...similarity
+    };
+  });
+
+  let displayList = [];
+
+  if (swapModalFilter === "similar") {
+    // Show funds similar in growth and risk appetite (excluding the currently selected one)
+    const candidates = scoredFunds.filter(item => !item.isCurrent);
+    candidates.sort((a, b) => b.similarityScore - a.similarityScore);
+    
+    // Take close peers (similarity >= 65%, or top 4 if fewer)
+    displayList = candidates.filter(item => item.similarityScore >= 65);
+    if (displayList.length < 4) {
+      displayList = candidates.slice(0, 4);
+    }
+
+    if (countEl) {
+      countEl.innerHTML = `<span class="inline-flex items-center gap-1 text-emerald-700 font-semibold"><i data-lucide="check" class="w-3.5 h-3.5"></i> Showing ${displayList.length} closest peers in growth & risk</span>`;
+    }
+  } else {
+    // Show all funds of this type, sorted with current holding first then by similarity
+    displayList = scoredFunds.slice().sort((a, b) => {
+      if (a.isCurrent) return -1;
+      if (b.isCurrent) return 1;
+      return b.similarityScore - a.similarityScore;
+    });
+
+    if (countEl) {
+      countEl.textContent = `Showing all ${displayList.length} funds`;
+    }
+  }
+
+  if (displayList.length === 0) {
+    modalList.innerHTML = `
+      <div class="text-center py-8 text-slate-500">
+        <p class="font-bold">No similar funds found with this exact risk/return profile.</p>
+        <button onclick="setSwapModalFilter('all')" class="mt-2 text-xs font-semibold text-brand-600 underline">
+          View all available ${targetType} funds instead
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  modalList.innerHTML = displayList.map(item => {
+    const f = item.fund;
+    const isCurrent = item.isCurrent;
+    const score = item.similarityScore;
+    const retDiffStr = `${item.returnDiffSigned >= 0 ? '+' : ''}${item.returnDiffSigned.toFixed(1)}%`;
+    const riskDiffStr = `${item.riskDiffSigned >= 0 ? '+' : ''}${item.riskDiffSigned}`;
+
+    let matchBadgeClass = "bg-slate-100 text-slate-700 border-slate-200";
+    let matchLabel = `${score}% Match`;
+    if (isCurrent) {
+      matchBadgeClass = "bg-brand-600 text-white border-brand-700";
+      matchLabel = "Current Holding";
+    } else if (score >= 88) {
+      matchBadgeClass = "bg-emerald-100 text-emerald-800 border-emerald-300";
+      matchLabel = `🎯 ${score}% Match (High Fit)`;
+    } else if (score >= 72) {
+      matchBadgeClass = "bg-teal-100 text-teal-800 border-teal-300";
+      matchLabel = `🎯 ${score}% Match (Good Fit)`;
+    } else {
+      matchBadgeClass = "bg-amber-100 text-amber-800 border-amber-300";
+      matchLabel = `🎯 ${score}% Match (Different Profile)`;
+    }
+
     return `
-      <div onclick="selectSwappedFund('${f.id}')" 
-        class="p-3.5 rounded-xl border ${isCurrent ? 'border-brand-500 bg-brand-50/50' : 'border-slate-200 hover:border-brand-400 bg-white'} cursor-pointer transition flex items-center justify-between gap-3">
-        <div class="space-y-1">
+      <div onclick="${isCurrent ? '' : `selectSwappedFund('${f.id}')`}" 
+        class="p-4 rounded-xl border transition ${
+          isCurrent 
+            ? 'border-brand-500 bg-brand-50/60 ring-2 ring-brand-500/20 cursor-default' 
+            : 'border-slate-200 hover:border-brand-500 hover:bg-slate-50/90 hover:shadow-md cursor-pointer bg-white'
+        } flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        
+        <div class="space-y-1.5 flex-1 min-w-0">
           <div class="flex items-center gap-2 flex-wrap">
             <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-white">${f.house}</span>
-            <h5 class="text-xs font-bold text-slate-900">${f.name}</h5>
+            <h5 class="text-xs font-bold text-slate-900 truncate">${f.name}</h5>
             ${renderFeCrowns(f.feCrowns)}
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border ${matchBadgeClass}">
+              ${matchLabel}
+            </span>
           </div>
-          <p class="text-[11px] text-slate-500">
-            ${f.iaSector} • FE Risk: <strong>${f.feRiskScore}</strong> • 2026 YTD: <strong class="text-cyan-800">${formatPct(f.ytdReturn2026)}</strong> • OCF: <strong>${f.ocfPct}%</strong>
-          </p>
+
+          <div class="flex items-center gap-2 flex-wrap text-[11px] text-slate-500">
+            <span>Sector: <strong>${f.iaSector}</strong></span>
+            <span>•</span>
+            <span>OCF: <strong>${f.ocfPct}%</strong></span>
+            <span>•</span>
+            <span>CITICODE: <strong class="font-mono text-slate-600">${f.citicode}</strong></span>
+            ${f.managerName ? `<span>•</span><span>Mgr: <strong class="text-slate-700">${f.managerName.split('&')[0]}</strong></span>` : ''}
+          </div>
+
+          <!-- Comparison Pill vs Current Fund -->
+          ${!isCurrent ? `
+            <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200/80 text-[10px] text-slate-700 flex-wrap">
+              <span class="font-semibold text-slate-500">Comparison vs Current:</span>
+              <span>Growth: <strong class="text-slate-900">${f.avgAnnualReturn15Yr.toFixed(1)}%</strong> <span class="${item.returnDiffSigned >= 0 ? 'text-emerald-600' : 'text-slate-500'} font-semibold">(${retDiffStr})</span></span>
+              <span>•</span>
+              <span>Risk: <strong class="text-slate-900">${f.feRiskScore}</strong> <span class="text-slate-500 font-semibold">(${riskDiffStr})</span></span>
+              <span>•</span>
+              <span>2026 YTD: <strong class="${f.ytdReturn2026 >= 0 ? 'text-cyan-700' : 'text-rose-600'}">${formatPct(f.ytdReturn2026)}</strong></span>
+            </div>
+          ` : `
+            <span class="text-[10px] font-semibold text-brand-700">Currently in your portfolio slot</span>
+          `}
         </div>
-        <div class="text-right flex-shrink-0">
-          <span class="text-sm font-extrabold text-emerald-600 block">${f.avgAnnualReturn15Yr.toFixed(1)}% p.a.</span>
-          <span class="text-[10px] text-slate-400">15-Yr Return</span>
+
+        <div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center flex-shrink-0 gap-1.5 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">
+          <div class="text-right">
+            <span class="text-base font-black text-emerald-600 block">${f.avgAnnualReturn15Yr.toFixed(1)}%</span>
+            <span class="text-[10px] text-slate-400">15-Yr Annual Return</span>
+          </div>
+
+          ${!isCurrent ? `
+            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-brand-600 text-white text-xs font-bold hover:bg-brand-700 transition shadow-xs">
+              <span>Select & Swap</span>
+              <i data-lucide="arrow-right" class="w-3 h-3"></i>
+            </span>
+          ` : `
+            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[11px] font-bold bg-brand-100 text-brand-800">
+              Active Selection
+            </span>
+          `}
         </div>
+
       </div>
     `;
   }).join("");
 
-  modalEl.classList.remove("hidden");
-  modalEl.classList.add("flex");
-};
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
+}
 
 window.closeSwapModal = function() {
   const modalEl = document.getElementById("swap-fund-modal");
-  modalEl.classList.add("hidden");
-  modalEl.classList.remove("flex");
+  if (modalEl) {
+    modalEl.classList.add("hidden");
+    modalEl.classList.remove("flex");
+  }
 };
 
 window.selectSwappedFund = function(newFundId) {
