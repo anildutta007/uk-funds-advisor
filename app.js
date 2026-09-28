@@ -1352,14 +1352,21 @@ function renderPortfolioCards(strategyType, portfolioItems, inputs) {
     }
   });
 
+  const portfolioWeightedReturn = portfolioItems.reduce((acc, item) => {
+    return acc + (getFundById(item.fundId).avgAnnualReturn15Yr * (item.allocationPct / 100));
+  }, 0);
+  const totalPortfolioFutureVal = calculateFutureValue(inputs.lumpSum, inputs.monthlyAmount, portfolioWeightedReturn, inputs.horizon);
+  const totalPrincipalInvested = inputs.lumpSum + (inputs.monthlyAmount * 12 * inputs.horizon);
+
   container.innerHTML = portfolioItems.map((item, index) => {
     const fund = getFundById(item.fundId);
     const fundLumpSum = inputs.lumpSum * (item.allocationPct / 100);
     const fundMonthly = inputs.monthlyAmount * (item.allocationPct / 100);
     
-    const fundFutureVal = calculateFutureValue(fundLumpSum, fundMonthly, fund.avgAnnualReturn15Yr, inputs.horizon);
+    // In a rebalanced model portfolio, each fund maintains its target allocation percentage of the total portfolio
+    const fundFutureVal = Math.round(totalPortfolioFutureVal * (item.allocationPct / 100));
     const fundRealVal = Math.round(fundFutureVal / Math.pow(1 + 0.03, inputs.horizon));
-    const fundPrincipal = fundLumpSum + (fundMonthly * 12 * inputs.horizon);
+    const fundPrincipal = Math.round(totalPrincipalInvested * (item.allocationPct / 100));
     const fundProfit = fundFutureVal - fundPrincipal;
     const isPositiveAlpha = fund.alphaVsBenchmark >= 0;
 
@@ -1467,7 +1474,7 @@ function renderPortfolioCards(strategyType, portfolioItems, inputs) {
 
           <div class="bg-gradient-to-br from-brand-50 to-cyan-50/50 p-2.5 rounded-xl border border-brand-200 flex flex-col justify-between">
             <div>
-              <span class="text-[11px] text-brand-700 font-semibold block mb-0.5">Expected at Age ${inputs.retirementAge}</span>
+              <span class="text-[11px] text-brand-700 font-semibold block mb-0.5">Expected at Age ${inputs.retirementAge} (${item.allocationPct}% of Pot)</span>
               <div class="flex items-baseline justify-between gap-1">
                 <span class="font-black text-brand-900 text-sm">${formatCurrency(fundFutureVal)}</span>
                 <span class="text-[9px] text-slate-400 uppercase font-semibold">Nominal</span>
@@ -1939,11 +1946,16 @@ function updateFundFutureValueChart(portfolioItems, inputs) {
   const futureValues = [];
   const initialPrincipal = [];
 
+  // Model portfolio rebalancing: total portfolio future value is distributed across funds by target allocation
+  const portfolioWeightedReturn = portfolioItems.reduce((acc, item) => {
+    return acc + (getFundById(item.fundId).avgAnnualReturn15Yr * (item.allocationPct / 100));
+  }, 0);
+  const totalPortfolioFutureVal = calculateFutureValue(inputs.lumpSum, inputs.monthlyAmount, portfolioWeightedReturn, inputs.horizon);
+  const totalPrincipalInvested = inputs.lumpSum + (inputs.monthlyAmount * 12 * inputs.horizon);
+
   funds.forEach(f => {
-    const fundLump = inputs.lumpSum * (f.alloc / 100);
-    const fundMonthly = inputs.monthlyAmount * (f.alloc / 100);
-    const principal = fundLump + (fundMonthly * 12 * inputs.horizon);
-    const futureVal = calculateFutureValue(fundLump, fundMonthly, f.avgAnnualReturn15Yr, inputs.horizon);
+    const principal = Math.round(totalPrincipalInvested * (f.alloc / 100));
+    const futureVal = Math.round(totalPortfolioFutureVal * (f.alloc / 100));
 
     initialPrincipal.push(principal);
     futureValues.push(futureVal);
@@ -1980,12 +1992,20 @@ function updateFundFutureValueChart(portfolioItems, inputs) {
         tooltip: {
           backgroundColor: "#0f172a",
           callbacks: {
+            title: (items) => {
+              const f = funds[items[0].dataIndex];
+              return `${f.name} (${f.alloc}% Target Allocation)`;
+            },
             label: (ctx) => {
+              const f = funds[ctx.dataIndex];
               if (ctx.datasetIndex === 1) {
                 const realVal = Math.round(ctx.raw / Math.pow(1 + 0.03, inputs.horizon));
-                return ` ${ctx.dataset.label}: ${formatCurrency(ctx.raw)} (Today's World: ${formatCurrency(realVal)})`;
+                return [
+                  ` ${ctx.dataset.label}: ${formatCurrency(ctx.raw)} (${f.alloc}% of total portfolio)`,
+                  ` Today's World Value: ${formatCurrency(realVal)} (@ 3% inflation)`
+                ];
               }
-              return ` ${ctx.dataset.label}: ${formatCurrency(ctx.raw)}`;
+              return ` ${ctx.dataset.label}: ${formatCurrency(ctx.raw)} (${f.alloc}% of principal)`;
             }
           }
         }
@@ -2381,15 +2401,20 @@ function exportCSV() {
 
   csv += "Strategy,Fund House,Fund Name,ISIN,Citicode,IA Sector,FE Crowns,FE Risk Score,Allocation %,Lump Sum (£),Monthly (£),Expected Value at Retirement (£),15-Yr Return (% p.a.),2026 YTD Return (%),Benchmark Index,Benchmark Return (% p.a.),Alpha/Tracking Diff,Fund Size AUM (£B),Lead Manager,Manager Tenure (Yrs),Inception Year,OCF (%),Trustnet Link\n";
 
+  const activeRate = activeCustomPortfolio.reduce((acc, item) => acc + (getFundById(item.fundId).avgAnnualReturn15Yr * (item.allocationPct / 100)), 0);
+  const passiveRate = passiveCustomPortfolio.reduce((acc, item) => acc + (getFundById(item.fundId).avgAnnualReturn15Yr * (item.allocationPct / 100)), 0);
+  const activeVal = calculateFutureValue(inputs.lumpSum, inputs.monthlyAmount, activeRate, inputs.horizon);
+  const passiveVal = calculateFutureValue(inputs.lumpSum, inputs.monthlyAmount, passiveRate, inputs.horizon);
+
   [
-    { name: "ACTIVE", items: activeCustomPortfolio },
-    { name: "PASSIVE", items: passiveCustomPortfolio }
+    { name: "ACTIVE", items: activeCustomPortfolio, totalVal: activeVal },
+    { name: "PASSIVE", items: passiveCustomPortfolio, totalVal: passiveVal }
   ].forEach(strat => {
     strat.items.forEach(item => {
       const f = getFundById(item.fundId);
       const fundLump = inputs.lumpSum * (item.allocationPct / 100);
       const fundMonthly = inputs.monthlyAmount * (item.allocationPct / 100);
-      const futureVal = calculateFutureValue(fundLump, fundMonthly, f.avgAnnualReturn15Yr, inputs.horizon);
+      const futureVal = Math.round(strat.totalVal * (item.allocationPct / 100));
 
       const row = [
         strat.name,
