@@ -1150,18 +1150,21 @@ class AdvisorRequestHandler(http.server.SimpleHTTPRequestHandler):
                 current_lump = float(data.get("current_lump_sum", 50000))
                 inflation_rate = float(data.get("inflation_rate", 0.03))
                 post_growth = float(data.get("post_growth_rate", 0.055))
-                wrapper = str(data.get("wrapper", "sipp"))
+                wrapper = str(data.get("wrapper", "sipp")).lower()
+                include_sp = bool(data.get("include_state_pension", True))
+                sp_age = int(data.get("state_pension_age", 67))
+                sp_annual = float(data.get("state_pension_annual", 11973.0))
 
                 years_to_retire = max(1, retire_age - current_age)
                 years_in_retire = max(1, life_expectancy - retire_age)
 
-                def uk_tax(gross):
-                    if wrapper == "isa" or gross <= 0:
+                def uk_tax_on_income(taxable):
+                    if taxable <= 0:
                         return 0.0
-                    taxable = gross * 0.75
-                    pa = 12570.0 if taxable <= 100000 else max(0.0, 12570.0 - (taxable - 100000.0) / 2.0)
+                    pa = 12570.0 if taxable <= 100000.0 else max(0.0, 12570.0 - (taxable - 100000.0) / 2.0)
                     after_pa = max(0.0, taxable - pa)
-                    if after_pa <= 0: return 0.0
+                    if after_pa <= 0:
+                        return 0.0
                     basic = min(after_pa, 37700.0) * 0.20
                     higher = 0.0
                     add = 0.0
@@ -1172,33 +1175,71 @@ class AdvisorRequestHandler(http.server.SimpleHTTPRequestHandler):
                             add = (after_pa - 37700.0 - h_max) * 0.45
                     return basic + higher + add
 
-                def find_gross(target_net):
-                    if target_net <= 0 or wrapper == "isa":
-                        return target_net
-                    low = target_net
-                    high = target_net * 2.5
+                def solve_withdrawal(target_net, sp_amt=0.0):
+                    base_taxable = sp_amt
+                    base_tax = uk_tax_on_income(base_taxable)
+                    net_base = max(0.0, base_taxable - base_tax)
+                    if target_net <= 0 or net_base >= target_net:
+                        return {"gross": 0.0, "total_tax": base_tax, "tax_on_fund": 0.0, "net_from_fund": 0.0, "total_net": net_base}
+
+                    if wrapper in ("isa", "isa_tax_free"):
+                        needed = max(0.0, target_net - net_base)
+                        return {"gross": needed, "total_tax": base_tax, "tax_on_fund": 0.0, "net_from_fund": needed, "total_net": net_base + needed}
+
+                    alpha = 0.75  # 25% tax-free lump sum under UFPLS
+
+                    def net_for(g):
+                        tot_taxable = base_taxable + (alpha * g)
+                        return (base_taxable + g) - uk_tax_on_income(tot_taxable)
+
+                    low = 0.0
+                    high = max(target_net * 2.5, 50000.0)
+                    while net_for(high) < target_net:
+                        high *= 1.5
+                        if high > 1e9:
+                            break
+
                     for _ in range(35):
                         mid = (low + high) / 2.0
-                        tax = uk_tax(mid)
-                        net = mid - tax
-                        if abs(net - target_net) < 0.01:
-                            return mid
-                        if net < target_net:
+                        n_mid = net_for(mid)
+                        if abs(n_mid - target_net) < 0.01:
+                            low = mid
+                            break
+                        if n_mid < target_net:
                             low = mid
                         else:
                             high = mid
-                    return (low + high) / 2.0
 
-                net_yr1 = desired_net * ((1.0 + inflation_rate) ** years_to_retire)
+                    gross_w = (low + high) / 2.0
+                    tot_tax = uk_tax_on_income(base_taxable + alpha * gross_w)
+                    tax_fund = max(0.0, tot_tax - base_tax)
+                    return {
+                        "gross": gross_w,
+                        "total_tax": tot_tax,
+                        "tax_on_fund": tax_fund,
+                        "net_from_fund": max(0.0, gross_w - tax_fund),
+                        "total_net": (base_taxable + gross_w) - tot_tax
+                    }
+
                 withdrawals = []
                 total_net = 0.0
 
                 for y in range(years_in_retire):
-                    net_y = net_yr1 * ((1.0 + inflation_rate) ** y)
-                    gross_y = find_gross(net_y)
-                    tax_y = uk_tax(gross_y)
+                    age_at_y = retire_age + y
+                    inf_factor = (1.0 + inflation_rate) ** (years_to_retire + y)
+                    net_y = desired_net * inf_factor
+                    is_sp = include_sp and (age_at_y >= sp_age)
+                    sp_y = (sp_annual * inf_factor) if is_sp else 0.0
+
+                    solve_res = solve_withdrawal(net_y, sp_y)
                     total_net += net_y
-                    withdrawals.append({"net": net_y, "gross": gross_y, "tax": tax_y})
+                    withdrawals.append({
+                        "age": age_at_y,
+                        "net": net_y,
+                        "gross": solve_res["gross"],
+                        "state_pension": sp_y,
+                        "tax": solve_res["total_tax"]
+                    })
 
                 target_pot = 0.0
                 for y in range(years_in_retire - 1, -1, -1):
@@ -1206,6 +1247,18 @@ class AdvisorRequestHandler(http.server.SimpleHTTPRequestHandler):
                 target_pot = round(target_pot)
 
                 target_pot_today = round(target_pot / ((1.0 + inflation_rate) ** years_to_retire))
+
+                # Baseline target pot without State Pension for relief savings metric
+                target_pot_no_sp = 0.0
+                for y in range(years_in_retire - 1, -1, -1):
+                    inf_factor = (1.0 + inflation_rate) ** (years_to_retire + y)
+                    net_y = desired_net * inf_factor
+                    res_no_sp = solve_withdrawal(net_y, 0.0)
+                    target_pot_no_sp = res_no_sp["gross"] + (target_pot_no_sp / (1.0 + post_growth))
+                target_pot_no_sp = round(target_pot_no_sp)
+
+                pot_savings_nominal = max(0, target_pot_no_sp - target_pot)
+                pot_savings_today = round(pot_savings_nominal / ((1.0 + inflation_rate) ** years_to_retire))
 
                 risk_rates = {
                     "low": {"label": "Low Risk", "rate": 0.052},
@@ -1233,9 +1286,14 @@ class AdvisorRequestHandler(http.server.SimpleHTTPRequestHandler):
                 res_obj = {
                     "years_to_retire": years_to_retire,
                     "years_in_retire": years_in_retire,
-                    "year1_net_nominal": round(net_yr1),
+                    "year1_net_nominal": round(desired_net * ((1.0 + inflation_rate) ** years_to_retire)),
                     "target_pot_needed": target_pot,
                     "target_pot_today": target_pot_today,
+                    "target_pot_without_sp": target_pot_no_sp,
+                    "pot_savings_nominal": pot_savings_nominal,
+                    "pot_savings_today": pot_savings_today,
+                    "include_state_pension": include_sp,
+                    "state_pension_age": sp_age,
                     "lifetime_net_payout": round(total_net),
                     "accumulation_plans": plans
                 }
@@ -1253,7 +1311,7 @@ class AdvisorRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.wfile.write(json.dumps({"error": str(e)}).encode("utf-8"))
                 return
 
-        return super().do_GET()
+        self.send_error(404, "Endpoint not found")
 
 def start_server():
     socketserver.TCPServer.allow_reuse_address = True

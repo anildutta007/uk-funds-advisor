@@ -3206,22 +3206,8 @@ function selectTargetRiskProfile(riskKey) {
 }
 
 /**
- * Solves UK gross withdrawal from net income considering UFPLS / ISA wrapper.
- */
-function solveUKGrossForTarget(netAnnual, taxWrapper) {
-  const wrapperKey = taxWrapper === "isa" ? "isa_tax_free" : "pension_ufpls";
-  const gross = findGrossWithdrawalForNet(netAnnual, 0, wrapperKey);
-  const taxRes = calculateUkTaxOnGross(gross, 0, wrapperKey);
-  return {
-    gross,
-    tax: taxRes.incomeTax,
-    net: taxRes.netIncome
-  };
-}
-
-/**
  * Calculates target retirement pot, required monthly savings, lifetime schedule,
- * and updates chart and DOM KPI cards.
+ * and updates chart and DOM KPI cards with UK State Pension integration.
  */
 function updateTargetRetirementPlanner() {
   const incomeInput = document.getElementById("target-net-income");
@@ -3231,6 +3217,9 @@ function updateTargetRetirementPlanner() {
   const taxWrapperInput = document.getElementById("target-tax-wrapper");
   const curAgeInput = document.getElementById("target-current-age");
   const lumpInput = document.getElementById("target-current-lump");
+  const targetIncludeSPEl = document.getElementById("target-include-state-pension");
+  const targetSPAgeEl = document.getElementById("target-state-pension-age");
+  const targetSPAmountEl = document.getElementById("target-state-pension-amount");
 
   if (!incomeInput || !retireAgeInput || !lifeExpInput) return;
 
@@ -3246,7 +3235,12 @@ function updateTargetRetirementPlanner() {
   const currentLumpSum = Math.max(0, parseFloat(lumpInput ? lumpInput.value : 50000) || 0);
   const postGrowthRate = Math.max(0.01, (parseFloat(postGrowthInput ? postGrowthInput.value : 5.5) || 5.5) / 100);
   const taxWrapper = taxWrapperInput ? taxWrapperInput.value : "sipp";
+  const taxWrapperKey = taxWrapper === "isa" ? "isa_tax_free" : "pension_ufpls";
   const inflationRate = 0.03; // 3% per annum compound
+
+  const includeStatePension = targetIncludeSPEl ? targetIncludeSPEl.checked : true;
+  const statePensionAge = parseInt(targetSPAgeEl ? targetSPAgeEl.value : 67, 10) || 67;
+  const statePensionAnnualToday = Math.max(0, parseFloat(targetSPAmountEl ? targetSPAmountEl.value : 11973) || 11973);
 
   const yearsToRetire = Math.max(1, retireAge - currentAge);
   const yearsInRetire = Math.max(1, lifeExpectancy - retireAge);
@@ -3273,25 +3267,33 @@ function updateTargetRetirementPlanner() {
   // ----------------------------------------------------
   // Phase 1: Post-Retirement Target Pot Solver
   // ----------------------------------------------------
-  // Year 1 Net Income in nominal terms (inflated at 3% for yearsToRetire)
-  const netYear1Nominal = desiredNetAnnualToday * Math.pow(1 + inflationRate, yearsToRetire);
-
   const decumulationWithdrawals = [];
   let totalNetPayout = 0;
   for (let y = 0; y < yearsInRetire; y++) {
-    const net_y = netYear1Nominal * Math.pow(1 + inflationRate, y);
-    const taxRes = solveUKGrossForTarget(net_y, taxWrapper);
-    totalNetPayout += net_y;
+    const ageAtYear = retireAge + y;
+    const elapsedYearsFromToday = yearsToRetire + y;
+    const inflationFactor = Math.pow(1 + inflationRate, elapsedYearsFromToday);
+    const targetNet_y = desiredNetAnnualToday * inflationFactor;
+
+    const isSPEligible = includeStatePension && (ageAtYear >= statePensionAge);
+    const sp_y = isSPEligible ? (statePensionAnnualToday * inflationFactor) : 0;
+
+    const solveRes = solveFundWithdrawalForTotalNet(targetNet_y, sp_y, 0, taxWrapperKey);
+    totalNetPayout += targetNet_y;
+
     decumulationWithdrawals.push({
       yearIndex: y,
-      age: retireAge + y,
-      net: net_y,
-      gross: taxRes.gross,
-      tax: taxRes.tax
+      age: ageAtYear,
+      net: targetNet_y,
+      gross: solveRes.grossWithdrawal,
+      statePension: sp_y,
+      tax: solveRes.totalTax,
+      netFromFund: solveRes.netFromFund,
+      totalNet: solveRes.totalNetReceived
     });
   }
 
-  // Backward recurrence solver:
+  // Backward recurrence solver for Target Pot Needed:
   // Balance_{y-1} = Gross_y + (Balance_y / (1 + postGrowthRate))
   let targetPotNeeded = 0;
   for (let y = yearsInRetire - 1; y >= 0; y--) {
@@ -3302,6 +3304,22 @@ function updateTargetRetirementPlanner() {
 
   // Target pot in Today's World (deflated at 3% for yearsToRetire)
   const targetPotToday = Math.round(targetPotNeeded / Math.pow(1 + inflationRate, yearsToRetire));
+
+  // Compute baseline without State Pension for comparison callout
+  let targetPotWithoutSP = 0;
+  for (let y = yearsInRetire - 1; y >= 0; y--) {
+    const elapsedYearsFromToday = yearsToRetire + y;
+    const inflationFactor = Math.pow(1 + inflationRate, elapsedYearsFromToday);
+    const targetNet_y = desiredNetAnnualToday * inflationFactor;
+    const resNoSP = solveFundWithdrawalForTotalNet(targetNet_y, 0, 0, taxWrapperKey);
+    targetPotWithoutSP = resNoSP.grossWithdrawal + (targetPotWithoutSP / (1 + postGrowthRate));
+  }
+  targetPotWithoutSP = Math.round(targetPotWithoutSP);
+  const potSavingsNominal = Math.max(0, targetPotWithoutSP - targetPotNeeded);
+  const potSavingsToday = Math.round(potSavingsNominal / Math.pow(1 + inflationRate, yearsToRetire));
+
+  // Year 1 Target Net Income in nominal money
+  const netYear1Nominal = desiredNetAnnualToday * Math.pow(1 + inflationRate, yearsToRetire);
 
   // ----------------------------------------------------
   // Phase 2: Pre-Retirement Accumulation Solver
@@ -3359,9 +3377,30 @@ function updateTargetRetirementPlanner() {
   const potNominalEl = document.getElementById("target-pot-nominal-display");
   const potRealEl = document.getElementById("target-pot-real-display");
   const year1NetEl = document.getElementById("target-year1-net-display");
+  const potSavingsRow = document.getElementById("target-pot-savings-row");
+  const potSavingsDisplay = document.getElementById("target-pot-savings-display");
+
   if (potNominalEl) potNominalEl.textContent = `£${targetPotNeeded.toLocaleString()}`;
   if (potRealEl) potRealEl.textContent = `£${targetPotToday.toLocaleString()}`;
   if (year1NetEl) year1NetEl.textContent = `£${Math.round(netYear1Nominal).toLocaleString()} / yr`;
+  if (potSavingsRow && potSavingsDisplay) {
+    if (includeStatePension && potSavingsNominal > 0) {
+      potSavingsRow.style.display = "flex";
+      potSavingsDisplay.textContent = `-£${potSavingsNominal.toLocaleString()} saved (-£${potSavingsToday.toLocaleString()} today's £)`;
+    } else {
+      potSavingsRow.style.display = "none";
+    }
+  }
+
+  // Relief Banner Callout in Target Planner
+  const targetReliefText = document.getElementById("target-state-pension-relief-text");
+  if (targetReliefText) {
+    if (includeStatePension) {
+      targetReliefText.textContent = `UK State Pension from Age ${statePensionAge} covers ~£${Math.round(statePensionAnnualToday).toLocaleString()}/yr (indexed to inflation), reducing your required nest egg by £${potSavingsNominal.toLocaleString()} (saving ~£${potSavingsToday.toLocaleString()} in today's money) and significantly lowering your required monthly savings!`;
+    } else {
+      targetReliefText.textContent = `UK State Pension excluded. Full retirement income will be funded solely by your private investment portfolio.`;
+    }
+  }
 
   // ----------------------------------------------------
   // Update 4 Executive KPI Cards
@@ -3404,6 +3443,7 @@ function updateTargetRetirementPlanner() {
     growthEarned: 0,
     annualDeposit: 0,
     grossWithdrawal: 0,
+    statePension: 0,
     ukTaxPaid: 0,
     netWithdrawal: 0,
     endBalanceNominal: currentLumpSum,
@@ -3439,6 +3479,7 @@ function updateTargetRetirementPlanner() {
       growthEarned: yearGrowth,
       annualDeposit: activePlan.monthlyNeeded * 12,
       grossWithdrawal: 0,
+      statePension: 0,
       ukTaxPaid: 0,
       netWithdrawal: 0,
       endBalanceNominal: endBalNominal,
@@ -3477,8 +3518,9 @@ function updateTargetRetirementPlanner() {
       growthEarned: yrGrowth,
       annualDeposit: 0,
       grossWithdrawal: w.gross,
+      statePension: w.statePension,
       ukTaxPaid: w.tax,
-      netWithdrawal: w.net,
+      netWithdrawal: w.totalNet,
       endBalanceNominal: endBalNominal,
       endBalanceReal: endBalReal,
       isInitial: false
@@ -3495,22 +3537,26 @@ function updateTargetRetirementPlanner() {
     tbody.innerHTML = schedule.filter(r => !r.isInitial).map(r => {
       const isRetire = r.phase === "Retirement";
       const isRetirePeak = r.age === retireAge;
+      const spBadge = r.statePension > 0 
+        ? `<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-sky-100 text-sky-800">£${Math.round(r.statePension).toLocaleString()}</span>` 
+        : `<span class="text-slate-400">-</span>`;
       return `
         <tr class="hover:bg-slate-50 transition ${isRetirePeak ? 'bg-brand-50/70 font-bold border-y-2 border-brand-300' : (isRetire ? 'bg-emerald-50/20' : '')}">
-          <td class="py-2.5 px-3 font-bold text-slate-900">${r.age} ${isRetirePeak ? '<span class="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-brand-600 text-white font-extrabold">Retire</span>' : ''}</td>
-          <td class="py-2.5 px-3 text-slate-500 font-mono text-[11px]">${r.year}</td>
-          <td class="py-2.5 px-3">
+          <td class="py-2.5 px-2.5 font-bold text-slate-900">${r.age} ${isRetirePeak ? '<span class="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-brand-600 text-white font-extrabold">Retire</span>' : ''}</td>
+          <td class="py-2.5 px-2.5 text-slate-500 font-mono text-[11px]">${r.year}</td>
+          <td class="py-2.5 px-2.5">
             <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ${isRetire ? 'bg-emerald-100 text-emerald-800' : 'bg-brand-100 text-brand-800'}">
               ${isRetire ? 'Drawdown' : 'Accumulation'}
             </span>
           </td>
-          <td class="py-2.5 px-3 text-slate-700">£${Math.round(r.startBalance).toLocaleString()}</td>
-          <td class="py-2.5 px-3 font-semibold text-emerald-600">+£${Math.round(r.growthEarned).toLocaleString()}</td>
-          <td class="py-2.5 px-3 font-semibold ${r.annualDeposit > 0 ? 'text-brand-700 font-bold' : 'text-slate-400'}">${r.annualDeposit > 0 ? '£' + Math.round(r.annualDeposit).toLocaleString() : '-'}</td>
-          <td class="py-2.5 px-3 font-semibold ${r.grossWithdrawal > 0 ? 'text-amber-700' : 'text-slate-400'}">${r.grossWithdrawal > 0 ? '£' + Math.round(r.grossWithdrawal).toLocaleString() : '-'}</td>
-          <td class="py-2.5 px-3 font-bold ${r.netWithdrawal > 0 ? 'text-emerald-800 font-extrabold' : 'text-slate-400'}">${r.netWithdrawal > 0 ? '£' + Math.round(r.netWithdrawal).toLocaleString() : '-'}</td>
-          <td class="py-2.5 px-3 font-extrabold ${isRetirePeak ? 'text-brand-900 text-sm' : 'text-slate-900'}">£${Math.round(r.endBalanceNominal).toLocaleString()}</td>
-          <td class="py-2.5 px-3 font-extrabold text-emerald-900 bg-emerald-50/60">£${Math.round(r.endBalanceReal).toLocaleString()}</td>
+          <td class="py-2.5 px-2.5 text-slate-700">£${Math.round(r.startBalance).toLocaleString()}</td>
+          <td class="py-2.5 px-2.5 font-semibold text-emerald-600">+£${Math.round(r.growthEarned).toLocaleString()}</td>
+          <td class="py-2.5 px-2.5 font-semibold ${r.annualDeposit > 0 ? 'text-brand-700 font-bold' : 'text-slate-400'}">${r.annualDeposit > 0 ? '£' + Math.round(r.annualDeposit).toLocaleString() : '-'}</td>
+          <td class="py-2.5 px-2.5 font-semibold ${r.grossWithdrawal > 0 ? 'text-amber-800' : 'text-slate-400'}">${r.grossWithdrawal > 0 ? '£' + Math.round(r.grossWithdrawal).toLocaleString() : '-'}</td>
+          <td class="py-2.5 px-2.5 font-semibold text-sky-700 bg-sky-50/30">${spBadge}</td>
+          <td class="py-2.5 px-2.5 font-bold ${r.netWithdrawal > 0 ? 'text-emerald-800 font-extrabold bg-emerald-50/60' : 'text-slate-400'}">${r.netWithdrawal > 0 ? '£' + Math.round(r.netWithdrawal).toLocaleString() : '-'}</td>
+          <td class="py-2.5 px-2.5 font-extrabold ${isRetirePeak ? 'text-brand-900 text-sm' : 'text-slate-900'}">£${Math.round(r.endBalanceNominal).toLocaleString()}</td>
+          <td class="py-2.5 px-2.5 font-extrabold text-emerald-900 bg-emerald-100/40">£${Math.round(r.endBalanceReal).toLocaleString()}</td>
         </tr>
       `;
     }).join("");
@@ -3640,9 +3686,13 @@ function renderTargetLifetimeChart(schedule, retireAge) {
                   `Yearly Growth: +£${Math.round(r.growthEarned).toLocaleString()}`
                 ];
               } else {
+                const spLine = r.statePension > 0 
+                  ? `UK State Pension: ${formatCurrency(r.statePension)}/yr`
+                  : `State Pension: None (Pre-age requirement)`;
                 return [
-                  `Net in Hand: £${Math.round(r.netWithdrawal).toLocaleString()}/yr`,
-                  `Gross Withdrawal: £${Math.round(r.grossWithdrawal).toLocaleString()}/yr`,
+                  `Total Net in Hand: £${Math.round(r.netWithdrawal).toLocaleString()}/yr`,
+                  `Fund Gross Drawn: £${Math.round(r.grossWithdrawal).toLocaleString()}/yr`,
+                  spLine,
                   `UK Tax Deducted: £${Math.round(r.ukTaxPaid).toLocaleString()}/yr`
                 ];
               }
@@ -3681,6 +3731,13 @@ function exportTargetScheduleCSV() {
   const curAgeInput = document.getElementById("target-current-age");
   const lumpInput = document.getElementById("target-current-lump");
   const postGrowthInput = document.getElementById("target-post-growth");
+  const targetIncludeSPEl = document.getElementById("target-include-state-pension");
+  const targetSPAgeEl = document.getElementById("target-state-pension-age");
+  const targetSPAmountEl = document.getElementById("target-state-pension-amount");
+
+  const includeSP = targetIncludeSPEl ? targetIncludeSPEl.checked : true;
+  const spAge = targetSPAgeEl ? targetSPAgeEl.value : "67";
+  const spAmount = targetSPAmountEl ? targetSPAmountEl.value : "11973";
 
   let csv = "Dutta UK Funds Selection Advisor - How Much Money Do I Need to Retire? Schedule\n";
   csv += `Date Generated: ${new Date().toLocaleDateString('en-GB')}\n`;
@@ -3691,9 +3748,10 @@ function exportTargetScheduleCSV() {
   csv += `Current Lump Sum Invested: £${lumpInput ? lumpInput.value : ''}\n`;
   csv += `Selected Accumulation Strategy: ${TARGET_RISK_SPECS[selectedTargetRisk].fullLabel}\n`;
   csv += `Post-Retirement Growth Rate: ${postGrowthInput ? postGrowthInput.value : ''}%\n`;
-  csv += `Inflation Assumption: 3.0% per annum compound\n\n`;
+  csv += `Inflation Assumption: 3.0% per annum compound\n`;
+  csv += `UK State Pension: ${includeSP ? `Included from Age ${spAge} (£${spAmount}/yr in today's money + 3% inflation)` : 'Excluded'}\n\n`;
 
-  csv += "Age,Calendar Year,Phase,Start Balance (£),Growth Earned (£),Annual Deposit (£),Gross Withdrawal (£),UK Tax Paid (£),Net in Hand (£),End Balance Nominal (£),End Balance Real (Today's Money £)\n";
+  csv += "Age,Calendar Year,Phase,Start Balance (£),Growth Earned (£),Annual Deposit (£),Fund Gross Drawn (£),State Pension (£),UK Tax Paid (£),Total Net in Hand (£),End Balance Nominal (£),End Balance Real (Today's Money £)\n";
 
   cachedTargetSchedule.forEach(r => {
     csv += [
@@ -3704,6 +3762,7 @@ function exportTargetScheduleCSV() {
       Math.round(r.growthEarned),
       Math.round(r.annualDeposit),
       Math.round(r.grossWithdrawal),
+      Math.round(r.statePension || 0),
       Math.round(r.ukTaxPaid),
       Math.round(r.netWithdrawal),
       Math.round(r.endBalanceNominal),
@@ -3792,17 +3851,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const tabActive = document.getElementById("tab-active");
   const tabPassive = document.getElementById("tab-passive");
-  const tabCompare = document.getElementById("tab-compare");
-  const tabScreener = document.getElementById("tab-screener");
   const tabDrawdown = document.getElementById("tab-drawdown");
   const tabTarget = document.getElementById("tab-target");
+  const tabScreener = document.getElementById("tab-screener");
 
   const secActive = document.getElementById("section-active");
   const secPassive = document.getElementById("section-passive");
-  const secCompare = document.getElementById("section-compare");
-  const secScreener = document.getElementById("section-screener");
   const secDrawdown = document.getElementById("section-drawdown");
   const secTarget = document.getElementById("section-target");
+  const secScreener = document.getElementById("section-screener");
   const secChartsOverview = document.getElementById("section-charts-overview");
   const secInvestorProfile = document.getElementById("section-investor-profile");
   const secMetricsSummary = document.getElementById("section-metrics-summary");
@@ -3847,7 +3904,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (e) {}
 
     // Reset all tabs to inactive styling
-    [tabActive, tabPassive, tabCompare, tabScreener, tabDrawdown, tabTarget].forEach(t => {
+    [tabActive, tabPassive, tabDrawdown, tabTarget, tabScreener].forEach(t => {
       if (t) {
         t.classList.remove("active");
         t.classList.remove("bg-white", "text-slate-900", "shadow-sm");
@@ -3856,15 +3913,14 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // Hide all sections initially
-    [secActive, secPassive, secCompare, secScreener, secDrawdown, secTarget].forEach(s => s && s.classList.add("hidden"));
+    [secActive, secPassive, secDrawdown, secTarget, secScreener].forEach(s => s && s.classList.add("hidden"));
 
     const activeBtn = {
       active: tabActive,
       passive: tabPassive,
-      compare: tabCompare,
-      screener: tabScreener,
       drawdown: tabDrawdown,
-      target: tabTarget
+      target: tabTarget,
+      screener: tabScreener
     }[tab];
 
     if (activeBtn) {
@@ -3883,16 +3939,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (secChartsOverview) secChartsOverview.classList.remove("hidden");
       if (secInvestorProfile) secInvestorProfile.classList.remove("hidden");
       if (secMetricsSummary) secMetricsSummary.classList.remove("hidden");
-    } else if (tab === "compare") {
-      secCompare.classList.remove("hidden");
-      if (secChartsOverview) secChartsOverview.classList.remove("hidden");
-      if (secInvestorProfile) secInvestorProfile.classList.remove("hidden");
-      if (secMetricsSummary) secMetricsSummary.classList.remove("hidden");
-    } else if (tab === "screener") {
-      secScreener.classList.remove("hidden");
-      if (secChartsOverview) secChartsOverview.classList.add("hidden"); // Dedicated full-width screener
-      if (secInvestorProfile) secInvestorProfile.classList.add("hidden");
-      if (secMetricsSummary) secMetricsSummary.classList.add("hidden");
     } else if (tab === "drawdown") {
       secDrawdown.classList.remove("hidden");
       if (secChartsOverview) secChartsOverview.classList.add("hidden"); // Dedicated longevity simulator
@@ -3905,6 +3951,11 @@ document.addEventListener("DOMContentLoaded", () => {
       if (secInvestorProfile) secInvestorProfile.classList.add("hidden");
       if (secMetricsSummary) secMetricsSummary.classList.add("hidden");
       updateTargetRetirementPlanner();
+    } else if (tab === "screener") {
+      secScreener.classList.remove("hidden");
+      if (secChartsOverview) secChartsOverview.classList.add("hidden"); // Dedicated full-width screener
+      if (secInvestorProfile) secInvestorProfile.classList.add("hidden");
+      if (secMetricsSummary) secMetricsSummary.classList.add("hidden");
     }
 
     const inputs = getInputs();
@@ -3920,10 +3971,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (tabActive) tabActive.addEventListener("click", () => setTab("active"));
   if (tabPassive) tabPassive.addEventListener("click", () => setTab("passive"));
-  if (tabCompare) tabCompare.addEventListener("click", () => setTab("compare"));
-  if (tabScreener) tabScreener.addEventListener("click", () => setTab("screener"));
   if (tabDrawdown) tabDrawdown.addEventListener("click", () => setTab("drawdown"));
   if (tabTarget) tabTarget.addEventListener("click", () => setTab("target"));
+  if (tabScreener) tabScreener.addEventListener("click", () => setTab("screener"));
 
   // Restore saved state from localStorage if available (e.g. when opened in a new tab)
   try {
@@ -4043,7 +4093,9 @@ document.addEventListener("DOMContentLoaded", () => {
     "target-post-growth",
     "target-tax-wrapper",
     "target-current-age",
-    "target-current-lump"
+    "target-current-lump",
+    "target-state-pension-age",
+    "target-state-pension-amount"
   ];
   targetInputIds.forEach(id => {
     const el = document.getElementById(id);
@@ -4056,6 +4108,20 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
   });
+
+  const targetIncludeSPEl = document.getElementById("target-include-state-pension");
+  if (targetIncludeSPEl) {
+    targetIncludeSPEl.addEventListener("change", () => {
+      const controls = document.getElementById("target-state-pension-controls");
+      if (controls) {
+        controls.style.opacity = targetIncludeSPEl.checked ? "1" : "0.45";
+        controls.querySelectorAll("select, input").forEach(inp => {
+          inp.disabled = !targetIncludeSPEl.checked;
+        });
+      }
+      updateTargetRetirementPlanner();
+    });
+  }
 
   const btnSyncTarget = document.getElementById("btn-sync-advisor-to-target");
   if (btnSyncTarget) {
@@ -4074,10 +4140,10 @@ document.addEventListener("DOMContentLoaded", () => {
   updateDrawdownCalculator();
   updateTargetRetirementPlanner();
 
-  // Check URL query parameters for deep-linking (e.g. ?tab=drawdown or ?tab=screener or ?tab=target)
+  // Check URL query parameters for deep-linking (e.g. ?tab=drawdown or ?tab=target or ?tab=screener)
   const urlParams = new URLSearchParams(window.location.search);
   const requestedTab = urlParams.get("tab") || window.location.hash.replace("#", "");
-  if (requestedTab && ["active", "passive", "compare", "screener", "drawdown", "target"].includes(requestedTab)) {
+  if (requestedTab && ["active", "passive", "drawdown", "target", "screener"].includes(requestedTab)) {
     window._isPopoutInstance = true;
     setTab(requestedTab, true);
   } else {

@@ -32,19 +32,36 @@ Pick one of 3 simple risk profiles:
 
 ---
 
-## 🌟 Two Game-Changing Features Built Just for You
+## 🌟 Three Game-Changing Features Built Just for You
 
 ### 1. 🪙 "Today's World" Money (Defeating the Inflation Monster)
 Seeing £1,000,000 in 30 years sounds amazing — but a loaf of bread will also cost more in 2056!
 * Alongside every future number, our app shows you a green badge: **"Today's World: £X (@ 3% infl.)"**.
 * This translates your future pot into **today's actual supermarket and bill prices**, so you know the real purchasing power you can rely on.
 
-### 2. ⏳ The Longevity Simulator: "How Long Will My Money Last?"
-Click the **"How Long Will My Fund Last?"** tab:
-1. Put in your expected retirement fund (e.g. £400,000) and retirement age.
-2. Put in the **clean cash you want in your bank account each month** (e.g. £2,500 net).
-3. **UK State Pension Integration**: Toggle your eligibility and select your State Pension age (Age 66, 67, or 68 per official **gov.uk** rules). When your State Pension starts, your private fund withdrawals automatically reduce, preserving your capital and extending your fund's life by years!
-4. **Automatic UK Tax Engine**: It factors in your 25% tax-free lump sum (UFPLS) and standard HMRC income tax bands, drawing an age-by-age graph and year-by-year schedule showing whether your fund lasts until age 85, 95, or forever!
+### 2. ⏳ Longevity Simulator: "How Long Will My Fund Last?" (Tab 3)
+* Put in your expected retirement fund (e.g. £400,000) and retirement age.
+* Put in the **clean net cash you want in your bank account each month** (e.g. £2,500 net).
+* **UK State Pension Integration**: Toggle your eligibility and select your State Pension age (Age 66, 67, or 68 per official **gov.uk** rules). When your State Pension starts, your private fund withdrawals automatically reduce, preserving your capital and extending your fund's life by years!
+* **Automatic UK Tax Engine**: Factors in your 25% tax-free lump sum (UFPLS) and HMRC income tax bands, drawing an age-by-age graph and year-by-year schedule showing whether your fund lasts until age 85, 95, or forever!
+
+### 3. 🎯 Target Nest Egg & Savings Planner: "How Much Do I Need to Retire?" (Tab 4)
+Work backwards from your dream retirement lifestyle:
+* Enter your desired **net spendable income** (e.g. £30,000/yr), your target retirement age, and life expectancy.
+* **State Pension Relief**: Automatically integrates your UK State Pension from Age 66/67/68, showing you **exactly how many hundreds of thousands of pounds it knocks off your required nest egg**!
+* **Monthly Savings Calculator**: Compares Low, Medium, and High Risk investment routes to tell you exactly how much you need to save each month (including how your current lump sum will grow) to hit your goal on time.
+
+---
+
+## 🗂️ App Navigation & Tabs
+The clean top bar gives you 5 clear tools:
+1. **Active Fund Strategy**: Hand-picked portfolio by world-class fund managers.
+2. **Passive Fund Strategy**: Low-cost index tracker portfolio mimicking global market returns.
+3. **How Long Will My Fund Last?**: Post-retirement decumulation simulator with UK tax & State Pension.
+4. **How Much Do I Need to Retire?**: Target pot and required monthly savings calculator with State Pension relief.
+5. **Explore All Trustnet Funds**: Full database browser with sector, house, risk, and fee filters.
+
+💡 *Pro Tip*: Use the **"Open options in new browser tab"** toggle or the pop-out icon (↗) on any tab to run multiple scenarios side-by-side!
 
 ---
 

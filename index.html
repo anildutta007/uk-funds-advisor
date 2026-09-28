@@ -141,25 +141,7 @@
             </span>
           </button>
 
-          <!-- Tab 3: Compare -->
-          <button id="tab-compare" type="button" class="strategy-tab px-3.5 py-2 text-xs font-bold rounded-lg transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5" title="Side-by-Side Comparison Matrix">
-            <i data-lucide="columns-2" class="w-4 h-4 text-indigo-600 flex-shrink-0"></i>
-            <span>Side-by-Side Comparison</span>
-            <span onclick="event.stopPropagation(); openOptionInNewTab('compare')" class="popout-btn ml-1 p-0.5 rounded hover:bg-slate-200 text-slate-400 hover:text-slate-700 transition cursor-pointer" title="Open Comparison in a new browser tab">
-              <i data-lucide="external-link" class="w-3 h-3"></i>
-            </span>
-          </button>
-
-          <!-- Tab 4: Screener -->
-          <button id="tab-screener" type="button" class="strategy-tab px-3.5 py-2 text-xs font-bold rounded-lg transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5" title="Explore Trustnet Fund Database">
-            <i data-lucide="compass" class="w-4 h-4 text-amber-600 flex-shrink-0"></i>
-            <span>Explore All Trustnet Funds</span>
-            <span onclick="event.stopPropagation(); openOptionInNewTab('screener')" class="popout-btn ml-1 p-0.5 rounded hover:bg-slate-200 text-slate-400 hover:text-slate-700 transition cursor-pointer" title="Open Trustnet Screener in a new browser tab">
-              <i data-lucide="external-link" class="w-3 h-3"></i>
-            </span>
-          </button>
-
-          <!-- Tab 5: Drawdown -->
+          <!-- Tab 3: Drawdown -->
           <button id="tab-drawdown" type="button" class="strategy-tab px-3.5 py-2 text-xs font-bold rounded-lg transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5" title="How Long Will My Fund Last? Longevity Simulator">
             <i data-lucide="hourglass" class="w-4 h-4 text-emerald-600 flex-shrink-0"></i>
             <span>How Long Will My Fund Last?</span>
@@ -168,11 +150,20 @@
             </span>
           </button>
 
-          <!-- Tab 6: How Much Do I Need to Retire? -->
+          <!-- Tab 4: How Much Do I Need to Retire? -->
           <button id="tab-target" type="button" class="strategy-tab px-3.5 py-2 text-xs font-bold rounded-lg transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5" title="How Much Money Do I Need to Retire? Target Nest Egg & Savings Planner">
             <i data-lucide="target" class="w-4 h-4 text-brand-600 flex-shrink-0"></i>
             <span>How Much Do I Need to Retire?</span>
             <span onclick="event.stopPropagation(); openOptionInNewTab('target')" class="popout-btn ml-1 p-0.5 rounded hover:bg-slate-200 text-slate-400 hover:text-slate-700 transition cursor-pointer" title="Open Retirement Planner in a new browser tab">
+              <i data-lucide="external-link" class="w-3 h-3"></i>
+            </span>
+          </button>
+
+          <!-- Tab 5: Screener (Explore All Trustnet Funds - Last Option) -->
+          <button id="tab-screener" type="button" class="strategy-tab px-3.5 py-2 text-xs font-bold rounded-lg transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5" title="Explore Trustnet Fund Database">
+            <i data-lucide="compass" class="w-4 h-4 text-amber-600 flex-shrink-0"></i>
+            <span>Explore All Trustnet Funds</span>
+            <span onclick="event.stopPropagation(); openOptionInNewTab('screener')" class="popout-btn ml-1 p-0.5 rounded hover:bg-slate-200 text-slate-400 hover:text-slate-700 transition cursor-pointer" title="Open Trustnet Screener in a new browser tab">
               <i data-lucide="external-link" class="w-3 h-3"></i>
             </span>
           </button>
@@ -609,29 +600,7 @@
       </div>
     </section>
 
-    <!-- Side-by-Side Comparison Section -->
-    <section id="section-compare" class="strategy-section hidden space-y-6">
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 overflow-x-auto">
-        <h3 class="text-base font-bold text-slate-900 mb-2 flex items-center gap-2">
-          <i data-lucide="git-compare" class="w-5 h-5 text-indigo-600"></i>
-          Active vs. Passive Strategy Comprehensive Matrix
-        </h3>
-        <p class="text-xs text-slate-500 mb-6">Compare structural differences, expected terminal wealth, fees, and operational attributes.</p>
 
-        <table class="w-full text-left border-collapse text-xs">
-          <thead>
-            <tr class="border-b border-slate-200 bg-slate-50 text-slate-700">
-              <th class="py-3 px-4 font-bold">Criteria</th>
-              <th class="py-3 px-4 font-bold text-brand-700 bg-brand-50/60">Active Strategy</th>
-              <th class="py-3 px-4 font-bold text-teal-700 bg-teal-50/60">Passive (Index) Strategy</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100 text-slate-600" id="compare-matrix-body">
-            <!-- Populated dynamically via JS -->
-          </tbody>
-        </table>
-      </div>
-    </section>
 
     <!-- Master Trustnet Fund Screener Section -->
     <section id="section-screener" class="strategy-section hidden space-y-4">
@@ -1160,19 +1129,76 @@
 
           </div>
 
+          <!-- UK State Pension (gov.uk rules) Integration Card in Target Planner -->
+          <div class="p-3.5 rounded-xl bg-gradient-to-r from-emerald-50/70 via-slate-50 to-indigo-50/50 border border-emerald-200/80 space-y-2.5">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <input type="checkbox" id="target-include-state-pension" checked
+                  class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300 cursor-pointer">
+                <label for="target-include-state-pension" class="text-xs font-bold text-slate-800 cursor-pointer flex items-center gap-1.5">
+                  <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
+                  Include UK State Pension (Reduces Target Pot & Savings)
+                </label>
+              </div>
+              <a href="https://www.gov.uk/state-pension-age" target="_blank" rel="noopener noreferrer" 
+                 class="text-[11px] font-semibold text-emerald-700 hover:text-emerald-800 hover:underline flex items-center gap-1">
+                <span>gov.uk rules</span>
+                <i data-lucide="external-link" class="w-3 h-3"></i>
+              </a>
+            </div>
+
+            <div id="target-state-pension-controls" class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end pt-1">
+              <!-- State Pension Age (gov.uk) -->
+              <div class="space-y-1">
+                <label for="target-state-pension-age" class="block text-[11px] font-bold text-slate-700">
+                  State Pension Age (gov.uk):
+                </label>
+                <select id="target-state-pension-age" class="w-full py-1.5 px-2.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-800 focus:ring-1 focus:ring-emerald-500 bg-white">
+                  <option value="66">Age 66 (Born before 6 April 1960)</option>
+                  <option value="67" selected>Age 67 (Born 6 Apr 1960 – 5 Apr 1977)</option>
+                  <option value="68">Age 68 (Born after 5 April 1977)</option>
+                </select>
+              </div>
+
+              <!-- Full New State Pension Amount in Today's £ -->
+              <div class="space-y-1">
+                <label for="target-state-pension-amount" class="block text-[11px] font-bold text-slate-700">
+                  State Pension in Today's £/yr:
+                </label>
+                <div class="relative">
+                  <span class="absolute left-2.5 top-1.5 text-xs text-slate-400 font-semibold">£</span>
+                  <input type="number" id="target-state-pension-amount" min="0" step="100" value="11973"
+                    class="w-full pl-6 pr-3 py-1.5 text-xs rounded-lg border border-slate-300 font-semibold text-slate-800 focus:ring-1 focus:ring-emerald-500 bg-white">
+                </div>
+              </div>
+            </div>
+
+            <!-- Dynamic State Pension Relief Callout -->
+            <div id="target-state-pension-relief-banner" class="text-[11px] font-medium text-emerald-800 bg-emerald-100/70 border border-emerald-300/60 rounded-lg px-2.5 py-1.5 flex items-center gap-1.5">
+              <i data-lucide="info" class="w-3.5 h-3.5 text-emerald-700 flex-shrink-0"></i>
+              <span id="target-state-pension-relief-text">
+                State Pension covers £11,973/yr from Age 67 (indexed to inflation), reducing your required nest egg and monthly savings.
+              </span>
+            </div>
+          </div>
+
           <!-- Target Pot Callout Box -->
           <div class="mt-3 p-4 rounded-xl bg-gradient-to-br from-brand-50 to-indigo-50/60 border border-brand-200">
             <span class="text-[11px] text-brand-700 font-bold uppercase tracking-wider block mb-1">Target Pot Needed at Retirement</span>
             <div class="flex items-baseline justify-between gap-2 flex-wrap">
-              <span id="target-pot-nominal-display" class="text-2xl font-black text-brand-900">£1,222,210</span>
+              <span id="target-pot-nominal-display" class="text-2xl font-black text-brand-900">£912,134</span>
               <span class="text-xs font-semibold text-slate-500">at Age <span id="target-display-retire-age">65</span></span>
             </div>
             <div class="mt-2 pt-2 border-t border-brand-200/80 flex items-center justify-between text-xs">
               <span class="text-slate-600 font-medium">In Today's World (@ 3% infl.):</span>
-              <span id="target-pot-real-display" class="font-extrabold text-emerald-700">£676,708</span>
+              <span id="target-pot-real-display" class="font-extrabold text-emerald-700">£505,027</span>
+            </div>
+            <div id="target-pot-savings-row" class="mt-1 flex items-center justify-between text-[11px] text-emerald-700 font-bold">
+              <span>State Pension Pot Relief:</span>
+              <span id="target-pot-savings-display">-£310,077 saved from nest egg</span>
             </div>
             <div class="mt-1 flex items-center justify-between text-[11px] text-slate-500">
-              <span>Year 1 Net Income Needed:</span>
+              <span>Year 1 Net Income Target:</span>
               <span id="target-year1-net-display" class="font-bold text-slate-800">£54,183 / yr</span>
             </div>
           </div>
@@ -1390,16 +1416,17 @@
           <table class="w-full text-left border-collapse text-xs">
             <thead class="sticky top-0 bg-slate-100 z-10 text-slate-700 border-b border-slate-200">
               <tr>
-                <th class="py-2.5 px-3 font-bold">Age</th>
-                <th class="py-2.5 px-3 font-bold">Year</th>
-                <th class="py-2.5 px-3 font-bold">Phase</th>
-                <th class="py-2.5 px-3 font-bold">Start Balance (£)</th>
-                <th class="py-2.5 px-3 font-bold text-emerald-700">Growth (£)</th>
-                <th class="py-2.5 px-3 font-bold text-brand-700">Annual Deposit (£)</th>
-                <th class="py-2.5 px-3 font-bold text-amber-700">Gross Withdrawal (£)</th>
-                <th class="py-2.5 px-3 font-bold text-emerald-800">Net in Hand (£)</th>
-                <th class="py-2.5 px-3 font-bold text-slate-900">End Balance (Nominal)</th>
-                <th class="py-2.5 px-3 font-bold text-emerald-900 bg-emerald-50/60">End Balance (Today's Money £)</th>
+                <th class="py-2.5 px-2.5 font-bold">Age</th>
+                <th class="py-2.5 px-2.5 font-bold">Year</th>
+                <th class="py-2.5 px-2.5 font-bold">Phase</th>
+                <th class="py-2.5 px-2.5 font-bold text-slate-700">Start Balance (£)</th>
+                <th class="py-2.5 px-2.5 font-bold text-emerald-700">Growth (£)</th>
+                <th class="py-2.5 px-2.5 font-bold text-brand-700">Deposit (£)</th>
+                <th class="py-2.5 px-2.5 font-bold text-amber-800">Gross Drawn (£)</th>
+                <th class="py-2.5 px-2.5 font-bold text-sky-700 bg-sky-50/70">State Pension (£)</th>
+                <th class="py-2.5 px-2.5 font-bold text-emerald-800 bg-emerald-50/70">Net in Hand (£)</th>
+                <th class="py-2.5 px-2.5 font-bold text-slate-900">End Balance (Nominal)</th>
+                <th class="py-2.5 px-2.5 font-bold text-emerald-900 bg-emerald-100/50">End Balance (Today's £)</th>
               </tr>
             </thead>
             <tbody id="target-schedule-body" class="divide-y divide-slate-100 font-medium">
