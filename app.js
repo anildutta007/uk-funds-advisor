@@ -3624,6 +3624,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const secDrawdown = document.getElementById("section-drawdown");
   const secTarget = document.getElementById("section-target");
   const secChartsOverview = document.getElementById("section-charts-overview");
+  const secInvestorProfile = document.getElementById("section-investor-profile");
+  const secMetricsSummary = document.getElementById("section-metrics-summary");
 
   function saveAdvisorState() {
     try {
@@ -3694,22 +3696,34 @@ document.addEventListener("DOMContentLoaded", () => {
     if (tab === "active") {
       secActive.classList.remove("hidden");
       if (secChartsOverview) secChartsOverview.classList.remove("hidden");
+      if (secInvestorProfile) secInvestorProfile.classList.remove("hidden");
+      if (secMetricsSummary) secMetricsSummary.classList.remove("hidden");
     } else if (tab === "passive") {
       secPassive.classList.remove("hidden");
       if (secChartsOverview) secChartsOverview.classList.remove("hidden");
+      if (secInvestorProfile) secInvestorProfile.classList.remove("hidden");
+      if (secMetricsSummary) secMetricsSummary.classList.remove("hidden");
     } else if (tab === "compare") {
       secCompare.classList.remove("hidden");
       if (secChartsOverview) secChartsOverview.classList.remove("hidden");
+      if (secInvestorProfile) secInvestorProfile.classList.remove("hidden");
+      if (secMetricsSummary) secMetricsSummary.classList.remove("hidden");
     } else if (tab === "screener") {
       secScreener.classList.remove("hidden");
       if (secChartsOverview) secChartsOverview.classList.add("hidden"); // Dedicated full-width screener
+      if (secInvestorProfile) secInvestorProfile.classList.add("hidden");
+      if (secMetricsSummary) secMetricsSummary.classList.add("hidden");
     } else if (tab === "drawdown") {
       secDrawdown.classList.remove("hidden");
       if (secChartsOverview) secChartsOverview.classList.add("hidden"); // Dedicated longevity simulator
+      if (secInvestorProfile) secInvestorProfile.classList.add("hidden");
+      if (secMetricsSummary) secMetricsSummary.classList.add("hidden");
       updateDrawdownCalculator();
     } else if (tab === "target") {
       if (secTarget) secTarget.classList.remove("hidden");
       if (secChartsOverview) secChartsOverview.classList.add("hidden"); // Dedicated target planner
+      if (secInvestorProfile) secInvestorProfile.classList.add("hidden");
+      if (secMetricsSummary) secMetricsSummary.classList.add("hidden");
       updateTargetRetirementPlanner();
     }
 

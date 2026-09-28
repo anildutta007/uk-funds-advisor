@@ -117,13 +117,86 @@
         </a>
       </div>
     </div>
+
+    <!-- Strategy Selector Navigation Tabs Bar (Top of Web Page) -->
+    <div class="bg-slate-50/95 border-t border-slate-100 print:hidden">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-wrap items-center justify-between gap-3">
+        <div class="inline-flex p-1 bg-slate-200/80 rounded-xl space-x-1 max-w-full overflow-x-auto" role="tablist">
+          
+          <!-- Tab 1: Active -->
+          <button id="tab-active" type="button" class="strategy-tab active px-3.5 py-2 text-xs font-bold rounded-lg transition flex items-center gap-1.5" title="View Active Fund Strategy">
+            <i data-lucide="briefcase" class="w-4 h-4 text-brand-600 flex-shrink-0"></i>
+            <span>Active Fund Strategy</span>
+            <span onclick="event.stopPropagation(); openOptionInNewTab('active')" class="popout-btn ml-1 p-0.5 rounded hover:bg-slate-200 text-slate-400 hover:text-slate-700 transition cursor-pointer" title="Open Active Strategy in a new browser tab">
+              <i data-lucide="external-link" class="w-3 h-3"></i>
+            </span>
+          </button>
+
+          <!-- Tab 2: Passive -->
+          <button id="tab-passive" type="button" class="strategy-tab px-3.5 py-2 text-xs font-bold rounded-lg transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5" title="View Passive Index Strategy">
+            <i data-lucide="layers" class="w-4 h-4 text-teal-600 flex-shrink-0"></i>
+            <span>Passive Fund Strategy</span>
+            <span onclick="event.stopPropagation(); openOptionInNewTab('passive')" class="popout-btn ml-1 p-0.5 rounded hover:bg-slate-200 text-slate-400 hover:text-slate-700 transition cursor-pointer" title="Open Passive Strategy in a new browser tab">
+              <i data-lucide="external-link" class="w-3 h-3"></i>
+            </span>
+          </button>
+
+          <!-- Tab 3: Compare -->
+          <button id="tab-compare" type="button" class="strategy-tab px-3.5 py-2 text-xs font-bold rounded-lg transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5" title="Side-by-Side Comparison Matrix">
+            <i data-lucide="columns-2" class="w-4 h-4 text-indigo-600 flex-shrink-0"></i>
+            <span>Side-by-Side Comparison</span>
+            <span onclick="event.stopPropagation(); openOptionInNewTab('compare')" class="popout-btn ml-1 p-0.5 rounded hover:bg-slate-200 text-slate-400 hover:text-slate-700 transition cursor-pointer" title="Open Comparison in a new browser tab">
+              <i data-lucide="external-link" class="w-3 h-3"></i>
+            </span>
+          </button>
+
+          <!-- Tab 4: Screener -->
+          <button id="tab-screener" type="button" class="strategy-tab px-3.5 py-2 text-xs font-bold rounded-lg transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5" title="Explore Trustnet Fund Database">
+            <i data-lucide="compass" class="w-4 h-4 text-amber-600 flex-shrink-0"></i>
+            <span>Explore All Trustnet Funds</span>
+            <span onclick="event.stopPropagation(); openOptionInNewTab('screener')" class="popout-btn ml-1 p-0.5 rounded hover:bg-slate-200 text-slate-400 hover:text-slate-700 transition cursor-pointer" title="Open Trustnet Screener in a new browser tab">
+              <i data-lucide="external-link" class="w-3 h-3"></i>
+            </span>
+          </button>
+
+          <!-- Tab 5: Drawdown -->
+          <button id="tab-drawdown" type="button" class="strategy-tab px-3.5 py-2 text-xs font-bold rounded-lg transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5" title="How Long Will My Fund Last? Longevity Simulator">
+            <i data-lucide="hourglass" class="w-4 h-4 text-emerald-600 flex-shrink-0"></i>
+            <span>How Long Will My Fund Last?</span>
+            <span onclick="event.stopPropagation(); openOptionInNewTab('drawdown')" class="popout-btn ml-1 p-0.5 rounded hover:bg-slate-200 text-slate-400 hover:text-slate-700 transition cursor-pointer" title="Open Longevity Simulator in a new browser tab">
+              <i data-lucide="external-link" class="w-3 h-3"></i>
+            </span>
+          </button>
+
+          <!-- Tab 6: How Much Do I Need to Retire? -->
+          <button id="tab-target" type="button" class="strategy-tab px-3.5 py-2 text-xs font-bold rounded-lg transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5" title="How Much Money Do I Need to Retire? Target Nest Egg & Savings Planner">
+            <i data-lucide="target" class="w-4 h-4 text-brand-600 flex-shrink-0"></i>
+            <span>How Much Do I Need to Retire?</span>
+            <span onclick="event.stopPropagation(); openOptionInNewTab('target')" class="popout-btn ml-1 p-0.5 rounded hover:bg-slate-200 text-slate-400 hover:text-slate-700 transition cursor-pointer" title="Open Retirement Planner in a new browser tab">
+              <i data-lucide="external-link" class="w-3 h-3"></i>
+            </span>
+          </button>
+        </div>
+
+        <!-- New Tab Toggle Switch -->
+        <div class="flex items-center gap-3">
+          <label for="toggle-new-tab-mode" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:border-brand-400 text-xs font-bold text-slate-700 shadow-xs cursor-pointer transition select-none" title="When enabled, clicking any option opens it directly in a new browser tab">
+            <input type="checkbox" id="toggle-new-tab-mode" class="w-3.5 h-3.5 rounded text-brand-600 focus:ring-brand-500 border-slate-300 cursor-pointer">
+            <span class="flex items-center gap-1.5">
+              <span>Open options in new browser tab</span>
+              <i data-lucide="external-link" class="w-3.5 h-3.5 text-brand-600"></i>
+            </span>
+          </label>
+        </div>
+      </div>
+    </div>
   </header>
 
   <!-- Main Container -->
   <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 space-y-8">
     
     <!-- Investor Profile Input Card -->
-    <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 relative overflow-hidden">
+    <section id="section-investor-profile" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 relative overflow-hidden">
       <div class="absolute -right-16 -top-16 w-64 h-64 bg-brand-50 rounded-full blur-3xl pointer-events-none -z-0"></div>
 
       <div class="relative z-10">
@@ -283,7 +356,7 @@
     </section>
 
     <!-- Executive Summary Metric Cards -->
-    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <section id="section-metrics-summary" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       
       <!-- Card 1: Total Capital Contributed -->
       <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
@@ -393,78 +466,6 @@
       </div>
 
     </section>
-
-    <!-- Strategy Selector Navigation Tabs -->
-    <!-- Strategy Selector Navigation Tabs -->
-    <div class="flex flex-wrap items-center justify-between border-b border-slate-200 pb-3 gap-3">
-      <div class="inline-flex p-1 bg-slate-200/80 rounded-xl space-x-1 max-w-full overflow-x-auto" role="tablist">
-        
-        <!-- Tab 1: Active -->
-        <button id="tab-active" type="button" class="strategy-tab active px-3.5 py-2 text-xs font-bold rounded-lg transition flex items-center gap-1.5" title="View Active Fund Strategy">
-          <i data-lucide="briefcase" class="w-4 h-4 text-brand-600 flex-shrink-0"></i>
-          <span>Active Fund Strategy</span>
-          <span onclick="event.stopPropagation(); openOptionInNewTab('active')" class="popout-btn ml-1 p-0.5 rounded hover:bg-slate-200 text-slate-400 hover:text-slate-700 transition cursor-pointer" title="Open Active Strategy in a new browser tab">
-            <i data-lucide="external-link" class="w-3 h-3"></i>
-          </span>
-        </button>
-
-        <!-- Tab 2: Passive -->
-        <button id="tab-passive" type="button" class="strategy-tab px-3.5 py-2 text-xs font-bold rounded-lg transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5" title="View Passive Index Strategy">
-          <i data-lucide="layers" class="w-4 h-4 text-teal-600 flex-shrink-0"></i>
-          <span>Passive Fund Strategy</span>
-          <span onclick="event.stopPropagation(); openOptionInNewTab('passive')" class="popout-btn ml-1 p-0.5 rounded hover:bg-slate-200 text-slate-400 hover:text-slate-700 transition cursor-pointer" title="Open Passive Strategy in a new browser tab">
-            <i data-lucide="external-link" class="w-3 h-3"></i>
-          </span>
-        </button>
-
-        <!-- Tab 3: Compare -->
-        <button id="tab-compare" type="button" class="strategy-tab px-3.5 py-2 text-xs font-bold rounded-lg transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5" title="Side-by-Side Comparison Matrix">
-          <i data-lucide="columns-2" class="w-4 h-4 text-indigo-600 flex-shrink-0"></i>
-          <span>Side-by-Side Comparison</span>
-          <span onclick="event.stopPropagation(); openOptionInNewTab('compare')" class="popout-btn ml-1 p-0.5 rounded hover:bg-slate-200 text-slate-400 hover:text-slate-700 transition cursor-pointer" title="Open Comparison in a new browser tab">
-            <i data-lucide="external-link" class="w-3 h-3"></i>
-          </span>
-        </button>
-
-        <!-- Tab 4: Screener -->
-        <button id="tab-screener" type="button" class="strategy-tab px-3.5 py-2 text-xs font-bold rounded-lg transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5" title="Explore Trustnet Fund Database">
-          <i data-lucide="compass" class="w-4 h-4 text-amber-600 flex-shrink-0"></i>
-          <span>Explore All Trustnet Funds</span>
-          <span onclick="event.stopPropagation(); openOptionInNewTab('screener')" class="popout-btn ml-1 p-0.5 rounded hover:bg-slate-200 text-slate-400 hover:text-slate-700 transition cursor-pointer" title="Open Trustnet Screener in a new browser tab">
-            <i data-lucide="external-link" class="w-3 h-3"></i>
-          </span>
-        </button>
-
-        <!-- Tab 5: Drawdown -->
-        <button id="tab-drawdown" type="button" class="strategy-tab px-3.5 py-2 text-xs font-bold rounded-lg transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5" title="How Long Will My Fund Last? Longevity Simulator">
-          <i data-lucide="hourglass" class="w-4 h-4 text-emerald-600 flex-shrink-0"></i>
-          <span>How Long Will My Fund Last?</span>
-          <span onclick="event.stopPropagation(); openOptionInNewTab('drawdown')" class="popout-btn ml-1 p-0.5 rounded hover:bg-slate-200 text-slate-400 hover:text-slate-700 transition cursor-pointer" title="Open Longevity Simulator in a new browser tab">
-            <i data-lucide="external-link" class="w-3 h-3"></i>
-          </span>
-        </button>
-
-        <!-- Tab 6: How Much Do I Need to Retire? -->
-        <button id="tab-target" type="button" class="strategy-tab px-3.5 py-2 text-xs font-bold rounded-lg transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5" title="How Much Money Do I Need to Retire? Target Nest Egg & Savings Planner">
-          <i data-lucide="target" class="w-4 h-4 text-brand-600 flex-shrink-0"></i>
-          <span>How Much Do I Need to Retire?</span>
-          <span onclick="event.stopPropagation(); openOptionInNewTab('target')" class="popout-btn ml-1 p-0.5 rounded hover:bg-slate-200 text-slate-400 hover:text-slate-700 transition cursor-pointer" title="Open Retirement Planner in a new browser tab">
-            <i data-lucide="external-link" class="w-3 h-3"></i>
-          </span>
-        </button>
-      </div>
-
-      <!-- New Tab Toggle Switch -->
-      <div class="flex items-center gap-3">
-        <label for="toggle-new-tab-mode" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:border-brand-400 text-xs font-bold text-slate-700 shadow-sm cursor-pointer transition select-none">
-          <input type="checkbox" id="toggle-new-tab-mode" class="w-3.5 h-3.5 rounded text-brand-600 focus:ring-brand-500 border-slate-300 cursor-pointer">
-          <span class="flex items-center gap-1.5">
-            <span>Open options in new browser tab</span>
-            <i data-lucide="external-link" class="w-3.5 h-3.5 text-brand-600"></i>
-          </span>
-        </label>
-      </div>
-    </div>
 
     <!-- Interactive Visual Graphs Section -->
     <section id="section-charts-overview" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
