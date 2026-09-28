@@ -1234,7 +1234,7 @@ function getInputs() {
  * Google Analytics 4 (GA4) Custom Event Dispatcher
  */
 function trackGAEvent(eventName, eventParams = {}) {
-  if (typeof window.gtag === "function" && window.GA_MEASUREMENT_ID && window.GA_MEASUREMENT_ID !== "G-XXXXXXXXXX") {
+  if (typeof window.gtag === "function" && window.GA_MEASUREMENT_ID) {
     try {
       window.gtag("event", eventName, eventParams);
     } catch (e) {
