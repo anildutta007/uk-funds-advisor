@@ -796,9 +796,15 @@
           
           <!-- Tax Wrapper Type -->
           <div class="space-y-1">
-            <label for="drawdown-tax-wrapper" class="block text-[11px] font-bold text-slate-700">
-              Account / Tax Structure:
-            </label>
+            <div class="flex items-center justify-between">
+              <label for="drawdown-tax-wrapper" class="block text-[11px] font-bold text-slate-700">
+                Account / Tax Structure:
+              </label>
+              <button type="button" onclick="openTaxWrapperGuideModal()" class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 hover:text-emerald-800 hover:underline cursor-pointer" title="Click to understand which tax structure to pick">
+                <i data-lucide="help-circle" class="w-3.5 h-3.5 text-emerald-600"></i>
+                <span>Explain options</span>
+              </button>
+            </div>
             <select id="drawdown-tax-wrapper" class="w-full py-1.5 px-2.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-800 focus:ring-1 focus:ring-emerald-500 bg-white">
               <option value="pension_ufpls" selected>UK SIPP / Pension (25% Tax-Free UFPLS)</option>
               <option value="pension_full_taxable">UK Pension (100% Taxable Drawdown)</option>
@@ -1128,7 +1134,13 @@
 
             <!-- Tax Wrapper Structure -->
             <div class="space-y-1">
-              <label for="target-tax-wrapper" class="text-xs font-bold text-slate-700">Tax Wrapper:</label>
+              <div class="flex items-center justify-between">
+                <label for="target-tax-wrapper" class="text-xs font-bold text-slate-700">Tax Wrapper:</label>
+                <button type="button" onclick="openTaxWrapperGuideModal()" class="inline-flex items-center gap-1 text-[11px] font-semibold text-brand-700 hover:text-brand-800 hover:underline cursor-pointer" title="Click to understand tax wrappers">
+                  <i data-lucide="help-circle" class="w-3.5 h-3.5 text-brand-600"></i>
+                  <span>Explain options</span>
+                </button>
+              </div>
               <select id="target-tax-wrapper" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 font-semibold text-slate-800 focus:ring-2 focus:ring-brand-500">
                 <option value="sipp" selected>SIPP / Pension (25% tax-free + UK tax)</option>
                 <option value="isa">ISA (100% Tax-Free)</option>
@@ -1875,6 +1887,179 @@
         <button onclick="closeUserGuideModal()" class="px-5 py-2 font-bold rounded-lg bg-brand-600 hover:bg-brand-700 text-white transition shadow-sm flex items-center gap-1.5">
           <span>Let's Get Started</span>
           <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+    </div>
+  <!-- Account / Tax Structure Explainer Modal Dialog -->
+  <div id="tax-wrapper-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4 overflow-y-auto" onclick="if(event.target === this) closeTaxWrapperGuideModal()">
+    <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
+      
+      <!-- Modal Header -->
+      <div class="p-5 border-b border-slate-100 bg-gradient-to-r from-emerald-50/80 via-white to-brand-50/80 flex items-start justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold shadow-md shadow-emerald-500/20 flex-shrink-0">
+            <i data-lucide="help-circle" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+              <span>Understanding Account & Tax Structure</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">Plain English</span>
+            </h3>
+            <p class="text-xs text-slate-600 mt-0.5">
+              Which option should you pick for your retirement fund? Here is how HMRC treats each choice:
+            </p>
+          </div>
+        </div>
+        <button onclick="closeTaxWrapperGuideModal()" class="w-8 h-8 rounded-lg bg-slate-200/80 hover:bg-slate-300 flex items-center justify-center text-slate-600 transition flex-shrink-0" title="Close">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 overflow-y-auto space-y-4 flex-1 text-xs text-slate-600 leading-relaxed">
+        
+        <!-- Option 1: UFPLS -->
+        <div class="p-4 rounded-xl bg-emerald-50/40 border border-emerald-300/80 space-y-2.5 relative hover:border-emerald-400 transition">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2 font-bold text-slate-900 text-xs sm:text-sm">
+              <span class="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-extrabold">1</span>
+              <span>UK SIPP / Pension (25% Tax-Free UFPLS)</span>
+            </div>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">Most Common Choice</span>
+          </div>
+
+          <p class="text-slate-700">
+            <strong>What is it?</strong> UFPLS stands for <em>Uncrystallised Funds Pension Lump Sum</em>. It simply means taking money out of your pension as and when you need it.
+          </p>
+
+          <p class="text-slate-700">
+            <strong>How the tax works:</strong> Every time you make a withdrawal, HMRC automatically splits it:
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+            <div class="p-2.5 rounded-lg bg-white border border-emerald-200 text-emerald-950">
+              <span class="font-bold block text-emerald-700">✓ 25% Tax-Free Cash</span>
+              Paid straight into your bank account with zero tax deducted.
+            </div>
+            <div class="p-2.5 rounded-lg bg-white border border-slate-200 text-slate-700">
+              <span class="font-bold block text-slate-800">✓ 75% Taxable Earnings</span>
+              Subject to standard UK income tax and your Personal Allowance (£12,570/yr).
+            </div>
+          </div>
+
+          <div class="p-2.5 rounded-lg bg-emerald-100/60 border border-emerald-200 text-[11px] text-emerald-950">
+            <strong>Real-Life Example:</strong> If you withdraw £1,000 this month, <strong>£250 is instantly yours tax-free</strong>. Only the remaining £750 is counted towards your annual income tax.
+          </div>
+
+          <div class="text-[11px] text-slate-600 bg-slate-100 p-2.5 rounded-lg border border-slate-200">
+            <strong>When to pick this:</strong> Pick this if your savings are in a SIPP or modern workplace pension, and you <em>have not</em> already taken your full 25% tax-free lump sum upfront.
+          </div>
+
+          <div class="pt-1 flex justify-end">
+            <button onclick="selectTaxWrapperAndClose('pension_ufpls')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition flex items-center gap-1.5 shadow-xs">
+              <span>Select Option 1 (25% UFPLS)</span>
+              <i data-lucide="check" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Option 2: 100% Taxable Drawdown -->
+        <div class="p-4 rounded-xl bg-amber-50/40 border border-amber-300/80 space-y-2.5 relative hover:border-amber-400 transition">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2 font-bold text-slate-900 text-xs sm:text-sm">
+              <span class="w-5 h-5 rounded-full bg-amber-600 text-white flex items-center justify-center text-[10px] font-extrabold">2</span>
+              <span>UK Pension (100% Taxable Drawdown)</span>
+            </div>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900">Already Took 25% Lump Sum</span>
+          </div>
+
+          <p class="text-slate-700">
+            <strong>What is it?</strong> Flexible drawdown on a pension pot where the 25% tax-free portion has already been fully extracted.
+          </p>
+
+          <p class="text-slate-700">
+            <strong>How the tax works:</strong> 100% of every pound you withdraw is treated as taxable income under standard HMRC income tax brackets (Personal Allowance £12,570, 20% basic, 40% higher).
+          </p>
+
+          <div class="p-2.5 rounded-lg bg-amber-100/60 border border-amber-200 text-[11px] text-amber-950">
+            <strong>Real-Life Example:</strong> If you withdraw £1,000 this month, the full <strong>£1,000 is assessed as taxable income</strong>. Standard income tax applies after using your Personal Allowance.
+          </div>
+
+          <div class="text-[11px] text-slate-600 bg-slate-100 p-2.5 rounded-lg border border-slate-200">
+            <strong>When to pick this:</strong> Pick this if you <em>already withdrew</em> your entire 25% tax-free cash lump sum in a single payment (e.g. to pay off your mortgage, clear debt, or renovate) on day 1 of retirement, leaving only the taxable pension pot behind.
+          </div>
+
+          <div class="pt-1 flex justify-end">
+            <button onclick="selectTaxWrapperAndClose('pension_full_taxable')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white transition flex items-center gap-1.5 shadow-xs">
+              <span>Select Option 2 (100% Taxable)</span>
+              <i data-lucide="check" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Option 3: Stocks & Shares ISA -->
+        <div class="p-4 rounded-xl bg-sky-50/40 border border-sky-300/80 space-y-2.5 relative hover:border-sky-400 transition">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2 font-bold text-slate-900 text-xs sm:text-sm">
+              <span class="w-5 h-5 rounded-full bg-sky-600 text-white flex items-center justify-center text-[10px] font-extrabold">3</span>
+              <span>Stocks & Shares ISA (100% Tax-Free)</span>
+            </div>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-100 text-sky-800">Zero Tax Ever</span>
+          </div>
+
+          <p class="text-slate-700">
+            <strong>What is it?</strong> Individual Savings Account (ISA).
+          </p>
+
+          <p class="text-slate-700">
+            <strong>How the tax works:</strong> <strong>£0.00 tax to HMRC. Ever.</strong> Every single penny you withdraw is 100% tax-free and does not count towards your income tax bracket at all.
+          </p>
+
+          <div class="p-2.5 rounded-lg bg-sky-100/60 border border-sky-200 text-[11px] text-sky-950">
+            <strong>Real-Life Example:</strong> If you withdraw £2,500 this month, you receive the full <strong>£2,500 in your bank account with £0.00 tax deducted</strong>, regardless of how much other income or pension you receive.
+          </div>
+
+          <div class="text-[11px] text-slate-600 bg-slate-100 p-2.5 rounded-lg border border-slate-200">
+            <strong>When to pick this:</strong> Pick this if your retirement savings are invested inside a UK Stocks & Shares ISA (on platforms like Vanguard, Hargreaves Lansdown, AJ Bell, or Fidelity). Because you invested from your take-home pay, all withdrawals and growth are totally tax-free.
+          </div>
+
+          <div class="pt-1 flex justify-end">
+            <button onclick="selectTaxWrapperAndClose('isa_tax_free')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-sky-600 hover:bg-sky-700 text-white transition flex items-center gap-1.5 shadow-xs">
+              <span>Select Option 3 (ISA Tax-Free)</span>
+              <i data-lucide="check" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Quick 3-Second Rule of Thumb -->
+        <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+          <div class="flex items-center gap-1.5 text-slate-900 font-bold text-xs">
+            <i data-lucide="lightbulb" class="w-4 h-4 text-amber-500 flex-shrink-0"></i>
+            <span>Quick 3-Second Rule of Thumb:</span>
+          </div>
+          <ul class="space-y-1.5 text-[11px] text-slate-700">
+            <li class="flex items-start gap-1.5">
+              <span class="text-sky-600 font-bold">1.</span>
+              <span><strong>Money in an ISA?</strong> 👉 Choose <strong>Option 3 (Stocks & Shares ISA)</strong>.</span>
+            </li>
+            <li class="flex items-start gap-1.5">
+              <span class="text-emerald-600 font-bold">2.</span>
+              <span><strong>Money in a SIPP/Pension and haven't touched tax-free cash?</strong> 👉 Choose <strong>Option 1 (25% Tax-Free UFPLS)</strong>.</span>
+            </li>
+            <li class="flex items-start gap-1.5">
+              <span class="text-amber-600 font-bold">3.</span>
+              <span><strong>Already took your 25% cash lump sum to pay off a mortgage?</strong> 👉 Choose <strong>Option 2 (100% Taxable)</strong>.</span>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between text-xs text-slate-500">
+        <span>Click any option above to select it, or close this window.</span>
+        <button onclick="closeTaxWrapperGuideModal()" class="px-4 py-2 font-bold rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-800 transition">
+          Close
         </button>
       </div>
 

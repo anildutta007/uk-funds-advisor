@@ -2375,6 +2375,49 @@ window.closeUserGuideModal = function() {
   }
 };
 
+window.openTaxWrapperGuideModal = function() {
+  const modalEl = document.getElementById("tax-wrapper-modal");
+  if (modalEl) {
+    modalEl.classList.remove("hidden");
+    modalEl.classList.add("flex");
+    trackGAEvent("tax_wrapper_guide_opened");
+    if (window.lucide) {
+      window.lucide.createIcons();
+    }
+  }
+};
+
+window.closeTaxWrapperGuideModal = function() {
+  const modalEl = document.getElementById("tax-wrapper-modal");
+  if (modalEl) {
+    modalEl.classList.add("hidden");
+    modalEl.classList.remove("flex");
+  }
+};
+
+window.selectTaxWrapperAndClose = function(wrapperKey) {
+  const drawdownWrapperEl = document.getElementById("drawdown-tax-wrapper");
+  if (drawdownWrapperEl) {
+    drawdownWrapperEl.value = wrapperKey;
+  }
+  const targetWrapperEl = document.getElementById("target-tax-wrapper");
+  if (targetWrapperEl) {
+    targetWrapperEl.value = wrapperKey === "isa_tax_free" ? "isa" : "sipp";
+  }
+  closeTaxWrapperGuideModal();
+  updateDrawdownCalculator();
+  updateTargetRetirementPlanner();
+  trackGAEvent("tax_wrapper_selected", { wrapper: wrapperKey });
+};
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    closeSwapModal();
+    closeUserGuideModal();
+    closeTaxWrapperGuideModal();
+  }
+});
+
 window.selectSwappedFund = function(newFundId) {
   const { strategyType, slotIndex } = pendingSwap;
   const portfolio = strategyType === "active" ? activeCustomPortfolio : passiveCustomPortfolio;
