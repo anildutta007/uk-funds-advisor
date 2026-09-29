@@ -2360,6 +2360,7 @@ window.openUserGuideModal = function() {
   if (modalEl) {
     modalEl.classList.remove("hidden");
     modalEl.classList.add("flex");
+    modalEl.style.display = "flex";
     trackGAEvent("user_guide_opened");
     if (window.lucide) {
       window.lucide.createIcons();
@@ -2372,6 +2373,7 @@ window.closeUserGuideModal = function() {
   if (modalEl) {
     modalEl.classList.add("hidden");
     modalEl.classList.remove("flex");
+    modalEl.style.display = "none";
   }
 };
 
@@ -2380,6 +2382,7 @@ window.openTaxWrapperGuideModal = function() {
   if (modalEl) {
     modalEl.classList.remove("hidden");
     modalEl.classList.add("flex");
+    modalEl.style.display = "flex";
     trackGAEvent("tax_wrapper_guide_opened");
     if (window.lucide) {
       window.lucide.createIcons();
@@ -2392,6 +2395,7 @@ window.closeTaxWrapperGuideModal = function() {
   if (modalEl) {
     modalEl.classList.add("hidden");
     modalEl.classList.remove("flex");
+    modalEl.style.display = "none";
   }
 };
 
