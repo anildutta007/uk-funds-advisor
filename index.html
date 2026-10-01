@@ -1697,7 +1697,7 @@
               <span class="px-2 py-0.2 rounded text-[10px] bg-emerald-200 text-emerald-900 font-bold">Bank-Grade</span>
             </h3>
             <p class="text-[11px] text-emerald-900/90 leading-relaxed mt-0.5">
-              This website <strong>never sees, handles, or stores your credit card numbers, CVV, or personal bank details</strong>. Payments are routed exclusively through FCA-regulated, PCI-DSS Level 1 compliant gateways (<strong>Apple Pay, Google Pay, PayPal, and Stripe via Ko-fi</strong>).
+              This website <strong>never sees, handles, or stores your credit card numbers, CVV, or personal bank details</strong>. Payments are routed exclusively through FCA-regulated, PCI-DSS Level 1 compliant gateways (<strong>Apple Pay, Google Pay, and UK Debit/Credit Cards via Ko-fi</strong>).
             </p>
           </div>
         </div>
@@ -1766,64 +1766,48 @@
 
           </div>
 
-          <!-- Step 2: Payment Gateway Options -->
+          <!-- Step 2: Payment Gateway Checkout -->
           <div class="space-y-3 pt-2 border-t border-slate-100">
             <div>
               <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
                 <i data-lucide="credit-card" class="w-4 h-4 text-emerald-600"></i>
-                Step 2: Complete Checkout via Your Preferred Secure Gateway
+                Step 2: Complete Checkout via Secure Hosted Gateway
               </h3>
-              <p class="text-xs text-slate-500 mt-0.5">Click below to open the official, secure hosted payment page:</p>
+              <p class="text-xs text-slate-500 mt-0.5">Click below to open the official, secure hosted Ko-fi payment page:</p>
             </div>
 
-            <!-- Gateway Buttons Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              
-              <!-- Ko-fi (Apple Pay, Google Pay, Cards, PayPal) -->
-              <a id="btn-tip-kofi" href="https://ko-fi.com/anildutta" target="_blank" rel="noopener noreferrer" 
-                 onclick="if(typeof trackGAEvent==='function') trackGAEvent('tip_initiated', { method: 'kofi' });"
-                 class="p-4 rounded-xl border border-rose-200 bg-rose-50/50 hover:bg-rose-100/70 transition flex items-center justify-between group shadow-xs">
-                <div class="space-y-0.5">
-                  <div class="flex items-center gap-2">
-                    <span class="text-xs font-bold text-rose-900">Ko-fi (Recommended)</span>
-                    <span class="px-1.5 py-0.2 rounded text-[9px] font-extrabold bg-rose-200 text-rose-800">0% Fee</span>
-                  </div>
-                  <p class="text-[10px] text-rose-700">Supports Apple Pay, Google Pay & UK Cards</p>
-                  <span class="text-xs font-extrabold text-rose-900 block mt-1">Tip <span class="tip-amount-display">£1.00</span> on Ko-fi →</span>
+            <!-- Ko-fi Checkout Card (Full Width) -->
+            <a id="btn-tip-kofi" href="https://ko-fi.com/anildutta" target="_blank" rel="noopener noreferrer" 
+               onclick="if(typeof trackGAEvent==='function') trackGAEvent('tip_initiated', { method: 'kofi' });"
+               class="p-4 sm:p-5 rounded-xl border-2 border-rose-200 bg-gradient-to-r from-rose-50 via-amber-50/30 to-rose-50 hover:border-rose-400 hover:shadow-md transition flex items-center justify-between group shadow-xs">
+              <div class="space-y-1">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="text-sm font-bold text-rose-900">Ko-fi Checkout</span>
+                  <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-rose-200 text-rose-800">0% Platform Fee</span>
+                  <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-100 text-emerald-800">Bank-Grade 256-bit SSL</span>
                 </div>
-                <div class="w-8 h-8 rounded-lg bg-rose-200 text-rose-800 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition">
-                  <i data-lucide="external-link" class="w-4 h-4"></i>
+                <p class="text-xs text-rose-800">Supports Apple Pay, Google Pay, and UK Debit / Credit Cards</p>
+                <div class="pt-1">
+                  <span class="text-xs sm:text-sm font-extrabold text-rose-700 group-hover:text-rose-900 flex items-center gap-1.5">
+                    Proceed to Tip <span class="tip-amount-display">£1.00</span> on Ko-fi
+                    <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                  </span>
                 </div>
-              </a>
+              </div>
+              <div class="w-11 h-11 rounded-xl bg-rose-200 text-rose-800 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition shadow-xs">
+                <i data-lucide="external-link" class="w-5 h-5"></i>
+              </div>
+            </a>
 
-              <!-- PayPal.Me -->
-              <a id="btn-tip-paypal" href="https://paypal.me/anildutta/1" target="_blank" rel="noopener noreferrer"
-                 onclick="if(typeof trackGAEvent==='function') trackGAEvent('tip_initiated', { method: 'paypal' });"
-                 class="p-4 rounded-xl border border-sky-200 bg-sky-50/50 hover:bg-sky-100/70 transition flex items-center justify-between group shadow-xs">
-                <div class="space-y-0.5">
-                  <div class="flex items-center gap-2">
-                    <span class="text-xs font-bold text-sky-900">PayPal.me</span>
-                    <span class="px-1.5 py-0.2 rounded text-[9px] font-extrabold bg-sky-200 text-sky-800">Instant</span>
-                  </div>
-                  <p class="text-[10px] text-sky-700">Direct instant transfer via your PayPal account</p>
-                  <span class="text-xs font-extrabold text-sky-900 block mt-1">Send <span class="tip-amount-display">£1.00</span> via PayPal →</span>
-                </div>
-                <div class="w-8 h-8 rounded-lg bg-sky-200 text-sky-800 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition">
-                  <i data-lucide="external-link" class="w-4 h-4"></i>
-                </div>
-              </a>
-
-            </div>
-
-            <!-- Optional Custom Handle Config Notice for Anil -->
+            <!-- Connected Account Notice -->
             <div class="mt-3 p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-3 text-[11px] text-slate-500">
               <div class="flex items-center gap-2">
-                <i data-lucide="settings" class="w-4 h-4 text-slate-400"></i>
-                <span>Tip links currently configured to: <strong id="tip-current-handle-label">ko-fi.com/anildutta</strong>.</span>
+                <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
+                <span>Direct tip link connected to: <strong id="tip-current-handle-label" class="text-slate-800 font-semibold">ko-fi.com/anildutta</strong></span>
               </div>
-              <button onclick="promptCustomTipLink()" class="font-bold text-brand-600 hover:text-brand-800 hover:underline flex-shrink-0">
-                Customise handle ⚙️
-              </button>
+              <a href="https://ko-fi.com/anildutta" target="_blank" rel="noopener noreferrer" class="font-bold text-brand-600 hover:text-brand-800 hover:underline flex-shrink-0">
+                View Ko-fi Profile ↗
+              </a>
             </div>
           </div>
         </div>

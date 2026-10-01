@@ -4370,15 +4370,14 @@ window.initPensionNews = initPensionNews;
 
 /* ==========================================================================
    Developer Tipping Engine (Voluntary Support capped at £1 - £2)
-   100% External Hosted Checkout via Ko-fi / Apple Pay / Google Pay / PayPal
+   100% External Hosted Checkout via Ko-fi (Apple Pay / Google Pay / UK Cards)
    Zero Card Breach Risk
    ========================================================================== */
 
 window.TIP_CONFIG = {
   developerName: "Anil Dutta",
   defaultAmount: 1,
-  kofiBaseUrl: "https://ko-fi.com/anildutta",
-  paypalBaseUrl: "https://paypal.me/anildutta"
+  kofiBaseUrl: "https://ko-fi.com/anildutta"
 };
 
 let currentTipAmount = 1;
@@ -4446,38 +4445,29 @@ function setTipAmount(amount) {
 
 function updateTipButtonLinks() {
   const kofiBtn = document.getElementById("btn-tip-kofi");
-  const paypalBtn = document.getElementById("btn-tip-paypal");
-
-  // Retrieve saved custom handle if any
-  const savedKofi = localStorage.getItem("dutta_tip_kofi") || window.TIP_CONFIG.kofiBaseUrl;
-  const savedPaypal = localStorage.getItem("dutta_tip_paypal") || window.TIP_CONFIG.paypalBaseUrl;
+  const kofiUrl = window.TIP_CONFIG.kofiBaseUrl;
 
   if (kofiBtn) {
-    kofiBtn.href = savedKofi;
-  }
-  if (paypalBtn) {
-    // Strip trailing slash/amount and append currentTipAmount
-    const cleanPaypal = savedPaypal.replace(/\/+$/, "").replace(/\/\d+$/, "");
-    paypalBtn.href = `${cleanPaypal}/${currentTipAmount}`;
+    kofiBtn.href = kofiUrl;
   }
 
   const labelEl = document.getElementById("tip-current-handle-label");
   if (labelEl) {
-    labelEl.textContent = savedKofi.replace(/^https?:\/\//, "");
+    labelEl.textContent = kofiUrl.replace(/^https?:\/\//, "");
   }
 }
 
 function promptCustomTipLink() {
-  const current = localStorage.getItem("dutta_tip_kofi") || window.TIP_CONFIG.kofiBaseUrl;
-  const input = prompt("Enter your Ko-fi page URL or username (e.g. https://ko-fi.com/yourname):", current);
+  const current = window.TIP_CONFIG.kofiBaseUrl;
+  const input = prompt("Enter your Ko-fi page URL (e.g. https://ko-fi.com/anildutta):", current);
   if (input && input.trim()) {
     let clean = input.trim();
     if (!clean.startsWith("http")) {
       clean = "https://ko-fi.com/" + clean.replace("@", "");
     }
-    localStorage.setItem("dutta_tip_kofi", clean);
+    window.TIP_CONFIG.kofiBaseUrl = clean;
     updateTipButtonLinks();
-    alert("Tip links updated successfully!");
+    alert("Ko-fi tip link updated successfully!");
   }
 }
 
