@@ -65,13 +65,14 @@ Stay ahead of legislative changes, Budget tax overhauls, and State Pension updat
 ---
 
 ## 🗂️ App Navigation & Tools
-The clean navigation bar gives you 6 dedicated core strategy tools:
+The clean navigation bar gives you dedicated strategy & planning tools:
 1. **Active Fund Strategy**: Hand-picked portfolio by world-class fund managers.
 2. **Passive Fund Strategy**: Low-cost index tracker portfolio mimicking global market returns.
 3. **How Long Will My Fund Last?**: Post-retirement decumulation simulator with UK tax & State Pension.
 4. **How Much Do I Need to Retire?**: Target pot and required monthly savings calculator with State Pension relief.
 5. **Explore All Trustnet Funds**: Full database browser with sector, house, risk, and fee filters.
 6. **Latest news about Pensions**: Real-time UK pension headlines, Triple Lock announcements, and regulatory policy updates.
+7. **Tip the Developer**: Voluntary micro-tipping (£1 – £2 max) to support ongoing hosting and algorithm maintenance.
 
 In the top menu bar, you also have quick access to:
 * **University Fees Loan Calculator**: Direct link to your university finance and student loan projection tool.

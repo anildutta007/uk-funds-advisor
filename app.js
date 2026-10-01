@@ -4368,6 +4368,152 @@ window.fetchLivePensionNews = fetchLivePensionNews;
 window.resetNewsFilters = resetNewsFilters;
 window.initPensionNews = initPensionNews;
 
+/* ==========================================================================
+   Developer Tipping Engine (Voluntary Support capped at £1 - £2)
+   100% External Hosted Checkout via Ko-fi / Apple Pay / Google Pay / PayPal
+   Zero Card Breach Risk
+   ========================================================================== */
+
+window.TIP_CONFIG = {
+  developerName: "Anil Dutta",
+  defaultAmount: 1,
+  kofiBaseUrl: "https://ko-fi.com/anildutta",
+  paypalBaseUrl: "https://paypal.me/anildutta"
+};
+
+let currentTipAmount = 1;
+
+function setTipAmount(amount) {
+  currentTipAmount = parseInt(amount, 10) || 1;
+  if (currentTipAmount > 2) currentTipAmount = 2;
+  if (currentTipAmount < 1) currentTipAmount = 1;
+
+  const card1 = document.getElementById("card-tip-1");
+  const card2 = document.getElementById("card-tip-2");
+
+  if (card1 && card2) {
+    if (currentTipAmount === 1) {
+      card1.classList.add("active", "border-2", "border-amber-500", "bg-amber-50/60", "shadow-xs");
+      card1.classList.remove("border-slate-200", "bg-white");
+      const dot1 = card1.querySelector(".tip-radio-dot");
+      if (dot1) {
+        dot1.classList.add("bg-amber-600");
+        dot1.classList.remove("bg-transparent");
+        dot1.parentElement.classList.add("border-amber-600");
+        dot1.parentElement.classList.remove("border-slate-300");
+      }
+
+      card2.classList.remove("active", "border-2", "border-amber-500", "bg-amber-50/60", "shadow-xs");
+      card2.classList.add("border-slate-200", "bg-white");
+      const dot2 = card2.querySelector(".tip-radio-dot");
+      if (dot2) {
+        dot2.classList.remove("bg-amber-600");
+        dot2.classList.add("bg-transparent");
+        dot2.parentElement.classList.remove("border-amber-600");
+        dot2.parentElement.classList.add("border-slate-300");
+      }
+    } else {
+      card2.classList.add("active", "border-2", "border-amber-500", "bg-amber-50/60", "shadow-xs");
+      card2.classList.remove("border-slate-200", "bg-white");
+      const dot2 = card2.querySelector(".tip-radio-dot");
+      if (dot2) {
+        dot2.classList.add("bg-amber-600");
+        dot2.classList.remove("bg-transparent");
+        dot2.parentElement.classList.add("border-amber-600");
+        dot2.parentElement.classList.remove("border-slate-300");
+      }
+
+      card1.classList.remove("active", "border-2", "border-amber-500", "bg-amber-50/60", "shadow-xs");
+      card1.classList.add("border-slate-200", "bg-white");
+      const dot1 = card1.querySelector(".tip-radio-dot");
+      if (dot1) {
+        dot1.classList.remove("bg-amber-600");
+        dot1.classList.add("bg-transparent");
+        dot1.parentElement.classList.remove("border-amber-600");
+        dot1.parentElement.classList.add("border-slate-300");
+      }
+    }
+  }
+
+  // Update text displays
+  document.querySelectorAll(".tip-amount-display").forEach(el => {
+    el.textContent = `£${currentTipAmount}.00`;
+  });
+
+  // Update checkout buttons
+  updateTipButtonLinks();
+}
+
+function updateTipButtonLinks() {
+  const kofiBtn = document.getElementById("btn-tip-kofi");
+  const paypalBtn = document.getElementById("btn-tip-paypal");
+
+  // Retrieve saved custom handle if any
+  const savedKofi = localStorage.getItem("dutta_tip_kofi") || window.TIP_CONFIG.kofiBaseUrl;
+  const savedPaypal = localStorage.getItem("dutta_tip_paypal") || window.TIP_CONFIG.paypalBaseUrl;
+
+  if (kofiBtn) {
+    kofiBtn.href = savedKofi;
+  }
+  if (paypalBtn) {
+    // Strip trailing slash/amount and append currentTipAmount
+    const cleanPaypal = savedPaypal.replace(/\/+$/, "").replace(/\/\d+$/, "");
+    paypalBtn.href = `${cleanPaypal}/${currentTipAmount}`;
+  }
+
+  const labelEl = document.getElementById("tip-current-handle-label");
+  if (labelEl) {
+    labelEl.textContent = savedKofi.replace(/^https?:\/\//, "");
+  }
+}
+
+function promptCustomTipLink() {
+  const current = localStorage.getItem("dutta_tip_kofi") || window.TIP_CONFIG.kofiBaseUrl;
+  const input = prompt("Enter your Ko-fi page URL or username (e.g. https://ko-fi.com/yourname):", current);
+  if (input && input.trim()) {
+    let clean = input.trim();
+    if (!clean.startsWith("http")) {
+      clean = "https://ko-fi.com/" + clean.replace("@", "");
+    }
+    localStorage.setItem("dutta_tip_kofi", clean);
+    updateTipButtonLinks();
+    alert("Tip links updated successfully!");
+  }
+}
+
+function copyAppUrlToClipboard() {
+  const text = window.location.origin + window.location.pathname;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      const btnText = document.getElementById("copy-url-btn-text");
+      if (btnText) {
+        btnText.textContent = "Copied to Clipboard! ✓";
+        setTimeout(() => { btnText.textContent = "Copy Website Link"; }, 2500);
+      }
+    });
+  } else {
+    prompt("Copy website address:", text);
+  }
+}
+
+function initTipDeveloper() {
+  updateTipButtonLinks();
+  setTipAmount(currentTipAmount);
+
+  // Set WhatsApp share message
+  const waBtn = document.getElementById("btn-share-whatsapp-tip");
+  if (waBtn) {
+    const shareUrl = encodeURIComponent(window.location.origin + window.location.pathname);
+    const msg = encodeURIComponent("Check out the Dutta UK Funds Selection Advisor - Free retirement, drawdown & State Pension planning tool: ") + shareUrl;
+    waBtn.href = `https://api.whatsapp.com/send?text=${msg}`;
+  }
+}
+
+window.setTipAmount = setTipAmount;
+window.promptCustomTipLink = promptCustomTipLink;
+window.copyAppUrlToClipboard = copyAppUrlToClipboard;
+window.initTipDeveloper = initTipDeveloper;
+
 document.addEventListener("DOMContentLoaded", () => {
   const inputIds = ["current-age", "retirement-age", "lump-sum", "monthly-amount", "target-growth"];
   inputIds.forEach(id => {
@@ -4420,6 +4566,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const tabTarget = document.getElementById("tab-target");
   const tabScreener = document.getElementById("tab-screener");
   const tabPensionNews = document.getElementById("tab-pension-news");
+  const tabTipDeveloper = document.getElementById("tab-tip-developer");
   const btnRegulatoryInfo = document.getElementById("btn-regulatory-info");
 
   const secActive = document.getElementById("section-active");
@@ -4428,6 +4575,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const secTarget = document.getElementById("section-target");
   const secScreener = document.getElementById("section-screener");
   const secPensionNews = document.getElementById("section-pension-news");
+  const secTipDeveloper = document.getElementById("section-tip-developer");
   const secCompliance = document.getElementById("compliance");
   const secChartsOverview = document.getElementById("section-charts-overview");
   const secInvestorProfile = document.getElementById("section-investor-profile");
@@ -4473,7 +4621,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (e) {}
 
     // Reset all strategy tabs to inactive styling
-    [tabActive, tabPassive, tabDrawdown, tabTarget, tabScreener, tabPensionNews].forEach(t => {
+    [tabActive, tabPassive, tabDrawdown, tabTarget, tabScreener, tabPensionNews, tabTipDeveloper].forEach(t => {
       if (t) {
         t.classList.remove("active");
         t.classList.remove("bg-white", "text-slate-900", "shadow-sm");
@@ -4493,7 +4641,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Hide all sections initially (including regulatory compliance)
-    [secActive, secPassive, secDrawdown, secTarget, secScreener, secPensionNews, secCompliance].forEach(s => s && s.classList.add("hidden"));
+    [secActive, secPassive, secDrawdown, secTarget, secScreener, secPensionNews, secTipDeveloper, secCompliance].forEach(s => s && s.classList.add("hidden"));
 
     const activeBtn = {
       active: tabActive,
@@ -4502,7 +4650,9 @@ document.addEventListener("DOMContentLoaded", () => {
       target: tabTarget,
       screener: tabScreener,
       "pension-news": tabPensionNews,
-      news: tabPensionNews
+      news: tabPensionNews,
+      tip: tabTipDeveloper,
+      "tip-developer": tabTipDeveloper
     }[tab];
 
     if (activeBtn) {
@@ -4545,6 +4695,13 @@ document.addEventListener("DOMContentLoaded", () => {
       if (secMetricsSummary) secMetricsSummary.classList.add("hidden");
       initPensionNews();
       window.scrollTo({ top: 0, behavior: "smooth" });
+    } else if (tab === "tip" || tab === "tip-developer") {
+      if (secTipDeveloper) secTipDeveloper.classList.remove("hidden"); // Dedicated Tip Developer Tab
+      if (secChartsOverview) secChartsOverview.classList.add("hidden");
+      if (secInvestorProfile) secInvestorProfile.classList.add("hidden");
+      if (secMetricsSummary) secMetricsSummary.classList.add("hidden");
+      initTipDeveloper();
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } else if (tab === "regulatory") {
       if (secCompliance) secCompliance.classList.remove("hidden"); // Only show when user presses Regulatory Info
       if (secChartsOverview) secChartsOverview.classList.add("hidden");
@@ -4570,6 +4727,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (tabTarget) tabTarget.addEventListener("click", () => setTab("target"));
   if (tabScreener) tabScreener.addEventListener("click", () => setTab("screener"));
   if (tabPensionNews) tabPensionNews.addEventListener("click", () => setTab("pension-news"));
+  if (tabTipDeveloper) tabTipDeveloper.addEventListener("click", () => setTab("tip"));
   if (btnRegulatoryInfo) btnRegulatoryInfo.addEventListener("click", () => setTab("regulatory"));
 
   // Restore saved state from localStorage if available (e.g. when opened in a new tab)
@@ -4737,12 +4895,12 @@ document.addEventListener("DOMContentLoaded", () => {
   updateDrawdownCalculator();
   updateTargetRetirementPlanner();
 
-  // Check URL query parameters for deep-linking (e.g. ?tab=drawdown or ?tab=target or ?tab=screener or ?tab=pension-news or ?tab=regulatory)
+  // Check URL query parameters for deep-linking (e.g. ?tab=drawdown or ?tab=target or ?tab=screener or ?tab=pension-news or ?tab=tip or ?tab=regulatory)
   const urlParams = new URLSearchParams(window.location.search);
   const requestedTab = urlParams.get("tab") || window.location.hash.replace("#", "");
-  if (requestedTab && ["active", "passive", "drawdown", "target", "screener", "pension-news", "news", "regulatory"].includes(requestedTab)) {
+  if (requestedTab && ["active", "passive", "drawdown", "target", "screener", "pension-news", "news", "tip", "tip-developer", "regulatory"].includes(requestedTab)) {
     window._isPopoutInstance = true;
-    setTab(requestedTab === "news" ? "pension-news" : requestedTab, true);
+    setTab(requestedTab.startsWith("tip") ? "tip" : (requestedTab === "news" ? "pension-news" : requestedTab), true);
   } else {
     setTab("active", true);
   }
