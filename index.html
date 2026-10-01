@@ -181,24 +181,10 @@
               <i data-lucide="external-link" class="w-3 h-3"></i>
             </span>
           </button>
-
-          <!-- Tab 7: Regulatory Info -->
-          <button id="tab-regulatory" type="button" class="strategy-tab px-3.5 py-2 text-xs font-bold rounded-lg transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5" title="Fund Selection Methodology, Scoring Criteria & UK Regulatory Disclosures">
-            <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600 flex-shrink-0"></i>
-            <span>Regulatory Info</span>
-            <span onclick="event.stopPropagation(); openOptionInNewTab('regulatory')" class="popout-btn ml-1 p-0.5 rounded hover:bg-slate-200 text-slate-400 hover:text-slate-700 transition cursor-pointer" title="Open Regulatory Info in a new browser tab">
-              <i data-lucide="external-link" class="w-3 h-3"></i>
-            </span>
-          </button>
         </div>
 
-        <!-- Actions & Partner Links -->
+        <!-- Open in New Tab Toggle Switch -->
         <div class="flex items-center gap-2.5">
-          <a href="https://student-loan-dusky.vercel.app/" target="_blank" rel="noopener noreferrer" id="btn-uni-calc-nav" onclick="if(typeof trackGAEvent==='function') trackGAEvent('external_link_click', { destination: 'university_fees_calculator', location: 'strategy_bar' });" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-xs font-bold text-indigo-700 shadow-xs transition" title="Open University Fees Loan Calculator in a new tab">
-            <i data-lucide="graduation-cap" class="w-4 h-4 text-indigo-600"></i>
-            <span>University Fees Loan Calculator</span>
-            <i data-lucide="external-link" class="w-3.5 h-3.5 text-indigo-500"></i>
-          </a>
           <label for="toggle-new-tab-mode" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:border-brand-400 text-xs font-bold text-slate-700 shadow-xs cursor-pointer transition select-none" title="When enabled, clicking any option opens it directly in a new browser tab">
             <input type="checkbox" id="toggle-new-tab-mode" class="w-3.5 h-3.5 rounded text-brand-600 focus:ring-brand-500 border-slate-300 cursor-pointer">
             <span class="flex items-center gap-1.5">
@@ -2083,7 +2069,7 @@
 
         <!-- Tabs Quick Reference -->
         <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
-          <span class="font-bold text-slate-800 text-xs block">🧭 Quick Reference to Your 7 Tools at the Top:</span>
+          <span class="font-bold text-slate-800 text-xs block">🧭 Quick Reference to Your 6 Core Strategy Tabs:</span>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-slate-600">
             <div><strong class="text-brand-700">1. Active Fund Strategy:</strong> Veteran managers hand-picking stocks.</div>
             <div><strong class="text-teal-700">2. Passive Fund Strategy:</strong> Low-cost index trackers copying global markets.</div>
@@ -2091,8 +2077,10 @@
             <div><strong class="text-brand-700">4. How Much Do I Need to Retire?:</strong> Target pot & monthly savings planner.</div>
             <div><strong class="text-amber-700">5. Explore All Trustnet Funds:</strong> Full institutional database screener.</div>
             <div><strong class="text-rose-700">6. Latest news about Pensions:</strong> Live UK pension news, Triple Lock & policy tracker.</div>
-            <div><strong class="text-emerald-800">7. Regulatory Info:</strong> Strict FCA educational disclosures & scoring rules.</div>
           </div>
+          <p class="text-[10px] text-slate-500 pt-1 border-t border-slate-200/80">
+            *Looking for <strong>University Fees Loan Calculator</strong> or <strong>Regulatory Info</strong>? Both are accessible in the top menu bar alongside Export CSV and Print.
+          </p>
         </div>
 
         <div class="text-[11px] text-slate-500 bg-slate-100 p-3 rounded-lg border border-slate-200">

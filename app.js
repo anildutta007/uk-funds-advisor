@@ -4420,7 +4420,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const tabTarget = document.getElementById("tab-target");
   const tabScreener = document.getElementById("tab-screener");
   const tabPensionNews = document.getElementById("tab-pension-news");
-  const tabRegulatory = document.getElementById("tab-regulatory");
+  const btnRegulatoryInfo = document.getElementById("btn-regulatory-info");
 
   const secActive = document.getElementById("section-active");
   const secPassive = document.getElementById("section-passive");
@@ -4472,14 +4472,25 @@ document.addEventListener("DOMContentLoaded", () => {
       window.history.replaceState({ tab }, "", newUrl.toString());
     } catch (e) {}
 
-    // Reset all tabs to inactive styling
-    [tabActive, tabPassive, tabDrawdown, tabTarget, tabScreener, tabPensionNews, tabRegulatory].forEach(t => {
+    // Reset all strategy tabs to inactive styling
+    [tabActive, tabPassive, tabDrawdown, tabTarget, tabScreener, tabPensionNews].forEach(t => {
       if (t) {
         t.classList.remove("active");
         t.classList.remove("bg-white", "text-slate-900", "shadow-sm");
         t.classList.add("text-slate-600");
       }
     });
+
+    // Update Regulatory Info button styling on top bar
+    if (btnRegulatoryInfo) {
+      if (tab === "regulatory") {
+        btnRegulatoryInfo.classList.remove("bg-slate-100", "text-slate-700");
+        btnRegulatoryInfo.classList.add("bg-emerald-100", "text-emerald-900", "border-emerald-300", "shadow-xs");
+      } else {
+        btnRegulatoryInfo.classList.remove("bg-emerald-100", "text-emerald-900", "border-emerald-300", "shadow-xs");
+        btnRegulatoryInfo.classList.add("bg-slate-100", "text-slate-700");
+      }
+    }
 
     // Hide all sections initially (including regulatory compliance)
     [secActive, secPassive, secDrawdown, secTarget, secScreener, secPensionNews, secCompliance].forEach(s => s && s.classList.add("hidden"));
@@ -4491,8 +4502,7 @@ document.addEventListener("DOMContentLoaded", () => {
       target: tabTarget,
       screener: tabScreener,
       "pension-news": tabPensionNews,
-      news: tabPensionNews,
-      regulatory: tabRegulatory
+      news: tabPensionNews
     }[tab];
 
     if (activeBtn) {
@@ -4560,7 +4570,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (tabTarget) tabTarget.addEventListener("click", () => setTab("target"));
   if (tabScreener) tabScreener.addEventListener("click", () => setTab("screener"));
   if (tabPensionNews) tabPensionNews.addEventListener("click", () => setTab("pension-news"));
-  if (tabRegulatory) tabRegulatory.addEventListener("click", () => setTab("regulatory"));
+  if (btnRegulatoryInfo) btnRegulatoryInfo.addEventListener("click", () => setTab("regulatory"));
 
   // Restore saved state from localStorage if available (e.g. when opened in a new tab)
   try {
