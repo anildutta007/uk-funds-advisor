@@ -1697,7 +1697,7 @@
               <span class="px-2 py-0.2 rounded text-[10px] bg-emerald-200 text-emerald-900 font-bold">Bank-Grade</span>
             </h3>
             <p class="text-[11px] text-emerald-900/90 leading-relaxed mt-0.5">
-              This website <strong>never sees, handles, or stores your credit card numbers, CVV, or personal bank details</strong>. Payments are routed exclusively through FCA-regulated, PCI-DSS Level 1 compliant gateways (<strong>Apple Pay, Google Pay, and UK Debit/Credit Cards via Ko-fi</strong>).
+              This website <strong>never sees, handles, or stores your credit card numbers, CVV, or personal bank details</strong>. Payments are routed exclusively through FCA-regulated, PCI-DSS Level 1 compliant bank infrastructure (<strong>Apple Pay, Google Pay, and UK Debit Cards via Monzo Bank</strong>).
             </p>
           </div>
         </div>
@@ -1771,30 +1771,33 @@
             <div>
               <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
                 <i data-lucide="credit-card" class="w-4 h-4 text-emerald-600"></i>
-                Step 2: Complete Checkout via Secure Hosted Gateway
+                Step 2: Complete Checkout via Monzo Direct Pay
               </h3>
-              <p class="text-xs text-slate-500 mt-0.5">Click below to open the official, secure hosted Ko-fi payment page:</p>
+              <p class="text-xs text-slate-500 mt-0.5">Click below to open your secure Monzo.me payment page:</p>
             </div>
 
-            <!-- Ko-fi Checkout Card (Full Width) -->
-            <a id="btn-tip-kofi" href="https://ko-fi.com/anildutta" target="_blank" rel="noopener noreferrer" 
-               onclick="if(typeof trackGAEvent==='function') trackGAEvent('tip_initiated', { method: 'kofi' });"
-               class="p-4 sm:p-5 rounded-xl border-2 border-rose-200 bg-gradient-to-r from-rose-50 via-amber-50/30 to-rose-50 hover:border-rose-400 hover:shadow-md transition flex items-center justify-between group shadow-xs">
-              <div class="space-y-1">
+            <!-- Monzo Checkout Card (Full Width) -->
+            <a id="btn-tip-monzo" href="https://monzo.me/anildutta/1?d=Tip%20for%20UK%20Funds%20Advisor" target="_blank" rel="noopener noreferrer" 
+               onclick="if(typeof trackGAEvent==='function') trackGAEvent('tip_initiated', { method: 'monzo' });"
+               class="p-4 sm:p-5 rounded-xl border-2 border-slate-900 bg-gradient-to-r from-slate-900 via-[#1a2b49] to-slate-900 text-white hover:shadow-lg hover:border-[#ff365d] transition flex items-center justify-between group shadow-sm cursor-pointer">
+              <div class="space-y-1.5">
                 <div class="flex items-center gap-2 flex-wrap">
-                  <span class="text-sm font-bold text-rose-900">Ko-fi Checkout</span>
-                  <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-rose-200 text-rose-800">0% Platform Fee</span>
-                  <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-100 text-emerald-800">Bank-Grade 256-bit SSL</span>
+                  <div class="flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-[#ff365d]"></span>
+                    <span class="text-sm font-bold tracking-tight text-white">Monzo Pay</span>
+                  </div>
+                  <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-[#ff365d] text-white">0% Platform Fee</span>
+                  <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Direct UK Bank Transfer</span>
                 </div>
-                <p class="text-xs text-rose-800">Supports Apple Pay, Google Pay, and UK Debit / Credit Cards</p>
-                <div class="pt-1">
-                  <span class="text-xs sm:text-sm font-extrabold text-rose-700 group-hover:text-rose-900 flex items-center gap-1.5">
-                    Proceed to Tip <span class="tip-amount-display">£1.00</span> on Ko-fi
+                <p class="text-xs text-slate-300">Fast checkout with <strong>Apple Pay</strong>, <strong>Google Pay</strong>, or any UK debit card</p>
+                <div class="pt-0.5">
+                  <span class="text-xs sm:text-sm font-extrabold text-[#ff365d] group-hover:text-rose-300 flex items-center gap-1.5 transition-colors">
+                    Tip <span class="tip-amount-display font-black text-white">£1.00</span> via Monzo
                     <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
                   </span>
                 </div>
               </div>
-              <div class="w-11 h-11 rounded-xl bg-rose-200 text-rose-800 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition shadow-xs">
+              <div class="w-12 h-12 rounded-xl bg-white/10 text-white flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:bg-[#ff365d] transition shadow-xs">
                 <i data-lucide="external-link" class="w-5 h-5"></i>
               </div>
             </a>
@@ -1803,10 +1806,10 @@
             <div class="mt-3 p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-3 text-[11px] text-slate-500">
               <div class="flex items-center gap-2">
                 <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
-                <span>Direct tip link connected to: <strong id="tip-current-handle-label" class="text-slate-800 font-semibold">ko-fi.com/anildutta</strong></span>
+                <span>Direct tip link connected to: <strong id="tip-current-handle-label" class="text-slate-800 font-semibold">monzo.me/anildutta</strong></span>
               </div>
-              <a href="https://ko-fi.com/anildutta" target="_blank" rel="noopener noreferrer" class="font-bold text-brand-600 hover:text-brand-800 hover:underline flex-shrink-0">
-                View Ko-fi Profile ↗
+              <a href="https://monzo.me/anildutta" target="_blank" rel="noopener noreferrer" class="font-bold text-brand-600 hover:text-brand-800 hover:underline flex-shrink-0">
+                Open Monzo Link ↗
               </a>
             </div>
           </div>

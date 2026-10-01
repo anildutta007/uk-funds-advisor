@@ -4370,14 +4370,15 @@ window.initPensionNews = initPensionNews;
 
 /* ==========================================================================
    Developer Tipping Engine (Voluntary Support capped at £1 - £2)
-   100% External Hosted Checkout via Ko-fi (Apple Pay / Google Pay / UK Cards)
+   100% External Hosted Checkout via Monzo (Apple Pay / Google Pay / UK Cards)
    Zero Card Breach Risk
    ========================================================================== */
 
 window.TIP_CONFIG = {
   developerName: "Anil Dutta",
   defaultAmount: 1,
-  kofiBaseUrl: "https://ko-fi.com/anildutta"
+  monzoUsername: "anildutta",
+  monzoBaseUrl: "https://monzo.me/anildutta"
 };
 
 let currentTipAmount = 1;
@@ -4444,30 +4445,29 @@ function setTipAmount(amount) {
 }
 
 function updateTipButtonLinks() {
-  const kofiBtn = document.getElementById("btn-tip-kofi");
-  const kofiUrl = window.TIP_CONFIG.kofiBaseUrl;
+  const tipBtn = document.getElementById("btn-tip-monzo") || document.getElementById("btn-tip-kofi");
+  const monzoUser = window.TIP_CONFIG.monzoUsername || "anildutta";
+  const note = encodeURIComponent("Tip for UK Funds Advisor");
+  const targetUrl = `https://monzo.me/${monzoUser}/${currentTipAmount}?d=${note}`;
 
-  if (kofiBtn) {
-    kofiBtn.href = kofiUrl;
+  if (tipBtn) {
+    tipBtn.href = targetUrl;
   }
 
   const labelEl = document.getElementById("tip-current-handle-label");
   if (labelEl) {
-    labelEl.textContent = kofiUrl.replace(/^https?:\/\//, "");
+    labelEl.textContent = `monzo.me/${monzoUser}`;
   }
 }
 
 function promptCustomTipLink() {
-  const current = window.TIP_CONFIG.kofiBaseUrl;
-  const input = prompt("Enter your Ko-fi page URL (e.g. https://ko-fi.com/anildutta):", current);
+  const current = window.TIP_CONFIG.monzoUsername || "anildutta";
+  const input = prompt("Enter your Monzo.me username (e.g. anildutta):", current);
   if (input && input.trim()) {
-    let clean = input.trim();
-    if (!clean.startsWith("http")) {
-      clean = "https://ko-fi.com/" + clean.replace("@", "");
-    }
-    window.TIP_CONFIG.kofiBaseUrl = clean;
+    let clean = input.trim().replace(/^https?:\/\/monzo\.me\//i, "").replace("@", "");
+    window.TIP_CONFIG.monzoUsername = clean;
     updateTipButtonLinks();
-    alert("Ko-fi tip link updated successfully!");
+    alert("Monzo tip link updated successfully!");
   }
 }
 
