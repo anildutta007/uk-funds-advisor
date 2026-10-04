@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Training Presentation — Dutta UK Funds Selection Advisor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .slide {
+      display: none;
+      opacity: 0;
+      transition: opacity 0.25s ease-in-out;
+    }
+    .slide.active {
+      display: flex;
+      opacity: 1;
+    }
+    @media print {
+      body {
+        background: white !important;
+        color: black !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .slide {
+        display: flex !important;
+        opacity: 1 !important;
+        page-break-after: always;
+        height: 100vh !important;
+        width: 100% !important;
+        box-shadow: none !important;
+        border: none !important;
+        padding: 2rem !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-brand-500 selection:text-white">
+
+  <!-- Top Bar Navigation (Presentation Controls) -->
+  <header class="no-print bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 sm:px-8 py-3 sticky top-0 z-50 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 flex items-center justify-center text-white font-extrabold shadow-md">
+        <i data-lucide="presentation" class="w-5 h-5"></i>
+      </div>
+      <div>
+        <h1 class="text-sm font-extrabold text-white flex items-center gap-2">
+          <span>Dutta UK Funds Advisor</span>
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Training Deck</span>
+        </h1>
+        <p class="text-[11px] text-slate-400">Master User Training Guide & Interactive Walkthrough</p>
+      </div>
+    </div>
+
+    <!-- Center Slide Counter -->
+    <div class="flex items-center gap-2 bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700 text-xs font-semibold">
+      <span class="text-slate-400">Slide</span>
+      <span id="current-slide-num" class="text-white font-bold text-sm text-indigo-400">1</span>
+      <span class="text-slate-500">of</span>
+      <span id="total-slides-num" class="text-slate-300 font-bold">12</span>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex items-center gap-2">
+      <button onclick="window.print()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition flex items-center gap-1.5 border border-slate-700" title="Print or Save as PDF Slide Deck">
+        <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+        <span class="hidden sm:inline">Save as PDF</span>
+      </button>
+      <a href="index.html" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm" title="Launch the live application">
+        <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+        <span>Open App</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Presentation Stage / Slides Container -->
+  <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-8 flex items-center justify-center">
+
+    <!-- Slide 1: Welcome & Overview -->
+    <div class="slide active flex-col justify-between w-full min-h-[600px] bg-slate-900 border border-slate-800 rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden">
+      <div class="absolute -right-20 -top-20 w-80 h-80 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none"></div>
+      
+      <div class="space-y-4">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-bold">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+          <span>Module 0 • Welcome & Executive Summary</span>
+        </div>
+        <h2 class="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
+          Dutta UK Funds Selection Advisor &amp; Retirement Planner
+        </h2>
+        <p class="text-lg text-slate-300 max-w-2xl leading-relaxed">
+          The institutional-grade, zero-jargon retirement planning tool engineered for UK savers, ISA investors, and pension holders.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-6">
+        <div class="p-5 rounded-2xl bg-slate-800/60 border border-slate-700/80 space-y-2">
+          <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
+            <i data-lucide="database" class="w-4 h-4"></i>
+          </div>
+          <h3 class="font-bold text-white text-sm">Trustnet (FE fundinfo) Data</h3>
+          <p class="text-xs text-slate-400">Institutional factsheets, FE Crown ratings, alpha, and fee drag for 25+ top UK funds.</p>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-slate-800/60 border border-slate-700/80 space-y-2">
+          <div class="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold">
+            <i data-lucide="shield-check" class="w-4 h-4"></i>
+          </div>
+          <h3 class="font-bold text-white text-sm">HMRC Tax Wrapper Aware</h3>
+          <p class="text-xs text-slate-400">Models real UK tax rules: 25% tax-free UFPLS, Personal Allowance (£12,570), and tax-free ISAs.</p>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-slate-800/60 border border-slate-700/80 space-y-2">
+          <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold">
+            <i data-lucide="hourglass" class="w-4 h-4"></i>
+          </div>
+          <h3 class="font-bold text-white text-sm">Full Longevity Simulator</h3>
+          <p class="text-xs text-slate-400">Simulates private pot depletion into your 70s, 80s, and 90s with built-in State Pension relief.</p>
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+        <span>Use <kbd class="px-2 py-0.5 rounded bg-slate-800 text-slate-200 border border-slate-700 font-mono">←</kbd> and <kbd class="px-2 py-0.5 rounded bg-slate-800 text-slate-200 border border-slate-700 font-mono">→</kbd> keys to navigate</span>
+        <span class="text-indigo-400 font-semibold">Press Next Slide to Begin →</span>
+      </div>
+    </div>
+
+    <!-- Slide 2: Why This Tool Was Built -->
+    <div class="slide flex-col justify-between w-full min-h-[600px] bg-slate-900 border border-slate-800 rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden">
+      <div class="space-y-3">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-bold">
+          <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
+          <span>Module 1 • The 3 Big Pitfalls UK Investors Face</span>
+        </div>
+        <h2 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+          Why Did We Build This Calculator?
+        </h2>
+        <p class="text-sm text-slate-400">Most existing pension tools mislead savers by ignoring three fundamental realities:</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5 my-6">
+        <div class="p-6 rounded-2xl bg-slate-800/50 border border-slate-700 space-y-3">
+          <span class="text-2xl">😵‍💫</span>
+          <h3 class="font-bold text-white text-base">1. Jargon Overload</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Bank factsheets confuse people with terms like <em>alpha</em>, <em>beta</em>, <em>standard deviation</em>, and <em>OCF</em>. Savers don't know whether to choose active human managers or passive index trackers.
+          </p>
+          <div class="p-2.5 rounded-lg bg-indigo-950/50 border border-indigo-800/50 text-[11px] text-indigo-300">
+            <strong>Our Fix:</strong> Plain English explanations, visual risk cards, and 1-click fund swaps.
+          </div>
+        </div>
+
+        <div class="p-6 rounded-2xl bg-slate-800/50 border border-slate-700 space-y-3">
+          <span class="text-2xl">💸</span>
+          <h3 class="font-bold text-white text-base">2. The Inflation Blindspot</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Seeing "£800,000 at age 65" gives false confidence. With 3% inflation, £800k in 30 years only buys what <strong>£329,000 buys today</strong>!
+          </p>
+          <div class="p-2.5 rounded-lg bg-emerald-950/50 border border-emerald-800/50 text-[11px] text-emerald-300">
+            <strong>Our Fix:</strong> Every future calculation features a real-time <strong>"Today's World" purchasing power badge</strong>.
+          </div>
+        </div>
+
+        <div class="p-6 rounded-2xl bg-slate-800/50 border border-slate-700 space-y-3">
+          <span class="text-2xl">⏳</span>
+          <h3 class="font-bold text-white text-base">3. The Longevity Fear</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Standard retirement tools stop at your retirement party. They fail to tell you if your money will last until age 80, 88, or 95 once you start spending.
+          </p>
+          <div class="p-2.5 rounded-lg bg-amber-950/50 border border-amber-800/50 text-[11px] text-amber-300">
+            <strong>Our Fix:</strong> A month-by-month longevity simulator factoring in the UK State Pension.
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-slate-800 text-xs text-slate-500">
+        Key Principle: Education & transparency over opaque sales pitches.
+      </div>
+    </div>
+
+    <!-- Slide 3: Investor Profile Inputs -->
+    <div class="slide flex-col justify-between w-full min-h-[600px] bg-slate-900 border border-slate-800 rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden">
+      <div class="space-y-3">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs font-bold">
+          <i data-lucide="sliders" class="w-3.5 h-3.5"></i>
+          <span>Module 2 • Getting Started in 60 Seconds</span>
+        </div>
+        <h2 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+          Setting Up Your Investor Profile
+        </h2>
+        <p class="text-sm text-slate-400">Five quick inputs at the top of the app establish your personal financial trajectory:</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 my-6 items-center">
+        <div class="lg:col-span-7 space-y-3">
+          <div class="grid grid-cols-2 gap-3 text-xs">
+            <div class="p-3.5 rounded-xl bg-slate-800 border border-slate-700 space-y-1">
+              <span class="font-bold text-white">1. Current Age (yrs)</span>
+              <p class="text-slate-400 text-[11px]">Your age today. UK adult investing begins at 18.</p>
+            </div>
+            <div class="p-3.5 rounded-xl bg-slate-800 border border-slate-700 space-y-1">
+              <span class="font-bold text-white">2. Retirement Age (yrs)</span>
+              <p class="text-slate-400 text-[11px]">Target stopping age (UK State Pension is ~67).</p>
+            </div>
+            <div class="p-3.5 rounded-xl bg-slate-800 border border-slate-700 space-y-1">
+              <span class="font-bold text-white">3. Initial Lump Sum (£)</span>
+              <p class="text-slate-400 text-[11px]">Current savings ready to invest today (or £0).</p>
+            </div>
+            <div class="p-3.5 rounded-xl bg-slate-800 border border-slate-700 space-y-1">
+              <span class="font-bold text-white">4. Monthly Saving (£)</span>
+              <p class="text-slate-400 text-[11px]">Regular standing order to compound over time.</p>
+            </div>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-slate-800/60 border border-slate-700 flex items-center justify-between text-xs">
+            <div>
+              <span class="font-bold text-indigo-400">5. Target Annual Growth (%)</span>
+              <p class="text-slate-400 text-[11px]">Long-term compounding benchmark (e.g. 7.5% long-term global equity avg).</p>
+            </div>
+            <span class="text-lg font-black text-white px-3 py-1 rounded-lg bg-indigo-600/30 border border-indigo-500/30">7.5%</span>
+          </div>
+        </div>
+
+        <!-- Risk Profile Selection Box -->
+        <div class="lg:col-span-5 p-5 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-800/40 border border-slate-700 space-y-3">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Choose Your Volatility Tier:</span>
+          
+          <div class="space-y-2 text-xs">
+            <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-700 flex items-center justify-between">
+              <span class="font-bold text-emerald-400">🛡️ Low (Conservative)</span>
+              <span class="text-[10px] text-slate-400">20-30% Equity / Gilts</span>
+            </div>
+            <div class="p-2.5 rounded-xl bg-indigo-950/60 border border-indigo-500 flex items-center justify-between">
+              <span class="font-bold text-indigo-300">⚖️ Medium (Balanced)</span>
+              <span class="text-[10px] text-indigo-400 font-bold">60% Equity / 40% Bonds</span>
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-700 flex items-center justify-between">
+              <span class="font-bold text-rose-400">🚀 High (Aggressive)</span>
+              <span class="text-[10px] text-slate-400">90-100% Global Equity</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+        <span>The app automatically monitors your <strong>£20k ISA</strong> and <strong>£60k SIPP</strong> annual allowances.</span>
+      </div>
+    </div>
+
+    <!-- Slide 4: Today's World vs Nominal -->
+    <div class="slide flex-col justify-between w-full min-h-[600px] bg-slate-900 border border-slate-800 rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden">
+      <div class="space-y-3">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold">
+          <i data-lucide="coins" class="w-3.5 h-3.5"></i>
+          <span>Module 3 • Defeating the Inflation Illusion</span>
+        </div>
+        <h2 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+          "Nominal Money" vs. "Today's World" Value
+        </h2>
+        <p class="text-sm text-slate-400">Why the green badge is your most important benchmark on the entire platform:</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-6 items-center">
+        <!-- Visual Comparison Card -->
+        <div class="p-6 rounded-2xl bg-slate-800/80 border border-slate-700 space-y-4">
+          <div class="space-y-1">
+            <span class="text-xs uppercase font-bold text-slate-400 tracking-wider">Projected Future Number (Nominal)</span>
+            <div class="text-3xl sm:text-4xl font-black text-white">£842,500</div>
+            <p class="text-xs text-slate-400">The total cash figure on your bank statement in 30 years.</p>
+          </div>
+
+          <div class="pt-4 border-t border-slate-700 space-y-1">
+            <span class="text-xs uppercase font-bold text-emerald-400 tracking-wider flex items-center gap-1.5">
+              <i data-lucide="check-circle" class="w-4 h-4"></i>
+              "Today's World" Purchasing Power (@ 3% Inflation)
+            </span>
+            <div class="text-3xl sm:text-4xl font-black text-emerald-400">£347,200</div>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              What that £842,500 will <strong>actually buy in groceries, energy bills, dining out, and housing</strong> in today's currency!
+            </p>
+          </div>
+        </div>
+
+        <!-- The Formula & Rationale -->
+        <div class="p-6 rounded-2xl bg-emerald-950/20 border border-emerald-800/40 space-y-3 text-xs text-slate-300">
+          <h3 class="font-bold text-emerald-400 text-sm flex items-center gap-2">
+            <i data-lucide="calculator" class="w-4 h-4"></i>
+            The Discounting Math Under the Hood
+          </h3>
+          <p class="leading-relaxed">
+            The app applies the standard Bank of England long-term inflation target ($r = 3\%$):
+          </p>
+          <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 font-mono text-center text-sm text-white">
+            PV = FV / (1 + 0.03)^Years
+          </div>
+          <p class="leading-relaxed">
+            <strong>Why it protects you:</strong> If you only plan around the big future number, you will unintentionally under-save and face a shock at retirement. The green badge keeps your standard of living realistic.
+          </p>
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-slate-800 text-xs text-slate-400">
+        Rule of Thumb: Always budget your retirement lifestyle using "Today's World" values.
+      </div>
+    </div>
+
+    <!-- Slide 5: Active vs Passive Strategies -->
+    <div class="slide flex-col justify-between w-full min-h-[600px] bg-slate-900 border border-slate-800 rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden">
+      <div class="space-y-3">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-bold">
+          <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+          <span>Module 4 • Core Portfolios (Tabs 1 &amp; 2)</span>
+        </div>
+        <h2 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+          Active Management vs. Passive Indexing
+        </h2>
+        <p class="text-sm text-slate-400">Choose your investment philosophy, inspect fee drag, or swap funds safely:</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-6">
+        <!-- Active Tab 1 -->
+        <div class="p-6 rounded-2xl bg-slate-800/70 border border-indigo-500/40 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-white text-base flex items-center gap-2">
+              <i data-lucide="briefcase" class="w-4 h-4 text-indigo-400"></i>
+              Tab 1: Active Fund Strategy
+            </span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-300">Human Managers</span>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Star fund managers (e.g. Terry Smith, Royal London Sustainable Leaders) hand-picking quality companies to beat the index.
+          </p>
+          <ul class="text-xs text-slate-400 space-y-1.5 list-disc list-inside">
+            <li><strong>Pros:</strong> Potential to outperform market drops; high FE Crown ratings.</li>
+            <li><strong>Fee Drag:</strong> Typically 0.75% – 0.85% OCF annual fee.</li>
+          </ul>
+        </div>
+
+        <!-- Passive Tab 2 -->
+        <div class="p-6 rounded-2xl bg-slate-800/70 border border-teal-500/40 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-white text-base flex items-center gap-2">
+              <i data-lucide="layers" class="w-4 h-4 text-teal-400"></i>
+              Tab 2: Passive Index Strategy
+            </span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-teal-500/20 text-teal-300">Automated Trackers</span>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Rule-based funds (e.g. Vanguard FTSE Global All Cap, S&P 500) mechanically mirroring the whole market.
+          </p>
+          <ul class="text-xs text-slate-400 space-y-1.5 list-disc list-inside">
+            <li><strong>Pros:</strong> Ultra-low fee drag (0.07% – 0.22% OCF); guarantees market returns.</li>
+            <li><strong>Fee Drag:</strong> Minimal drag, allowing compound growth to maximize.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Swap Fund Feature -->
+      <div class="p-4 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-between text-xs">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <span class="font-bold text-white">The "Swap Fund" Safety Guardrail:</span>
+            <span class="text-slate-400 block text-[11px]">Clicking "Swap Fund" only shows sister funds from Trustnet with the exact same risk level so you can't accidentally destabilize your portfolio.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 6: The 3 Tax Wrappers -->
+    <div class="slide flex-col justify-between w-full min-h-[600px] bg-slate-900 border border-slate-800 rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden">
+      <div class="space-y-3">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+          <span>Module 5 • HMRC Tax Architecture</span>
+        </div>
+        <h2 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+          Understanding the 3 HMRC Account Structures
+        </h2>
+        <p class="text-sm text-slate-400">How you take money out determines how much HMRC keeps:</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-6">
+        <!-- Option 1: UFPLS -->
+        <div class="p-5 rounded-2xl bg-slate-800 border border-emerald-500/40 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="w-6 h-6 rounded-full bg-emerald-500 text-slate-950 font-black text-xs flex items-center justify-center">1</span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">Most Popular</span>
+          </div>
+          <h3 class="font-bold text-white text-sm">UK SIPP (25% UFPLS)</h3>
+          <p class="text-xs text-slate-300">
+            Uncrystallised Funds Pension Lump Sum. Every monthly withdrawal is automatically split:
+          </p>
+          <div class="p-2 rounded bg-slate-900 border border-slate-800 text-[11px] text-emerald-300">
+            ✓ 25% Tax-Free Cash<br>
+            ✓ 75% Taxable Income
+          </div>
+          <p class="text-[11px] text-slate-400">Use if you haven't taken your tax-free cash upfront.</p>
+        </div>
+
+        <!-- Option 2: 100% Taxable -->
+        <div class="p-5 rounded-2xl bg-slate-800 border border-amber-500/40 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="w-6 h-6 rounded-full bg-amber-500 text-slate-950 font-black text-xs flex items-center justify-center">2</span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300">Post-Lump Sum</span>
+          </div>
+          <h3 class="font-bold text-white text-sm">100% Taxable Drawdown</h3>
+          <p class="text-xs text-slate-300">
+            For retirees who already cashed out their full 25% tax-free lump sum upfront on day 1 (e.g. paying off a mortgage).
+          </p>
+          <div class="p-2 rounded bg-slate-900 border border-slate-800 text-[11px] text-amber-300">
+            100% of withdrawals are assessed against standard UK income tax bands.
+          </div>
+          <p class="text-[11px] text-slate-400">Utilizes Personal Allowance (£12,570).</p>
+        </div>
+
+        <!-- Option 3: ISA -->
+        <div class="p-5 rounded-2xl bg-slate-800 border border-sky-500/40 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="w-6 h-6 rounded-full bg-sky-500 text-slate-950 font-black text-xs flex items-center justify-center">3</span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-sky-500/20 text-sky-300">Zero Tax Ever</span>
+          </div>
+          <h3 class="font-bold text-white text-sm">Stocks &amp; Shares ISA</h3>
+          <p class="text-xs text-slate-300">
+            Funded with post-tax savings (up to £20,000/year). 
+          </p>
+          <div class="p-2 rounded bg-slate-900 border border-slate-800 text-[11px] text-sky-300">
+            £0.00 tax to HMRC forever. Withdrawals never impact your tax bracket!
+          </div>
+          <p class="text-[11px] text-slate-400">Total drawdown freedom.</p>
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-slate-800 text-xs text-slate-400">
+        Tip: In the live app, click the <strong>"Option Explainer"</strong> button on Tab 3 or 4 anytime for interactive help.
+      </div>
+    </div>
+
+    <!-- Slide 7: Longevity Simulator (Tab 3) -->
+    <div class="slide flex-col justify-between w-full min-h-[600px] bg-slate-900 border border-slate-800 rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden">
+      <div class="space-y-3">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-bold">
+          <i data-lucide="hourglass" class="w-3.5 h-3.5"></i>
+          <span>Module 6 • Tab 3: Longevity Simulator</span>
+        </div>
+        <h2 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+          "How Long Will My Fund Last?"
+        </h2>
+        <p class="text-sm text-slate-400">Simulating your actual retirement drawdown experience:</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-6 items-center">
+        <div class="space-y-4">
+          <div class="p-4 rounded-xl bg-slate-800 border border-slate-700 space-y-2 text-xs">
+            <span class="font-bold text-white block">1. Enter Desired Take-Home Cash:</span>
+            <p class="text-slate-300">Enter the clean monthly cash you want arriving in your bank account (e.g. £2,500/month).</p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-800 border border-slate-700 space-y-2 text-xs">
+            <span class="font-bold text-white block">2. Automatic Gross-Up for Tax:</span>
+            <p class="text-slate-300">The engine automatically calculates the gross withdrawal needed so your take-home cash matches your target after HMRC income tax.</p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-800 border border-slate-700 space-y-2 text-xs">
+            <span class="font-bold text-purple-400 block">3. State Pension Relief Kicks In:</span>
+            <p class="text-slate-300">At age 67, the full UK State Pension (£11,502/year) automatically kicks in, drastically lowering the burden on your private pot!</p>
+          </div>
+        </div>
+
+        <div class="p-6 rounded-2xl bg-purple-950/20 border border-purple-800/40 space-y-4 text-center">
+          <span class="text-xs font-bold uppercase tracking-wider text-purple-300">Sample Simulation Result</span>
+          <div class="text-4xl font-black text-white">Age 92</div>
+          <span class="inline-block px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 font-bold text-xs">
+            27 Years of Comfortable Drawdown
+          </span>
+          <p class="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed pt-2">
+            Even with conservative 5% post-retirement growth, the combined State Pension cushion keeps your capital alive past age 90.
+          </p>
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-slate-800 text-xs text-slate-400">
+        Features interactive year-by-year schedule showing ending balance, growth, and tax paid.
+      </div>
+    </div>
+
+    <!-- Slide 8: Target Nest Egg Planner (Tab 4) -->
+    <div class="slide flex-col justify-between w-full min-h-[600px] bg-slate-900 border border-slate-800 rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden">
+      <div class="space-y-3">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs font-bold">
+          <i data-lucide="target" class="w-3.5 h-3.5"></i>
+          <span>Module 7 • Tab 4: Reverse Target Planner</span>
+        </div>
+        <h2 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+          "How Much Do I Need to Retire?"
+        </h2>
+        <p class="text-sm text-slate-400">Working backwards from your dream retirement income:</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-6">
+        <div class="p-5 rounded-2xl bg-slate-800 border border-slate-700 space-y-2">
+          <span class="text-xs font-bold text-slate-400 uppercase">Step 1</span>
+          <h3 class="font-bold text-white text-base">Desired Annual Income</h3>
+          <p class="text-xs text-slate-300">Enter what you want to live on (e.g. £30,000/yr in today's money).</p>
+          <div class="text-xl font-extrabold text-white pt-2">£30,000 / yr</div>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-slate-800 border border-indigo-500/50 space-y-2">
+          <span class="text-xs font-bold text-indigo-400 uppercase">Step 2 (The Relief)</span>
+          <h3 class="font-bold text-white text-base">Minus State Pension</h3>
+          <p class="text-xs text-slate-300">The state pays £11,502/yr, leaving only £18,498 to fund privately!</p>
+          <div class="text-xl font-extrabold text-emerald-400 pt-2">-£11,502 / yr</div>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-slate-800 border border-emerald-500/50 space-y-2">
+          <span class="text-xs font-bold text-emerald-400 uppercase">Step 3</span>
+          <h3 class="font-bold text-white text-base">Required Nest Egg</h3>
+          <p class="text-xs text-slate-300">Using the 4% safe withdrawal rule, your required target pot is calculated.</p>
+          <div class="text-xl font-extrabold text-indigo-400 pt-2">£462,450</div>
+        </div>
+      </div>
+
+      <!-- Actionable Monthly Saving Breakdown -->
+      <div class="p-4 rounded-xl bg-slate-800/80 border border-slate-700 flex flex-wrap items-center justify-between gap-4 text-xs">
+        <span class="font-bold text-white">How much do you need to save each month to hit this target?</span>
+        <div class="flex items-center gap-4">
+          <div class="text-slate-300">🛡️ Low Risk: <strong class="text-white">£740/mo</strong></div>
+          <div class="text-indigo-400">⚖️ Medium: <strong class="text-white">£485/mo</strong></div>
+          <div class="text-rose-400">🚀 High: <strong class="text-white">£310/mo</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 9: Trustnet Screener (Tab 5) -->
+    <div class="slide flex-col justify-between w-full min-h-[600px] bg-slate-900 border border-slate-800 rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden">
+      <div class="space-y-3">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold">
+          <i data-lucide="compass" class="w-3.5 h-3.5"></i>
+          <span>Module 8 • Tab 5: Institutional Fund Screener</span>
+        </div>
+        <h2 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+          Explore All Trustnet Funds
+        </h2>
+        <p class="text-sm text-slate-400">Directly interrogate the underlying mutual fund &amp; ETF database:</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-6">
+        <div class="space-y-3 text-xs">
+          <div class="p-4 rounded-xl bg-slate-800 border border-slate-700 space-y-1">
+            <span class="font-bold text-white flex items-center gap-1.5">
+              <i data-lucide="filter" class="w-4 h-4 text-amber-400"></i>
+              Filter by Investment Sector
+            </span>
+            <p class="text-slate-400">Global Equities, UK Equity Income, Tech & Innovation, Strategic Bonds, and Money Market.</p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-800 border border-slate-700 space-y-1">
+            <span class="font-bold text-white flex items-center gap-1.5">
+              <i data-lucide="building" class="w-4 h-4 text-amber-400"></i>
+              Filter by Fund House
+            </span>
+            <p class="text-slate-400">Isolate funds managed by Vanguard, Fidelity, BlackRock, Fundsmith, Rathbones, or HSBC.</p>
+          </div>
+        </div>
+
+        <div class="p-6 rounded-2xl bg-amber-950/20 border border-amber-800/40 space-y-3 text-xs">
+          <h3 class="font-bold text-amber-400 text-sm">Key Factsheet Metrics Displayed:</h3>
+          <ul class="space-y-2 text-slate-300">
+            <li><strong>👑 FE Crown Rating (1 to 5):</strong> Measures superior alpha, consistency, and risk control.</li>
+            <li><strong>🏷️ Ongoing Charges Figure (OCF):</strong> The exact annual percentage deducted for fund management.</li>
+            <li><strong>📈 Alpha:</strong> Outperformance versus the benchmark index.</li>
+            <li><strong>📅 5-Year Return (%):</strong> Historical long-term performance.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-slate-800 text-xs text-slate-400">
+        Includes live search to look up any fund name instantly.
+      </div>
+    </div>
+
+    <!-- Slide 10: Pension News & Companion Tools -->
+    <div class="slide flex-col justify-between w-full min-h-[600px] bg-slate-900 border border-slate-800 rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden">
+      <div class="space-y-3">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-bold">
+          <i data-lucide="newspaper" class="w-3.5 h-3.5"></i>
+          <span>Module 9 • Real-Time News &amp; Ecosystem Tools</span>
+        </div>
+        <h2 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+          Pension News &amp; Companion Calculators
+        </h2>
+        <p class="text-sm text-slate-400">Staying up to date with UK fiscal policies and student loan planning:</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-6">
+        <!-- Tab 6: Pension News -->
+        <div class="p-6 rounded-2xl bg-slate-800 border border-rose-500/40 space-y-3">
+          <span class="font-bold text-white text-base flex items-center gap-2">
+            <i data-lucide="newspaper" class="w-4 h-4 text-rose-400"></i>
+            Tab 6: Latest News About Pensions
+          </span>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Curated updates covering the <strong>State Pension Triple Lock</strong>, HMRC tax thresholds, Autumn/Spring fiscal budgets, and DWP retirement age reviews.
+          </p>
+          <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 text-[11px] text-slate-400">
+            Sources: BBC News, Financial Times, MoneySavingExpert, The Guardian, The Telegraph & GOV.UK.
+          </div>
+        </div>
+
+        <!-- Top Menu Items -->
+        <div class="p-6 rounded-2xl bg-slate-800 border border-indigo-500/40 space-y-3">
+          <span class="font-bold text-white text-base flex items-center gap-2">
+            <i data-lucide="graduation-cap" class="w-4 h-4 text-indigo-400"></i>
+            Top Menu Companion Links
+          </span>
+          <ul class="text-xs text-slate-300 space-y-2">
+            <li><strong>🎓 University Fees Loan Calculator:</strong> Models student loan repayment tiers (Plan 2, Plan 5) alongside your retirement cash flow.</li>
+            <li><strong>🛡️ Regulatory Info:</strong> Explains FE fundinfo data licensing and regulatory independence.</li>
+            <li><strong>☕ Tip the Developer:</strong> Direct integration with Monzo Direct Pay (`monzo.me/anildutta`) for £1–£2 voluntary support tokens.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-slate-800 text-xs text-slate-400">
+        All news feeds update automatically without requiring manual page refreshes.
+      </div>
+    </div>
+
+    <!-- Slide 11: Exporting & PDF Reports -->
+    <div class="slide flex-col justify-between w-full min-h-[600px] bg-slate-900 border border-slate-800 rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden">
+      <div class="space-y-3">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold">
+          <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+          <span>Module 10 • Exporting &amp; Advisory Reporting</span>
+        </div>
+        <h2 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+          Sharing Plans with Advisors or Partners
+        </h2>
+        <p class="text-sm text-slate-400">How to extract your numbers for Excel, IFA meetings, or home filing:</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5 my-6">
+        <div class="p-6 rounded-2xl bg-slate-800 border border-slate-700 space-y-3">
+          <div class="w-9 h-9 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
+            <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
+          </div>
+          <h3 class="font-bold text-white text-base">Export CSV</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Click <strong>"Export CSV"</strong> to download a clean spreadsheet containing all fund weightings, projected values, fee drag, and monthly compounding schedules for Excel or Google Sheets.
+          </p>
+        </div>
+
+        <div class="p-6 rounded-2xl bg-slate-800 border border-slate-700 space-y-3">
+          <div class="w-9 h-9 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold">
+            <i data-lucide="printer" class="w-5 h-5"></i>
+          </div>
+          <h3 class="font-bold text-white text-base">Print / PDF Report</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Click <strong>"Print / PDF Report"</strong>. The app triggers bespoke print stylesheets that strip web menus, producing a clean, professional multi-page executive advisory document.
+          </p>
+        </div>
+
+        <div class="p-6 rounded-2xl bg-slate-800 border border-slate-700 space-y-3">
+          <div class="w-9 h-9 rounded-lg bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold">
+            <i data-lucide="external-link" class="w-5 h-5"></i>
+          </div>
+          <h3 class="font-bold text-white text-base">Multi-Tab Side-by-Side</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Toggle <strong>"Open options in new browser tab"</strong>. Compare Active Strategy on Monitor 1 while viewing Drawdown on Monitor 2 simultaneously!
+          </p>
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-slate-800 text-xs text-slate-400">
+        All export operations execute 100% locally in your browser—no financial data is transmitted to external servers.
+      </div>
+    </div>
+
+    <!-- Slide 12: Best Practices & Summary -->
+    <div class="slide flex-col justify-between w-full min-h-[600px] bg-slate-900 border border-slate-800 rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden">
+      <div class="space-y-3">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold">
+          <i data-lucide="award" class="w-3.5 h-3.5"></i>
+          <span>Module 11 • Best Practices &amp; Next Steps</span>
+        </div>
+        <h2 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+          Golden Rules for Every UK Investor
+        </h2>
+        <p class="text-sm text-slate-400">Remember these core principles when executing your retirement strategy:</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-6 text-xs text-slate-300">
+        <div class="space-y-3">
+          <div class="p-3.5 rounded-xl bg-slate-800 border border-slate-700 space-y-1">
+            <span class="font-bold text-white">1. Always Check "Today's World" Purchasing Power</span>
+            <p class="text-slate-400">Never budget around raw future nominal numbers—always use discounted figures.</p>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-slate-800 border border-slate-700 space-y-1">
+            <span class="font-bold text-white">2. Maximize Tax Allowances First</span>
+            <p class="text-slate-400">Take full advantage of the £20k ISA and £60k SIPP allowances to shelter growth from Capital Gains Tax.</p>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <div class="p-3.5 rounded-xl bg-slate-800 border border-slate-700 space-y-1">
+            <span class="font-bold text-white">3. Where to Purchase These Funds</span>
+            <p class="text-slate-400">All funds featured are standard UK UCITS funds available on <strong>Hargreaves Lansdown</strong>, <strong>AJ Bell</strong>, <strong>Interactive Investor</strong>, and <strong>Vanguard</strong>.</p>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-slate-800 border border-slate-700 space-y-1">
+            <span class="font-bold text-white">4. Regulatory Disclaimer</span>
+            <p class="text-slate-400">Educational scenario analysis tool. For bespoke tax advice, always consult an FCA-authorized IFA.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <span class="text-slate-400">Ready to build your plan?</span>
+        <a href="index.html" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition flex items-center gap-2 shadow-md">
+          <span>Launch Dutta UK Funds Advisor Now</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </a>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Bottom Navigation Bar (Prev / Next Buttons) -->
+  <footer class="no-print bg-slate-900/90 backdrop-blur-md border-t border-slate-800 px-4 sm:px-8 py-3 sticky bottom-0 z-50 flex items-center justify-between">
+    <button id="btn-prev-slide" onclick="changeSlide(-1)" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition flex items-center gap-1.5 border border-slate-700 disabled:opacity-40 disabled:cursor-not-allowed">
+      <i data-lucide="chevron-left" class="w-4 h-4"></i>
+      <span>Previous Slide</span>
+    </button>
+
+    <div class="flex items-center gap-1.5" id="slide-dots">
+      <!-- Dots injected dynamically -->
+    </div>
+
+    <button id="btn-next-slide" onclick="changeSlide(1)" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition flex items-center gap-1.5 shadow-md">
+      <span>Next Slide</span>
+      <i data-lucide="chevron-right" class="w-4 h-4"></i>
+    </button>
+  </footer>
+
+  <script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+
+    function renderSlide(index) {
+      if (index < 0) index = 0;
+      if (index >= totalSlides) index = totalSlides - 1;
+      currentSlide = index;
+
+      slides.forEach((s, idx) => {
+        if (idx === currentSlide) {
+          s.classList.add('active');
+        } else {
+          s.classList.remove('active');
+        }
+      });
+
+      document.getElementById('current-slide-num').textContent = currentSlide + 1;
+      document.getElementById('total-slides-num').textContent = totalSlides;
+
+      // Update Prev / Next buttons
+      document.getElementById('btn-prev-slide').disabled = currentSlide === 0;
+      const nextBtn = document.getElementById('btn-next-slide');
+      if (currentSlide === totalSlides - 1) {
+        nextBtn.innerHTML = '<span>Finish &amp; Open App</span> <i data-lucide="external-link" class="w-4 h-4"></i>';
+        nextBtn.onclick = () => { window.location.href = 'index.html'; };
+      } else {
+        nextBtn.innerHTML = '<span>Next Slide</span> <i data-lucide="chevron-right" class="w-4 h-4"></i>';
+        nextBtn.onclick = () => { changeSlide(1); };
+      }
+
+      // Update dots
+      updateDots();
+      lucide.createIcons();
+    }
+
+    function changeSlide(direction) {
+      renderSlide(currentSlide + direction);
+    }
+
+    function initDots() {
+      const container = document.getElementById('slide-dots');
+      container.innerHTML = '';
+      for (let i = 0; i < totalSlides; i++) {
+        const dot = document.createElement('button');
+        dot.className = `w-2 h-2 rounded-full transition-all ${i === 0 ? 'bg-indigo-500 w-5' : 'bg-slate-700 hover:bg-slate-500'}`;
+        dot.onclick = () => renderSlide(i);
+        dot.title = `Go to slide ${i + 1}`;
+        container.appendChild(dot);
+      }
+    }
+
+    function updateDots() {
+      const dots = document.querySelectorAll('#slide-dots button');
+      dots.forEach((dot, idx) => {
+        if (idx === currentSlide) {
+          dot.className = 'w-5 h-2 rounded-full bg-indigo-500 transition-all';
+        } else {
+          dot.className = 'w-2 h-2 rounded-full bg-slate-700 hover:bg-slate-500 transition-all';
+        }
+      });
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') {
+        changeSlide(1);
+      } else if (e.key === 'ArrowLeft') {
+        changeSlide(-1);
+      } else if (e.key === 'Home') {
+        renderSlide(0);
+      } else if (e.key === 'End') {
+        renderSlide(totalSlides - 1);
+      }
+    });
+
+    // Initialize
+    initDots();
+    renderSlide(0);
+  </script>
+</body>
+</html>
