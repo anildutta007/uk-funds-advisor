@@ -92,6 +92,12 @@
               <i data-lucide="database" class="w-3.5 h-3.5 text-emerald-600"></i>
               <span>Trustnet.com Data (FE fundinfo)</span>
             </span>
+            <!-- Live Visitor Counter Badge -->
+            <div id="visitor-counter-container" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 shadow-xs" title="Total site visits recorded in real time">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <img id="hits-badge-img" src="https://hits.sh/uk-funds-advisor.vercel.app.svg?style=flat-square&label=Visitors&color=0369a1&labelColor=1e293b" alt="Site Visitors" class="h-5 rounded inline-block shadow-xs" onerror="handleVisitorCounterError(this)" />
+              <span id="visitor-counter-fallback" class="hidden text-xs font-bold text-slate-800"></span>
+            </div>
           </div>
           <p class="text-xs text-slate-500">Active & Passive Allocation Models for ISAs, SIPPs & GIAs • Sourced from Trustnet Factsheets</p>
         </div>

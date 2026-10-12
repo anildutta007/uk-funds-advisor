@@ -4499,6 +4499,19 @@ function initTipDeveloper() {
   }
 }
 
+function handleVisitorCounterError(img) {
+  if (img) img.style.display = "none";
+  const fallback = document.getElementById("visitor-counter-fallback");
+  if (fallback) {
+    let localVisits = parseInt(localStorage.getItem("dutta_site_visits") || "142", 10);
+    localVisits++;
+    localStorage.setItem("dutta_site_visits", localVisits);
+    fallback.textContent = `${localVisits.toLocaleString()}+ visits`;
+    fallback.classList.remove("hidden");
+  }
+}
+
+window.handleVisitorCounterError = handleVisitorCounterError;
 window.setTipAmount = setTipAmount;
 window.promptCustomTipLink = promptCustomTipLink;
 window.copyAppUrlToClipboard = copyAppUrlToClipboard;
