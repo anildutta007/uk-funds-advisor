@@ -4021,118 +4021,144 @@ async function fetchLivePensionNews(force = false) {
   isFetchingLiveNews = true;
 
   const refreshIcon = document.getElementById("news-refresh-icon");
+  const refreshBtnText = document.getElementById("news-refresh-btn-text");
   const statusText = document.getElementById("news-status-text");
+  const statusBadge = document.getElementById("news-live-status");
+
   if (refreshIcon) refreshIcon.classList.add("animate-spin");
+  if (refreshBtnText && force) refreshBtnText.textContent = "Refreshing...";
   if (statusText) statusText.textContent = "Fetching live UK pension news...";
+  if (statusBadge) {
+    statusBadge.className = "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-800 border border-indigo-200 shadow-xs";
+  }
 
   try {
     const rssTarget = "https://news.google.com/rss/search?q=UK+pension+OR+State+Pension&hl=en-GB&gl=GB&ceid=GB:en";
-    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(rssTarget)}`;
+    const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssTarget)}`;
     
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 6000); // 6s timeout
+    const timeoutId = setTimeout(() => controller.abort(), 7000); // 7s timeout
 
-    const resp = await fetch(proxyUrl, { signal: controller.signal });
+    const resp = await fetch(apiUrl, { signal: controller.signal });
     clearTimeout(timeoutId);
 
     if (resp.ok) {
       const data = await resp.json();
-      if (data && data.contents) {
-        const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(data.contents, "text/xml");
-        const items = xmlDoc.querySelectorAll("item");
-
+      if (data && data.status === "ok" && Array.isArray(data.items) && data.items.length > 0) {
         const parsedLiveStories = [];
-        items.forEach((item, idx) => {
-          if (idx >= 15) return; // Keep top 15 live stories
-          const title = item.querySelector("title")?.textContent || "";
-          const link = item.querySelector("link")?.textContent || "";
-          const pubDateStr = item.querySelector("pubDate")?.textContent || "";
-          const sourceEl = item.querySelector("source");
-          const sourceName = sourceEl ? sourceEl.textContent : "UK Financial News";
-          const sourceUrl = sourceEl ? (sourceEl.getAttribute("url") || "") : "";
+        data.items.forEach((item, idx) => {
+          let rawTitle = (item.title || "").trim();
+          if (!rawTitle) return;
 
-          // Filter for relevance
-          const lowerTitle = title.toLowerCase();
-          if (!lowerTitle.includes("pension") && !lowerTitle.includes("retire") && !lowerTitle.includes("triple lock") && !lowerTitle.includes("annuity")) {
-            return;
+          let sourceName = "UK Financial News";
+          let cleanTitle = rawTitle;
+          const lastDash = rawTitle.lastIndexOf(" - ");
+          if (lastDash > -1) {
+            cleanTitle = rawTitle.substring(0, lastDash).trim();
+            sourceName = rawTitle.substring(lastDash + 3).trim();
           }
 
-          // Assign category
+          // Category classification
+          const lower = cleanTitle.toLowerCase();
           let category = "triple-lock";
           let categoryLabel = "Triple Lock & State Pension";
-          if (lowerTitle.includes("tax") || lowerTitle.includes("lump sum") || lowerTitle.includes("allowance") || lowerTitle.includes("sipp")) {
+          if (lower.includes("tax") || lower.includes("lump sum") || lower.includes("allowance") || lower.includes("sipp") || lower.includes("isa")) {
             category = "tax";
             categoryLabel = "Taxes, SIPP & Allowances";
-          } else if (lowerTitle.includes("workplace") || lowerTitle.includes("auto-enrol") || lowerTitle.includes("megafund") || lowerTitle.includes("employer")) {
+          } else if (lower.includes("workplace") || lower.includes("auto-enrol") || lower.includes("megafund") || lower.includes("employer") || lower.includes("social care")) {
             category = "workplace";
             categoryLabel = "Workplace & Auto-Enrolment";
-          } else if (lowerTitle.includes("age") || lowerTitle.includes("waspi") || lowerTitle.includes("67") || lowerTitle.includes("68")) {
+          } else if (lower.includes("age") || lower.includes("waspi") || lower.includes("65") || lower.includes("66") || lower.includes("67") || lower.includes("68")) {
             category = "age-waspi";
             categoryLabel = "Retirement Age & Waspi";
-          } else if (lowerTitle.includes("annuity") || lowerTitle.includes("drawdown") || lowerTitle.includes("pot")) {
+          } else if (lower.includes("annuity") || lower.includes("drawdown") || lower.includes("pot") || lower.includes("buy-in")) {
             category = "annuity";
             categoryLabel = "Annuities & Drawdown";
           }
 
-          // Clean title (remove trailing " - Source")
-          const cleanTitle = title.replace(/\s*-\s*[^-]+$/, "");
-
           // Format date
-          let dateStr = "Recent";
+          let dateStr = "Today";
           try {
-            if (pubDateStr) {
-              const d = new Date(pubDateStr);
+            if (item.pubDate) {
+              const d = new Date(item.pubDate.replace(" ", "T"));
               dateStr = d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
             }
           } catch (e) {}
 
+          // Source badge styling
           let badgeClass = "bg-slate-100 text-slate-800 border-slate-300";
-          if (sourceName.includes("BBC")) badgeClass = "bg-red-50 text-red-700 border-red-200";
-          else if (sourceName.includes("Financial Times") || sourceName.includes("FT")) badgeClass = "bg-rose-50 text-rose-800 border-rose-200";
-          else if (sourceName.includes("Guardian")) badgeClass = "bg-blue-50 text-blue-700 border-blue-200";
-          else if (sourceName.includes("MoneySavingExpert")) badgeClass = "bg-emerald-50 text-emerald-800 border-emerald-200";
-          else if (sourceName.includes("Telegraph")) badgeClass = "bg-slate-100 text-slate-800 border-slate-300";
-          else if (sourceName.includes("GOV") || sourceName.includes("DWP") || sourceName.includes("Parliament")) badgeClass = "bg-indigo-50 text-indigo-800 border-indigo-200";
-          else if (sourceName.includes("Reuters")) badgeClass = "bg-orange-50 text-orange-800 border-orange-200";
-          else if (sourceName.includes("Sky")) badgeClass = "bg-sky-50 text-sky-800 border-sky-200";
+          const sLower = sourceName.toLowerCase();
+          if (sLower.includes("bbc")) badgeClass = "bg-red-50 text-red-700 border-red-200";
+          else if (sLower.includes("financial times") || sLower.includes("ft")) badgeClass = "bg-rose-50 text-rose-800 border-rose-200";
+          else if (sLower.includes("guardian")) badgeClass = "bg-blue-50 text-blue-700 border-blue-200";
+          else if (sLower.includes("moneysavingexpert") || sLower.includes("mse")) badgeClass = "bg-emerald-50 text-emerald-800 border-emerald-200";
+          else if (sLower.includes("telegraph")) badgeClass = "bg-slate-800 text-white border-slate-700";
+          else if (sLower.includes("gov") || sLower.includes("dwp") || sLower.includes("parliament")) badgeClass = "bg-indigo-50 text-indigo-800 border-indigo-200";
+          else if (sLower.includes("reuters")) badgeClass = "bg-orange-50 text-orange-800 border-orange-200";
+          else if (sLower.includes("sky")) badgeClass = "bg-sky-50 text-sky-800 border-sky-200";
+          else if (sLower.includes("fidelity") || sLower.includes("aj bell") || sLower.includes("hargreaves")) badgeClass = "bg-brand-50 text-brand-800 border-brand-200";
+
+          // Clean description
+          let descText = (item.description || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+          if (!descText || descText.length < 20) {
+            descText = `Live reporting from ${sourceName} regarding ongoing UK pension developments, legislative proposals, and retirement impacts for British savers.`;
+          }
 
           parsedLiveStories.push({
             id: `live-${idx}-${Date.now()}`,
             title: cleanTitle,
             source: sourceName,
-            sourceDomain: sourceUrl,
+            sourceDomain: item.link || "",
             sourceBadgeClass: badgeClass,
             category,
             categoryLabel,
             date: dateStr,
             relativeTime: "Live Update",
-            summary: `Breaking reporting from ${sourceName} regarding ongoing UK pension developments, legislative proposals, and retirement impacts for British savers.`,
+            summary: descText,
             takeaway: "Keep your retirement horizon and personal tax wrappers updated in accordance with emerging policy changes.",
-            url: link,
+            url: item.link || "#",
             isBreaking: true
           });
         });
 
         if (parsedLiveStories.length > 0) {
-          // Merge deduplicated
           const existingTitles = new Set(PENSION_NEWS_DATABASE.map(n => n.title.toLowerCase().trim()));
           const newUniqueStories = parsedLiveStories.filter(s => !existingTitles.has(s.title.toLowerCase().trim()));
           
           livePensionArticles = [...newUniqueStories, ...PENSION_NEWS_DATABASE];
-          if (statusText) statusText.textContent = `🟢 Live Feed Synced (${livePensionArticles.length} stories)`;
+          const timeStr = new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+          if (statusText) statusText.textContent = `🟢 Live Feed Synced (${livePensionArticles.length} stories) • ${timeStr}`;
+          if (statusBadge) {
+            statusBadge.className = "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-xs";
+          }
         } else {
           livePensionArticles = [...PENSION_NEWS_DATABASE];
           if (statusText) statusText.textContent = `🟢 Curated Feed Synced (${livePensionArticles.length} stories)`;
         }
+      } else {
+        livePensionArticles = [...PENSION_NEWS_DATABASE];
+        if (statusText) statusText.textContent = `🔵 Verified Curated Feed (${livePensionArticles.length} stories)`;
       }
     } else {
       livePensionArticles = [...PENSION_NEWS_DATABASE];
       if (statusText) statusText.textContent = `🔵 Verified Curated Feed (${livePensionArticles.length} stories)`;
     }
+
+    if (refreshBtnText && force) {
+      refreshBtnText.textContent = "Refreshed! ✓";
+      setTimeout(() => {
+        if (refreshBtnText) refreshBtnText.textContent = "Refresh News";
+      }, 2200);
+    }
   } catch (err) {
     livePensionArticles = [...PENSION_NEWS_DATABASE];
     if (statusText) statusText.textContent = `🔵 Verified Curated Feed (${livePensionArticles.length} stories)`;
+    if (refreshBtnText && force) {
+      refreshBtnText.textContent = "Feed Active ✓";
+      setTimeout(() => {
+        if (refreshBtnText) refreshBtnText.textContent = "Refresh News";
+      }, 2200);
+    }
   } finally {
     isFetchingLiveNews = false;
     if (refreshIcon) refreshIcon.classList.remove("animate-spin");
