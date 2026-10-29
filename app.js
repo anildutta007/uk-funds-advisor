@@ -4640,12 +4640,6 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   function setTab(tab, forceSameWindow = false) {
-    const toggleNewTab = document.getElementById("toggle-new-tab-mode");
-    if (toggleNewTab && toggleNewTab.checked && !forceSameWindow && !window._isPopoutInstance) {
-      openOptionInNewTab(tab);
-      return;
-    }
-
     activeTab = tab;
     trackGAEvent("tab_view", { tab_name: tab });
 
@@ -4801,20 +4795,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (saved.passivePortfolio) passiveCustomPortfolio = saved.passivePortfolio;
     }
   } catch (e) {}
-
-  // Handle "Open in new browser tab" preference toggle
-  const toggleNewTabMode = document.getElementById("toggle-new-tab-mode");
-  if (toggleNewTabMode) {
-    try {
-      const savedPref = localStorage.getItem("dutta_new_tab_pref");
-      if (savedPref === "true") {
-        toggleNewTabMode.checked = true;
-      }
-      toggleNewTabMode.addEventListener("change", () => {
-        localStorage.setItem("dutta_new_tab_pref", toggleNewTabMode.checked ? "true" : "false");
-      });
-    } catch (e) {}
-  }
 
   const filterSectorEl = document.getElementById("screener-filter-sector");
   const filterHouseEl = document.getElementById("screener-filter-house");
