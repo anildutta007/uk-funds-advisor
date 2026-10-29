@@ -4931,6 +4931,6 @@ document.addEventListener("DOMContentLoaded", () => {
     window._isPopoutInstance = true;
     setTab(requestedTab.startsWith("tip") ? "tip" : (requestedTab === "news" ? "pension-news" : requestedTab), true);
   } else {
-    setTab("active", true);
+    setTab("target", true);
   }
 });
