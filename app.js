@@ -2629,6 +2629,7 @@ function findGrossWithdrawalForNet(targetNetAnnual, otherTaxableIncome = 0, taxW
  * Solves for the exact Gross Fund Withdrawal required such that total net cash in hand
  * (Fund Net + State Pension Net + Other Income Net) matches the target net income.
  * Integrates UK State Pension as taxable income consuming the standard Personal Allowance.
+ * Preserved for backwards compatibility and the Target Retirement & Savings Planner.
  */
 function solveFundWithdrawalForTotalNet(targetTotalNet, statePension = 0, otherTaxableIncome = 0, taxWrapper = "pension_ufpls") {
   const baseTaxable = statePension + otherTaxableIncome;
@@ -2705,59 +2706,297 @@ function solveFundWithdrawalForTotalNet(targetTotalNet, statePension = 0, otherT
 }
 
 /**
- * Runs the full retirement fund longevity simulation, calculates nominal & real balances,
- * incorporates UK State Pension under gov.uk age rules, updates KPI statistics,
- * updates the Chart.js graph, and populates the schedule table.
+ * Solves multi-pot retirement decumulation across SIPP, Stocks & Shares ISA, and Cash ISA,
+ * taking into account UK Income Tax brackets (PA £12,570, Basic Rate 20% up to £50,270, Higher Rate 40%),
+ * 25% tax-free UFPLS on SIPP, and 100% tax-free ISA withdrawals.
+ * In Smart Waterfall mode, it draws SIPP up to the £50,270 Higher Rate threshold and funds the rest
+ * from Cash and Stocks ISAs tax-free, avoiding the 40% tax trap.
+ */
+function solveMultiPotDrawdown({
+  targetNetShortfall = 0,
+  guaranteedGross = 0,
+  sippBalance = 0,
+  stocksIsaBalance = 0,
+  cashIsaBalance = 0,
+  strategyMode = "smart_waterfall"
+}) {
+  const baseTax = computeUkIncomeTax(guaranteedGross);
+  let sippGrossDrawn = 0;
+  let stocksIsaDrawn = 0;
+  let cashIsaDrawn = 0;
+
+  function evalSipp(g) {
+    if (g <= 0) return { gross: 0, net: 0, tax: 0, taxablePortion: 0, taxFreePortion: 0 };
+    const taxFreePortion = g * 0.25;
+    const taxablePortion = g * 0.75;
+    const totalTaxable = guaranteedGross + taxablePortion;
+    const totalTax = computeUkIncomeTax(totalTaxable);
+    const marginalTax = Math.max(0, totalTax - baseTax);
+    const net = g - marginalTax;
+    return { gross: g, net, tax: marginalTax, taxablePortion, taxFreePortion };
+  }
+
+  function solveGrossSippForNet(requiredNet, maxGrossCap = Infinity) {
+    if (requiredNet <= 0 || maxGrossCap <= 0) return 0;
+    let low = 0;
+    let high = Math.min(maxGrossCap, Math.max(requiredNet * 2.5, 50000));
+    while (evalSipp(high).net < requiredNet && high < maxGrossCap) {
+      high = Math.min(maxGrossCap, high * 1.5);
+      if (high >= maxGrossCap) break;
+    }
+    for (let i = 0; i < 40; i++) {
+      const mid = (low + high) / 2;
+      const res = evalSipp(mid);
+      if (Math.abs(res.net - requiredNet) < 0.005) return mid;
+      if (res.net < requiredNet) low = mid;
+      else high = mid;
+    }
+    return Math.min(maxGrossCap, (low + high) / 2);
+  }
+
+  let remainingNet = targetNetShortfall;
+
+  if (strategyMode === "smart_waterfall") {
+    // 1. Draw from SIPP up to the 20% Basic Rate ceiling (£50,270 taxable total)
+    const roomToHigherRateTaxable = Math.max(0, 50270 - guaranteedGross);
+    const maxGrossSippInBasicRate = roomToHigherRateTaxable / 0.75;
+    const availableSippInBasic = Math.min(sippBalance, maxGrossSippInBasicRate);
+
+    const grossNeededBasic = solveGrossSippForNet(remainingNet, availableSippInBasic);
+    const sippRes1 = evalSipp(grossNeededBasic);
+    sippGrossDrawn = sippRes1.gross;
+    remainingNet = Math.max(0, remainingNet - sippRes1.net);
+
+    // 2. Draw tax-free from ISAs to fund the excess without crossing into 40% Higher Rate Tax!
+    if (remainingNet > 0) {
+      // Cash ISA buffer first (preserves equity compounding in Stocks ISA)
+      const cashDraw = Math.min(remainingNet, cashIsaBalance);
+      cashIsaDrawn += cashDraw;
+      remainingNet -= cashDraw;
+
+      // Stocks & Shares ISA
+      if (remainingNet > 0) {
+        const stocksDraw = Math.min(remainingNet, stocksIsaBalance);
+        stocksIsaDrawn += stocksDraw;
+        remainingNet -= stocksDraw;
+      }
+    }
+
+    // 3. Fallback: If ISAs are fully exhausted and net income is still needed, tap remaining SIPP (even at 40%)
+    if (remainingNet > 0 && (sippBalance - sippGrossDrawn) > 0) {
+      const currentSippNet = sippRes1.net;
+      const totalSippNetNeeded = currentSippNet + remainingNet;
+      sippGrossDrawn = solveGrossSippForNet(totalSippNetNeeded, sippBalance);
+    }
+  } else if (strategyMode === "pro_rata") {
+    const totalPots = sippBalance + stocksIsaBalance + cashIsaBalance;
+    if (totalPots > 0 && remainingNet > 0) {
+      const sippRatio = sippBalance / totalPots;
+      const stocksRatio = stocksIsaBalance / totalPots;
+      const cashRatio = cashIsaBalance / totalPots;
+
+      const targetNetSipp = remainingNet * sippRatio;
+      const targetNetStocks = remainingNet * stocksRatio;
+      const targetNetCash = remainingNet * cashRatio;
+
+      cashIsaDrawn = Math.min(cashIsaBalance, targetNetCash);
+      stocksIsaDrawn = Math.min(stocksIsaBalance, targetNetStocks);
+
+      sippGrossDrawn = solveGrossSippForNet(targetNetSipp, sippBalance);
+      const currentNet = evalSipp(sippGrossDrawn).net + cashIsaDrawn + stocksIsaDrawn;
+      remainingNet = Math.max(0, targetNetShortfall - currentNet);
+
+      // Spillover if any pot hit its limit
+      if (remainingNet > 0) {
+        const remCash = Math.min(remainingNet, cashIsaBalance - cashIsaDrawn);
+        cashIsaDrawn += remCash;
+        remainingNet -= remCash;
+
+        const remStocks = Math.min(remainingNet, stocksIsaBalance - stocksIsaDrawn);
+        stocksIsaDrawn += remStocks;
+        remainingNet -= remStocks;
+
+        if (remainingNet > 0 && (sippBalance - sippGrossDrawn) > 0) {
+          const curSippNet = evalSipp(sippGrossDrawn).net;
+          sippGrossDrawn = solveGrossSippForNet(curSippNet + remainingNet, sippBalance);
+        }
+      }
+    }
+  } else if (strategyMode === "isa_first") {
+    // Cash ISA -> Stocks ISA -> SIPP
+    const cashDraw = Math.min(remainingNet, cashIsaBalance);
+    cashIsaDrawn += cashDraw;
+    remainingNet -= cashDraw;
+
+    if (remainingNet > 0) {
+      const stocksDraw = Math.min(remainingNet, stocksIsaBalance);
+      stocksIsaDrawn += stocksDraw;
+      remainingNet -= stocksDraw;
+    }
+
+    if (remainingNet > 0 && sippBalance > 0) {
+      sippGrossDrawn = solveGrossSippForNet(remainingNet, sippBalance);
+    }
+  } else if (strategyMode === "sipp_first") {
+    // SIPP first -> Cash ISA -> Stocks ISA
+    sippGrossDrawn = solveGrossSippForNet(remainingNet, sippBalance);
+    const sippNet = evalSipp(sippGrossDrawn).net;
+    remainingNet = Math.max(0, remainingNet - sippNet);
+
+    if (remainingNet > 0) {
+      const cashDraw = Math.min(remainingNet, cashIsaBalance);
+      cashIsaDrawn += cashDraw;
+      remainingNet -= cashDraw;
+    }
+
+    if (remainingNet > 0) {
+      const stocksDraw = Math.min(remainingNet, stocksIsaBalance);
+      stocksIsaDrawn += stocksDraw;
+      remainingNet -= stocksDraw;
+    }
+  }
+
+  const finalSippRes = evalSipp(sippGrossDrawn);
+  const totalTaxable = guaranteedGross + finalSippRes.taxablePortion;
+  const totalTax = computeUkIncomeTax(totalTaxable);
+  const taxOnFund = Math.max(0, totalTax - baseTax);
+  const netFromFund = finalSippRes.net + stocksIsaDrawn + cashIsaDrawn;
+  const totalNetReceived = (guaranteedGross - baseTax) + netFromFund;
+
+  return {
+    sippGrossDrawn,
+    sippNet: finalSippRes.net,
+    sippTax: finalSippRes.tax,
+    sippTaxFreePortion: finalSippRes.taxFreePortion,
+    sippTaxablePortion: finalSippRes.taxablePortion,
+    stocksIsaDrawn,
+    cashIsaDrawn,
+    totalGrossDrawn: sippGrossDrawn + stocksIsaDrawn + cashIsaDrawn,
+    baseTax,
+    totalTax,
+    taxOnFund,
+    netFromFund,
+    totalNetReceived
+  };
+}
+
+/**
+ * Quick Allocation Preset Handler for the 3 Pots (SIPP, Stocks ISA, Cash ISA)
+ */
+window.applyPotSplitPreset = function(sippPct, stocksIsaPct, cashIsaPct) {
+  const sippEl = document.getElementById("drawdown-sipp-value");
+  const stocksEl = document.getElementById("drawdown-stocks-isa-value");
+  const cashEl = document.getElementById("drawdown-cash-isa-value");
+  if (!sippEl || !stocksEl || !cashEl) return;
+  const currentTotal = (parseFloat(sippEl.value) || 0) + (parseFloat(stocksEl.value) || 0) + (parseFloat(cashEl.value) || 0);
+  const total = currentTotal > 0 ? currentTotal : 500000;
+  sippEl.value = Math.round(total * sippPct);
+  stocksEl.value = Math.round(total * stocksIsaPct);
+  cashEl.value = Math.round(total * cashIsaPct);
+  updateDrawdownCalculator();
+  saveAdvisorState();
+};
+
+/**
+ * Runs the full multi-pot retirement fund longevity simulation, calculates nominal & real balances,
+ * incorporates UK State Pension, Final Salary (DB) Pension, Rental & other incomes under HMRC tax bands,
+ * executes the optimal tax-waterfall decumulation schedule, updates KPI cards, chart, and schedule table.
  */
 function updateDrawdownCalculator() {
-  const fundValueEl = document.getElementById("drawdown-fund-value");
+  const sippValEl = document.getElementById("drawdown-sipp-value");
+  const sippGrowthEl = document.getElementById("drawdown-sipp-growth");
+  const stocksIsaValEl = document.getElementById("drawdown-stocks-isa-value");
+  const stocksIsaGrowthEl = document.getElementById("drawdown-stocks-isa-growth");
+  const cashIsaValEl = document.getElementById("drawdown-cash-isa-value");
+  const cashIsaGrowthEl = document.getElementById("drawdown-cash-isa-growth");
+
   const retireAgeEl = document.getElementById("drawdown-retire-age");
   const netMonthlyEl = document.getElementById("drawdown-net-monthly");
-  const fundGrowthEl = document.getElementById("drawdown-fund-growth");
-  const taxWrapperEl = document.getElementById("drawdown-tax-wrapper");
+  const strategyModeEl = document.getElementById("drawdown-strategy-mode");
   const inflationRateEl = document.getElementById("drawdown-inflation-rate");
   const inflationAdjustEl = document.getElementById("drawdown-inflation-adjust");
+
   const includeSPEl = document.getElementById("drawdown-include-state-pension");
   const spAgeEl = document.getElementById("drawdown-state-pension-age");
   const spAmountEl = document.getElementById("drawdown-state-pension-amount");
+  const dbPensionAmountEl = document.getElementById("drawdown-db-pension-amount");
+  const dbPensionAgeEl = document.getElementById("drawdown-db-pension-age");
+  const rentalIncomeEl = document.getElementById("drawdown-rental-income");
   const otherIncomeEl = document.getElementById("drawdown-other-income");
 
-  if (!fundValueEl || !retireAgeEl || !netMonthlyEl || !fundGrowthEl) return;
+  if (!sippValEl || !retireAgeEl || !netMonthlyEl) return;
 
-  const initialFund = Math.max(0, parseFloat(fundValueEl.value) || 0);
+  const sippValue = Math.max(0, parseFloat(sippValEl.value) || 0);
+  const sippGrowthPct = parseFloat(sippGrowthEl ? sippGrowthEl.value : 5.5) || 5.5;
+  const stocksIsaValue = Math.max(0, parseFloat(stocksIsaValEl ? stocksIsaValEl.value : 0) || 0);
+  const stocksIsaGrowthPct = parseFloat(stocksIsaGrowthEl ? stocksIsaGrowthEl.value : 6.5) || 6.5;
+  const cashIsaValue = Math.max(0, parseFloat(cashIsaValEl ? cashIsaValEl.value : 0) || 0);
+  const cashIsaGrowthPct = parseFloat(cashIsaGrowthEl ? cashIsaGrowthEl.value : 4.0) || 4.0;
+
+  const totalPot = sippValue + stocksIsaValue + cashIsaValue;
+
+  // Update total portfolio badge & hidden input
+  const totalPotDisplay = document.getElementById("drawdown-total-pot-display");
+  if (totalPotDisplay) {
+    totalPotDisplay.textContent = `£${Math.round(totalPot).toLocaleString()}`;
+  }
+  const fundValHidden = document.getElementById("drawdown-fund-value");
+  if (fundValHidden) fundValHidden.value = totalPot;
+  const weightedGrowth = totalPot > 0 
+    ? ((sippValue * sippGrowthPct + stocksIsaValue * stocksIsaGrowthPct + cashIsaValue * cashIsaGrowthPct) / totalPot) 
+    : 5.5;
+  const fundGrowthHidden = document.getElementById("drawdown-fund-growth");
+  if (fundGrowthHidden) fundGrowthHidden.value = weightedGrowth.toFixed(1);
+
   const retireAge = Math.max(40, parseInt(retireAgeEl.value, 10) || 65);
   const netMonthly = Math.max(0, parseFloat(netMonthlyEl.value) || 0);
-  const annualGrowthPct = parseFloat(fundGrowthEl.value) || 0;
-  const taxWrapper = taxWrapperEl ? taxWrapperEl.value : "pension_ufpls";
+  const strategyMode = strategyModeEl ? strategyModeEl.value : "smart_waterfall";
   const inflationPct = parseFloat(inflationRateEl ? inflationRateEl.value : 3.0) || 3.0;
   const adjustForInflation = inflationAdjustEl ? inflationAdjustEl.checked : true;
+
   const includeStatePension = includeSPEl ? includeSPEl.checked : true;
   const statePensionAge = parseInt(spAgeEl ? spAgeEl.value : 67, 10) || 67;
   const statePensionAnnual = Math.max(0, parseFloat(spAmountEl ? spAmountEl.value : 11973) || 11973);
-  const otherIncome = Math.max(0, parseFloat(otherIncomeEl ? otherIncomeEl.value : 0) || 0);
 
-  const annualGrowthRate = annualGrowthPct / 100;
+  const dbPensionAnnual = Math.max(0, parseFloat(dbPensionAmountEl ? dbPensionAmountEl.value : 0) || 0);
+  const dbPensionAge = parseInt(dbPensionAgeEl ? dbPensionAgeEl.value : 65, 10) || 65;
+  const rentalIncomeAnnual = Math.max(0, parseFloat(rentalIncomeEl ? rentalIncomeEl.value : 0) || 0);
+  const otherIncomeAnnual = Math.max(0, parseFloat(otherIncomeEl ? otherIncomeEl.value : 0) || 0);
+
   const annualInflationRate = inflationPct / 100;
-  const monthlyGrowthRate = Math.pow(1 + annualGrowthRate, 1 / 12) - 1;
   const annualTargetNet = netMonthly * 12;
 
-  // Compute Year 1 Gross & Tax metrics for top cards
+  const monthlyGrowthSipp = Math.pow(1 + (sippGrowthPct / 100), 1 / 12) - 1;
+  const monthlyGrowthStocks = Math.pow(1 + (stocksIsaGrowthPct / 100), 1 / 12) - 1;
+  const monthlyGrowthCash = Math.pow(1 + (cashIsaGrowthPct / 100), 1 / 12) - 1;
+
+  // Year 1 Snapshot metrics
   const isYear1SPEligible = includeStatePension && (retireAge >= statePensionAge);
   const year1SP = isYear1SPEligible ? statePensionAnnual : 0;
-  const year1Solve = solveFundWithdrawalForTotalNet(annualTargetNet, year1SP, otherIncome, taxWrapper);
-  const year1GrossAnnual = year1Solve.grossWithdrawal;
-  const year1GrossMonthly = year1GrossAnnual / 12;
-  const year1TaxAnnual = year1Solve.totalTax;
-  const year1TaxMonthly = year1TaxAnnual / 12;
+  const isYear1DBEligible = (retireAge >= dbPensionAge);
+  const year1DB = isYear1DBEligible ? dbPensionAnnual : 0;
+  const year1GuaranteedGross = year1SP + year1DB + rentalIncomeAnnual + otherIncomeAnnual;
+  const year1GuaranteedTax = computeUkIncomeTax(year1GuaranteedGross);
+  const year1GuaranteedNet = Math.max(0, year1GuaranteedGross - year1GuaranteedTax);
+  const year1Shortfall = Math.max(0, annualTargetNet - year1GuaranteedNet);
 
-  // Compute metrics after State Pension kicks in (e.g. at Age 67 in today's money)
-  const postSPSolve = solveFundWithdrawalForTotalNet(annualTargetNet, statePensionAnnual, otherIncome, taxWrapper);
-  const postSPGrossMonthly = postSPSolve.grossWithdrawal / 12;
-  const postSPGrossAnnual = postSPSolve.grossWithdrawal;
-  const postSPAnnualSavings = Math.max(0, year1GrossAnnual - postSPGrossAnnual);
+  const year1Solve = solveMultiPotDrawdown({
+    targetNetShortfall: year1Shortfall,
+    guaranteedGross: year1GuaranteedGross,
+    sippBalance: sippValue,
+    stocksIsaBalance: stocksIsaValue,
+    cashIsaBalance: cashIsaValue,
+    strategyMode
+  });
 
-  // Run Simulation
-  let balance = initialFund;
+  // Calculate un-optimised single-pot comparison (tax if 100% came from SIPP)
+  const unoptimisedYear1Solve = solveFundWithdrawalForTotalNet(annualTargetNet, year1SP, year1DB + rentalIncomeAnnual + otherIncomeAnnual, "pension_ufpls");
+  const year1TaxSavings = Math.max(0, unoptimisedYear1Solve.totalTax - year1Solve.totalTax);
+
+  // Simulation run
+  let balSipp = sippValue;
+  let balStocks = stocksIsaValue;
+  let balCash = cashIsaValue;
   let currentYear = new Date().getFullYear();
   let schedule = [];
   let isDepleted = false;
@@ -2765,31 +3004,38 @@ function updateDrawdownCalculator() {
   let totalNetWithdrawn = 0;
   let totalGrossWithdrawn = 0;
   let totalTaxPaid = 0;
+  let totalBenchmarkTax = 0;
 
   const maxSimYears = 45;
 
-  // Initial milestone at Age retireAge (Year 0)
+  // Initial Year 0 milestone
   schedule.push({
     age: retireAge,
     year: currentYear,
-    startBalance: initialFund,
-    growthEarned: 0,
-    grossWithdrawal: 0,
-    statePension: 0,
+    sp: 0,
+    db: 0,
+    rentalAndOther: 0,
+    sippGrossDrawn: 0,
+    stocksIsaDrawn: 0,
+    cashIsaDrawn: 0,
+    totalGrossDrawn: 0,
     ukTaxPaid: 0,
     netFromFund: 0,
     totalNetReceived: 0,
-    endBalanceNominal: initialFund,
-    endBalanceReal: initialFund,
+    balSipp: sippValue,
+    balStocks: stocksIsaValue,
+    balCash: cashIsaValue,
+    balTotal: totalPot,
+    balTotalReal: totalPot,
     isInitial: true
   });
 
   for (let yr = 0; yr < maxSimYears; yr++) {
     const ageAtStart = retireAge + yr;
     const calendarYear = currentYear + yr;
-    const startBalance = balance;
+    const totalBalAtStart = balSipp + balStocks + balCash;
 
-    if (balance <= 0) {
+    if (totalBalAtStart <= 0) {
       if (!isDepleted) {
         isDepleted = true;
         depletionAge = ageAtStart;
@@ -2797,67 +3043,120 @@ function updateDrawdownCalculator() {
       break;
     }
 
-    const inflationFactor = Math.pow(1 + annualInflationRate, yr);
+    const inflationFactor = adjustForInflation ? Math.pow(1 + annualInflationRate, yr) : 1;
+    const targetNetYr = annualTargetNet * inflationFactor;
+
     const isSPEligible = includeStatePension && (ageAtStart >= statePensionAge);
-    const statePensionThisYear = isSPEligible ? (adjustForInflation ? (statePensionAnnual * inflationFactor) : statePensionAnnual) : 0;
-    const otherIncomeThisYear = adjustForInflation ? (otherIncome * inflationFactor) : otherIncome;
-    const targetNetThisYear = adjustForInflation ? (annualTargetNet * inflationFactor) : annualTargetNet;
+    const spYr = isSPEligible ? (adjustForInflation ? (statePensionAnnual * inflationFactor) : statePensionAnnual) : 0;
+    const isDBEligible = (ageAtStart >= dbPensionAge);
+    const dbYr = isDBEligible ? (adjustForInflation ? (dbPensionAnnual * inflationFactor) : dbPensionAnnual) : 0;
+    const rentalYr = adjustForInflation ? (rentalIncomeAnnual * inflationFactor) : rentalIncomeAnnual;
+    const otherYr = adjustForInflation ? (otherIncomeAnnual * inflationFactor) : otherIncomeAnnual;
 
-    const solveRes = solveFundWithdrawalForTotalNet(targetNetThisYear, statePensionThisYear, otherIncomeThisYear, taxWrapper);
-    const grossThisYear = solveRes.grossWithdrawal;
-    const monthlyGrossThisYear = grossThisYear / 12;
+    const guaranteedGrossYr = spYr + dbYr + rentalYr + otherYr;
+    const guaranteedTaxYr = computeUkIncomeTax(guaranteedGrossYr);
+    const guaranteedNetYr = Math.max(0, guaranteedGrossYr - guaranteedTaxYr);
+    const shortfallYr = Math.max(0, targetNetYr - guaranteedNetYr);
 
-    let yearGrowth = 0;
-    let actualGrossDrawn = 0;
+    const solveYr = solveMultiPotDrawdown({
+      targetNetShortfall: shortfallYr,
+      guaranteedGross: guaranteedGrossYr,
+      sippBalance: balSipp,
+      stocksIsaBalance: balStocks,
+      cashIsaBalance: balCash,
+      strategyMode
+    });
+
+    // Unoptimised benchmark tax for comparison
+    const unoptSolveYr = solveFundWithdrawalForTotalNet(targetNetYr, spYr, dbYr + rentalYr + otherYr, "pension_ufpls");
+    totalBenchmarkTax += unoptSolveYr.totalTax;
+
+    const monthlySippGross = solveYr.sippGrossDrawn / 12;
+    const monthlyStocksGross = solveYr.stocksIsaDrawn / 12;
+    const monthlyCashGross = solveYr.cashIsaDrawn / 12;
+
+    let yrActualSipp = 0;
+    let yrActualStocks = 0;
+    let yrActualCash = 0;
 
     for (let m = 0; m < 12; m++) {
-      if (balance <= 0) break;
+      if (balSipp <= 0 && balStocks <= 0 && balCash <= 0) break;
 
-      const monthInterest = balance * monthlyGrowthRate;
-      yearGrowth += monthInterest;
-      balance += monthInterest;
+      // Compound monthly growth
+      balSipp += balSipp * monthlyGrowthSipp;
+      balStocks += balStocks * monthlyGrowthStocks;
+      balCash += balCash * monthlyGrowthCash;
 
-      if (balance >= monthlyGrossThisYear) {
-        balance -= monthlyGrossThisYear;
-        actualGrossDrawn += monthlyGrossThisYear;
+      // Deduct SIPP
+      if (balSipp >= monthlySippGross) {
+        balSipp -= monthlySippGross;
+        yrActualSipp += monthlySippGross;
       } else {
-        actualGrossDrawn += balance;
-        balance = 0;
+        yrActualSipp += balSipp;
+        balSipp = 0;
+      }
+
+      // Deduct Stocks ISA
+      if (balStocks >= monthlyStocksGross) {
+        balStocks -= monthlyStocksGross;
+        yrActualStocks += monthlyStocksGross;
+      } else {
+        yrActualStocks += balStocks;
+        balStocks = 0;
+      }
+
+      // Deduct Cash ISA
+      if (balCash >= monthlyCashGross) {
+        balCash -= monthlyCashGross;
+        yrActualCash += monthlyCashGross;
+      } else {
+        yrActualCash += balCash;
+        balCash = 0;
+      }
+
+      if (balSipp + balStocks + balCash <= 0 && !isDepleted) {
         isDepleted = true;
         depletionAge = ageAtStart + ((m + 1) / 12);
         break;
       }
     }
 
-    const drawRatio = grossThisYear > 0 ? (actualGrossDrawn / grossThisYear) : 1;
-    const actualTaxOnFund = solveRes.taxOnFund * drawRatio;
-    const actualTotalTax = (solveRes.totalTax - solveRes.taxOnFund) + actualTaxOnFund;
-    const actualNetFromFund = Math.max(0, actualGrossDrawn - actualTaxOnFund);
-    const actualTotalNet = actualNetFromFund + Math.max(0, statePensionThisYear + otherIncomeThisYear - (solveRes.totalTax - solveRes.taxOnFund));
+    const actualTotalGross = yrActualSipp + yrActualStocks + yrActualCash;
+    const actualTaxOnFund = solveYr.sippGrossDrawn > 0 ? (solveYr.taxOnFund * (yrActualSipp / solveYr.sippGrossDrawn)) : 0;
+    const actualTotalTax = guaranteedTaxYr + actualTaxOnFund;
+    const actualNetFromFund = Math.max(0, actualTotalGross - actualTaxOnFund);
+    const actualTotalNet = guaranteedNetYr + actualNetFromFund;
 
-    totalGrossWithdrawn += actualGrossDrawn;
+    totalGrossWithdrawn += actualTotalGross;
     totalNetWithdrawn += actualTotalNet;
     totalTaxPaid += actualTotalTax;
 
-    const endOfYrInflationFactor = Math.pow(1 + annualInflationRate, yr + 1);
-    const endBalanceReal = balance / endOfYrInflationFactor;
+    const endOfYrInflationFactor = adjustForInflation ? Math.pow(1 + annualInflationRate, yr + 1) : 1;
+    const endBalTotal = balSipp + balStocks + balCash;
+    const endBalTotalReal = endBalTotal / endOfYrInflationFactor;
 
     schedule.push({
       age: ageAtStart + 1,
       year: calendarYear + 1,
-      startBalance: startBalance,
-      growthEarned: yearGrowth,
-      grossWithdrawal: actualGrossDrawn,
-      statePension: statePensionThisYear,
+      sp: spYr,
+      db: dbYr,
+      rentalAndOther: rentalYr + otherYr,
+      sippGrossDrawn: yrActualSipp,
+      stocksIsaDrawn: yrActualStocks,
+      cashIsaDrawn: yrActualCash,
+      totalGrossDrawn: actualTotalGross,
       ukTaxPaid: actualTotalTax,
       netFromFund: actualNetFromFund,
       totalNetReceived: actualTotalNet,
-      endBalanceNominal: balance,
-      endBalanceReal: endBalanceReal,
+      balSipp: balSipp,
+      balStocks: balStocks,
+      balCash: balCash,
+      balTotal: endBalTotal,
+      balTotalReal: endBalTotalReal,
       isInitial: false
     });
 
-    if (balance <= 0) {
+    if (endBalTotal <= 0) {
       isDepleted = true;
       if (!depletionAge) depletionAge = ageAtStart + 1;
       break;
@@ -2866,123 +3165,149 @@ function updateDrawdownCalculator() {
 
   cachedDrawdownSchedule = schedule;
 
-  // Update KPI Cards
+  // KPI Card 1: Combined Longevity
   const statLongevityAge = document.getElementById("stat-longevity-age");
   const statLongevitySubtext = document.getElementById("stat-longevity-subtext");
   const statLongevityStatus = document.getElementById("stat-longevity-status");
-
   if (statLongevityAge && statLongevitySubtext && statLongevityStatus) {
     if (isDepleted && depletionAge) {
       const wholeYears = Math.floor(depletionAge - retireAge);
       const wholeMonths = Math.round(((depletionAge - retireAge) - wholeYears) * 12);
       statLongevityAge.textContent = `Until Age ${depletionAge.toFixed(1)}`;
-      statLongevityAge.className = depletionAge < 80 ? "text-2xl font-black text-rose-600" : (depletionAge < 90 ? "text-2xl font-black text-amber-600" : "text-2xl font-black text-slate-900");
+      statLongevityAge.className = depletionAge < 82 ? "text-2xl font-black text-rose-600" : (depletionAge < 88 ? "text-2xl font-black text-amber-600" : "text-2xl font-black text-[#1F5A45]");
       statLongevitySubtext.textContent = `${wholeYears} Years and ${wholeMonths} Months`;
-      statLongevitySubtext.className = depletionAge < 80 ? "text-xs text-rose-700 font-semibold mt-1" : "text-xs text-amber-700 font-semibold mt-1";
-      statLongevityStatus.textContent = depletionAge < 85 ? `Fund exhausted around year ${Math.round(currentYear + depletionAge - retireAge)}` : `Sufficient longevity past UK average life expectancy`;
+      statLongevitySubtext.className = depletionAge < 82 ? "text-xs text-rose-700 font-semibold mt-1" : "text-xs text-[#1F5A45] font-semibold mt-1";
+      statLongevityStatus.textContent = depletionAge < 85 ? `Fund exhausted around year ${Math.round(currentYear + depletionAge - retireAge)}` : `Sufficient longevity past UK average life expectancy (Age 84)`;
     } else {
       statLongevityAge.textContent = "Sustainable Indefinitely";
-      statLongevityAge.className = "text-2xl font-black text-emerald-600";
-      statLongevitySubtext.textContent = "Portfolio growth covers withdrawals";
+      statLongevityAge.className = "text-2xl font-black text-[#1F5A45]";
+      statLongevitySubtext.textContent = "Portfolio growth covers target withdrawals";
       statLongevitySubtext.className = "text-xs text-emerald-700 font-semibold mt-1";
       const finalRow = schedule[schedule.length - 1];
-      statLongevityStatus.textContent = `At Age ${finalRow.age}, remaining balance is £${formatCompactNumber(finalRow.endBalanceNominal)}`;
+      statLongevityStatus.textContent = `At Age ${finalRow.age}, remaining wealth is £${formatCompactNumber(finalRow.balTotal)}`;
     }
   }
 
-  // KPI Card 2: Gross Monthly Withdrawal & UK Tax
+  // KPI Card 2: Year 1 Withdrawal Plan
   const statGrossMonthly = document.getElementById("stat-gross-monthly");
   const statGrossAnnual = document.getElementById("stat-gross-annual");
   const statTaxDeducted = document.getElementById("stat-tax-deducted");
   if (statGrossMonthly && statGrossAnnual && statTaxDeducted) {
-    statGrossMonthly.textContent = `£${Math.round(year1GrossMonthly).toLocaleString()} / mo`;
-    if (includeStatePension && retireAge < statePensionAge) {
-      statGrossAnnual.textContent = `Pre-State Pension (Ages ${retireAge}–${statePensionAge - 1}) | Drops to £${Math.round(postSPGrossMonthly).toLocaleString()}/mo at Age ${statePensionAge}`;
-      statTaxDeducted.textContent = `UK Tax: £${Math.round(year1TaxMonthly).toLocaleString()}/mo | Saves £${Math.round(postSPAnnualSavings).toLocaleString()}/yr from private pot from Age ${statePensionAge}`;
-    } else if (includeStatePension) {
-      statGrossAnnual.textContent = `£${Math.round(year1GrossAnnual).toLocaleString()} Gross / Year (State Pension active)`;
-      const effTaxRate = (year1GrossAnnual + year1SP) > 0 ? (year1TaxAnnual / (year1GrossAnnual + year1SP) * 100).toFixed(1) : "0.0";
-      statTaxDeducted.textContent = `UK Tax: £${Math.round(year1TaxMonthly).toLocaleString()}/mo | Combined with £${Math.round(statePensionAnnual).toLocaleString()}/yr State Pension (${effTaxRate}%)`;
-    } else {
-      statGrossAnnual.textContent = `£${Math.round(year1GrossAnnual).toLocaleString()} Gross / Year`;
-      const effTaxRate = year1GrossAnnual > 0 ? (year1TaxAnnual / year1GrossAnnual * 100).toFixed(1) : "0.0";
-      statTaxDeducted.textContent = `UK Tax: £${Math.round(year1TaxMonthly).toLocaleString()}/mo (£${Math.round(year1TaxAnnual).toLocaleString()}/yr) | ${effTaxRate}% Effective Rate`;
-    }
+    statGrossMonthly.textContent = `£${Math.round(netMonthly).toLocaleString()} / mo`;
+    statGrossAnnual.textContent = `Total Net Needed: £${Math.round(annualTargetNet).toLocaleString()} / yr`;
+    const sippMo = Math.round(year1Solve.sippGrossDrawn / 12);
+    const stocksMo = Math.round(year1Solve.stocksIsaDrawn / 12);
+    const cashMo = Math.round(year1Solve.cashIsaDrawn / 12);
+    statTaxDeducted.textContent = `SIPP: £${sippMo.toLocaleString()}/mo | Stocks ISA: £${stocksMo.toLocaleString()}/mo | Cash ISA: £${cashMo.toLocaleString()}/mo`;
   }
 
-  // Relief Banner Callout
-  const reliefText = document.getElementById("drawdown-state-pension-relief-text");
-  if (reliefText) {
-    if (includeStatePension) {
-      if (retireAge < statePensionAge) {
-        reliefText.textContent = `From Age ${statePensionAge}, UK State Pension (£${Math.round(statePensionAnnual).toLocaleString()}/yr) starts, reducing private fund drawdown from £${Math.round(year1GrossMonthly).toLocaleString()}/mo to £${Math.round(postSPGrossMonthly).toLocaleString()}/mo (saving £${Math.round(postSPAnnualSavings).toLocaleString()}/yr from being drained from your pot!).`;
-      } else {
-        reliefText.textContent = `At Age ${retireAge}, UK State Pension (£${Math.round(statePensionAnnual).toLocaleString()}/yr) is already active, reducing private fund drawdown to £${Math.round(year1GrossMonthly).toLocaleString()}/mo to deliver your £${Math.round(netMonthly).toLocaleString()}/mo net target!`;
-      }
-    } else {
-      reliefText.textContent = `UK State Pension excluded. Full £${Math.round(netMonthly).toLocaleString()}/mo net income will be funded solely by your private investment portfolio.`;
-    }
-  }
-
-  // 10-Year Purchasing Power Card
+  // KPI Card 3: Year 1 Tax & Waterfall Efficiency
   const statReal10Yr = document.getElementById("stat-real-value-10yr");
   const statNominal10Yr = document.getElementById("stat-nominal-value-10yr");
+  const statTaxSavingsCallout = document.getElementById("stat-tax-savings-callout");
   if (statReal10Yr && statNominal10Yr) {
-    const idx10 = Math.min(10, schedule.length - 1);
-    const row10 = schedule[idx10];
-    if (row10) {
-      statReal10Yr.textContent = `£${Math.round(row10.endBalanceReal).toLocaleString()}`;
-      statNominal10Yr.textContent = `Nominal: £${Math.round(row10.endBalanceNominal).toLocaleString()} (At Age ${row10.age})`;
-    } else {
-      statReal10Yr.textContent = "£0";
-      statNominal10Yr.textContent = "Depleted before 10 years";
+    statReal10Yr.textContent = `£${Math.round(year1Solve.totalTax).toLocaleString()} / yr`;
+    const effTaxRate = (year1Solve.totalGrossDrawn + year1GuaranteedGross > 0)
+      ? (year1Solve.totalTax / (year1Solve.totalGrossDrawn + year1GuaranteedGross) * 100).toFixed(1)
+      : "0.0";
+    statNominal10Yr.textContent = `${effTaxRate}% Effective Tax Rate`;
+    if (statTaxSavingsCallout) {
+      if (year1Solve.stocksIsaDrawn > 0 || year1Solve.cashIsaDrawn > 0) {
+        statTaxSavingsCallout.textContent = `40% Higher Rate Tax avoided via ISA buffer!`;
+        statTaxSavingsCallout.className = "mt-2 text-[11px] text-emerald-700 font-bold";
+      } else {
+        statTaxSavingsCallout.textContent = `Fully within Basic Rate / Personal Allowance (0%-20%)`;
+        statTaxSavingsCallout.className = "mt-2 text-[11px] text-slate-500 font-medium";
+      }
     }
   }
 
-  // Total Lifetime Tax Paid Card
-  const statTotalTax = document.getElementById("stat-total-tax-paid");
+  // KPI Card 4: Cumulative Lifetime Metrics
   const statTotalWithdrawn = document.getElementById("stat-total-withdrawn");
-  if (statTotalTax && statTotalWithdrawn) {
-    statTotalTax.textContent = `£${Math.round(totalTaxPaid).toLocaleString()}`;
-    statTotalWithdrawn.textContent = `Total Net Received: £${Math.round(totalNetWithdrawn).toLocaleString()}`;
+  const statTotalTax = document.getElementById("stat-total-tax-paid");
+  if (statTotalWithdrawn && statTotalTax) {
+    statTotalWithdrawn.textContent = `£${Math.round(totalNetWithdrawn).toLocaleString()}`;
+    const totalTaxSavedLifetime = Math.max(0, totalBenchmarkTax - totalTaxPaid);
+    statTotalTax.textContent = totalTaxSavedLifetime > 500
+      ? `UK Tax: £${Math.round(totalTaxPaid).toLocaleString()} (Saved £${Math.round(totalTaxSavedLifetime).toLocaleString()} vs single pot!)`
+      : `Total UK Tax Paid: £${Math.round(totalTaxPaid).toLocaleString()}`;
   }
 
-  // Render Schedule Table Body
+  // Dynamic Relief & Strategy Insight Banner Callout
+  const reliefText = document.getElementById("drawdown-state-pension-relief-text");
+  if (reliefText) {
+    const parts = [];
+    parts.push(`In Year 1 (Age ${retireAge}), your target spending is £${Math.round(netMonthly).toLocaleString()}/mo (£${Math.round(annualTargetNet).toLocaleString()}/yr).`);
+    
+    if (year1GuaranteedGross > 0) {
+      parts.push(`Guaranteed incomes cover £${Math.round(year1GuaranteedNet).toLocaleString()}/yr net, reducing your portfolio drawdown.`);
+    }
+
+    if (year1Solve.sippGrossDrawn > 0) {
+      const sippTax = Math.round(year1Solve.sippTax);
+      parts.push(`SIPP provides £${Math.round(year1Solve.sippNet).toLocaleString()} net (gross £${Math.round(year1Solve.sippGrossDrawn).toLocaleString()} with 25% tax-free UFPLS, tax £${sippTax.toLocaleString()}).`);
+    }
+
+    if (year1Solve.stocksIsaDrawn > 0 || year1Solve.cashIsaDrawn > 0) {
+      const isaTotal = Math.round(year1Solve.stocksIsaDrawn + year1Solve.cashIsaDrawn);
+      parts.push(`To keep your taxable income below the 40% Higher Rate band (£50,270), £${isaTotal.toLocaleString()} is drawn 100% tax-free from your ISAs!`);
+    }
+
+    if (includeStatePension && retireAge < statePensionAge) {
+      parts.push(`At Age ${statePensionAge}, the UK State Pension (+£${Math.round(statePensionAnnual).toLocaleString()}/yr) starts, cutting private pot drain significantly.`);
+    }
+
+    reliefText.textContent = parts.join(" ");
+  }
+
+  // Populate Schedule Table
   const tbody = document.getElementById("drawdown-schedule-body");
   if (tbody) {
     tbody.innerHTML = schedule.filter(r => !r.isInitial).map(r => {
-      const isDepletedRow = r.endBalanceNominal <= 0;
-      const spBadge = r.statePension > 0 
-        ? `<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-sky-100 text-sky-800">£${Math.round(r.statePension).toLocaleString()}</span>` 
+      const isDepletedRow = r.balTotal <= 0;
+      const spBadge = r.sp > 0 
+        ? `<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-sky-100 text-sky-800">£${Math.round(r.sp).toLocaleString()}</span>` 
         : `<span class="text-slate-400">-</span>`;
+      const dbBadge = r.db > 0 
+        ? `<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-teal-100 text-teal-800">£${Math.round(r.db).toLocaleString()}</span>` 
+        : `<span class="text-slate-400">-</span>`;
+      const rentalBadge = r.rentalAndOther > 0 
+        ? `<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-800">£${Math.round(r.rentalAndOther).toLocaleString()}</span>` 
+        : `<span class="text-slate-400">-</span>`;
+
       return `
-        <tr class="hover:bg-slate-50 transition ${isDepletedRow ? 'bg-rose-50/40 text-rose-900' : ''}">
+        <tr class="hover:bg-[#FCFAF4] transition ${isDepletedRow ? 'bg-rose-50/40 text-rose-900' : ''}">
           <td class="py-2 px-2.5 font-bold text-slate-900">${r.age}</td>
           <td class="py-2 px-2.5 text-slate-500 font-mono text-[11px]">${r.year}</td>
-          <td class="py-2 px-2.5 text-slate-700">£${Math.round(r.startBalance).toLocaleString()}</td>
-          <td class="py-2 px-2.5 font-semibold text-emerald-600">+£${Math.round(r.growthEarned).toLocaleString()}</td>
-          <td class="py-2 px-2.5 font-semibold text-amber-800">£${Math.round(r.grossWithdrawal).toLocaleString()}</td>
           <td class="py-2 px-2.5 font-semibold text-sky-700 bg-sky-50/30">${spBadge}</td>
+          <td class="py-2 px-2.5 font-semibold text-teal-700 bg-teal-50/30">${dbBadge}</td>
+          <td class="py-2 px-2.5 font-semibold text-slate-700">${rentalBadge}</td>
+          <td class="py-2 px-2.5 font-semibold text-emerald-800 bg-emerald-50/40">£${Math.round(r.sippGrossDrawn).toLocaleString()}</td>
+          <td class="py-2 px-2.5 font-semibold text-indigo-800 bg-indigo-50/40">£${Math.round(r.stocksIsaDrawn).toLocaleString()}</td>
+          <td class="py-2 px-2.5 font-semibold text-amber-800 bg-amber-50/40">£${Math.round(r.cashIsaDrawn).toLocaleString()}</td>
           <td class="py-2 px-2.5 font-semibold text-rose-600">£${Math.round(r.ukTaxPaid).toLocaleString()}</td>
-          <td class="py-2 px-2.5 font-semibold text-amber-900">£${Math.round(r.netFromFund).toLocaleString()}</td>
-          <td class="py-2 px-2.5 font-bold text-emerald-800 bg-emerald-50/60">£${Math.round(r.totalNetReceived).toLocaleString()}</td>
-          <td class="py-2 px-2.5 font-extrabold ${isDepletedRow ? 'text-rose-600' : 'text-indigo-900'}">£${Math.round(r.endBalanceNominal).toLocaleString()}</td>
-          <td class="py-2 px-2.5 font-extrabold text-emerald-900 bg-emerald-100/40">£${Math.round(r.endBalanceReal).toLocaleString()}</td>
+          <td class="py-2 px-2.5 font-bold text-emerald-900 bg-emerald-100/60">£${Math.round(r.totalNetReceived).toLocaleString()}</td>
+          <td class="py-2 px-2.5 font-semibold text-slate-800">£${Math.round(r.balSipp).toLocaleString()}</td>
+          <td class="py-2 px-2.5 font-semibold text-indigo-900">£${Math.round(r.balStocks).toLocaleString()}</td>
+          <td class="py-2 px-2.5 font-semibold text-amber-900">£${Math.round(r.balCash).toLocaleString()}</td>
+          <td class="py-2 px-2.5 font-extrabold ${isDepletedRow ? 'text-rose-600' : 'text-[#1F5A45]'} bg-[#E4EDE7]/40">£${Math.round(r.balTotal).toLocaleString()}</td>
+          <td class="py-2 px-2.5 font-extrabold text-emerald-950 bg-emerald-200/30">£${Math.round(r.balTotalReal).toLocaleString()}</td>
         </tr>
       `;
     }).join("");
   }
 
-  // Render Drawdown Chart
+  // Render Multi-Pot Drawdown Chart
   renderDrawdownChart(schedule, inflationPct);
 
   trackGAEvent("drawdown_calculated", {
-    fund_value: initialFund,
+    total_fund: totalPot,
+    sipp_value: sippValue,
+    stocks_isa_value: stocksIsaValue,
+    cash_isa_value: cashIsaValue,
     retire_age: retireAge,
     net_monthly: netMonthly,
-    fund_growth: annualGrowthPct,
-    include_state_pension: includeStatePension,
-    state_pension_age: statePensionAge,
+    strategy_mode: strategyMode,
     is_depleted: isDepleted,
     depletion_age: depletionAge
   });
@@ -3001,8 +3326,11 @@ function renderDrawdownChart(schedule, inflationPct) {
   }
 
   const labels = schedule.map(r => `Age ${r.age}`);
-  const nominalData = schedule.map(r => Math.round(r.endBalanceNominal));
-  const realData = schedule.map(r => Math.round(r.endBalanceReal));
+  const totalNominal = schedule.map(r => Math.round(r.balTotal));
+  const sippData = schedule.map(r => Math.round(r.balSipp));
+  const stocksIsaData = schedule.map(r => Math.round(r.balStocks));
+  const cashIsaData = schedule.map(r => Math.round(r.balCash));
+  const totalReal = schedule.map(r => Math.round(r.balTotalReal));
 
   drawdownLongevityChart = new Chart(ctx, {
     type: "line",
@@ -3010,26 +3338,56 @@ function renderDrawdownChart(schedule, inflationPct) {
       labels: labels,
       datasets: [
         {
-          label: "Nominal Fund Balance (£)",
-          data: nominalData,
+          label: "Total Combined (Nominal)",
+          data: totalNominal,
           borderColor: "#1F5A45",
           backgroundColor: "rgba(31, 90, 69, 0.08)",
           fill: true,
           tension: 0.3,
           borderWidth: 3,
-          pointRadius: 3,
-          pointHoverRadius: 6
+          pointRadius: 2,
+          pointHoverRadius: 5
         },
         {
-          label: `Real Money (Today's Value @ ${inflationPct}% Inflation)`,
-          data: realData,
-          borderColor: "#E9774F",
-          backgroundColor: "rgba(233, 119, 79, 0.08)",
-          fill: true,
+          label: "SIPP Pot Balance",
+          data: sippData,
+          borderColor: "#10B981",
+          backgroundColor: "transparent",
+          borderWidth: 2,
           tension: 0.3,
-          borderWidth: 3,
-          pointRadius: 3,
-          pointHoverRadius: 6
+          pointRadius: 0,
+          pointHoverRadius: 4
+        },
+        {
+          label: "Stocks & Shares ISA",
+          data: stocksIsaData,
+          borderColor: "#6366F1",
+          backgroundColor: "transparent",
+          borderWidth: 2,
+          tension: 0.3,
+          pointRadius: 0,
+          pointHoverRadius: 4
+        },
+        {
+          label: "Cash ISA Buffer",
+          data: cashIsaData,
+          borderColor: "#F59E0B",
+          backgroundColor: "transparent",
+          borderWidth: 2,
+          tension: 0.3,
+          pointRadius: 0,
+          pointHoverRadius: 4
+        },
+        {
+          label: `Real Money (Today's £ @ ${inflationPct}% Inflation)`,
+          data: totalReal,
+          borderColor: "#E9774F",
+          backgroundColor: "transparent",
+          borderDash: [5, 5],
+          borderWidth: 2.5,
+          tension: 0.3,
+          pointRadius: 0,
+          pointHoverRadius: 5
         }
       ]
     },
@@ -3048,16 +3406,16 @@ function renderDrawdownChart(schedule, inflationPct) {
             afterBody: (items) => {
               const row = schedule[items[0].dataIndex];
               if (!row || row.isInitial) return [];
-              const spLine = row.statePension > 0 
-                ? `UK State Pension: ${formatCurrency(row.statePension)}/yr`
-                : `State Pension: None (Pre-age requirement)`;
-              return [
-                `Fund Gross Drawn: ${formatCurrency(row.grossWithdrawal)}/yr`,
-                spLine,
-                `UK Income Tax: ${formatCurrency(row.ukTaxPaid)}/yr`,
-                `Net from Fund: ${formatCurrency(row.netFromFund)}/yr`,
-                `Total Net in Hand: ${formatCurrency(row.totalNetReceived)}/yr`
-              ];
+              const lines = [];
+              if (row.sp > 0) lines.push(`UK State Pension: ${formatCurrency(row.sp)}/yr`);
+              if (row.db > 0) lines.push(`Final Salary DB: ${formatCurrency(row.db)}/yr`);
+              if (row.rentalAndOther > 0) lines.push(`Rental & Other: ${formatCurrency(row.rentalAndOther)}/yr`);
+              lines.push(`SIPP Drawn: ${formatCurrency(row.sippGrossDrawn)}/yr`);
+              if (row.stocksIsaDrawn > 0) lines.push(`Stocks ISA Drawn: ${formatCurrency(row.stocksIsaDrawn)}/yr (Tax-Free)`);
+              if (row.cashIsaDrawn > 0) lines.push(`Cash ISA Drawn: ${formatCurrency(row.cashIsaDrawn)}/yr (Tax-Free)`);
+              lines.push(`UK Tax Paid: ${formatCurrency(row.ukTaxPaid)}/yr`);
+              lines.push(`Total Net in Hand: ${formatCurrency(row.totalNetReceived)}/yr`);
+              return lines;
             }
           }
         }
@@ -3084,10 +3442,12 @@ function exportDrawdownCSV() {
   trackGAEvent("drawdown_csv_exported");
   if (!cachedDrawdownSchedule || cachedDrawdownSchedule.length === 0) return;
 
-  const fundValueEl = document.getElementById("drawdown-fund-value");
+  const sippValEl = document.getElementById("drawdown-sipp-value");
+  const stocksIsaValEl = document.getElementById("drawdown-stocks-isa-value");
+  const cashIsaValEl = document.getElementById("drawdown-cash-isa-value");
   const retireAgeEl = document.getElementById("drawdown-retire-age");
   const netMonthlyEl = document.getElementById("drawdown-net-monthly");
-  const fundGrowthEl = document.getElementById("drawdown-fund-growth");
+  const strategyModeEl = document.getElementById("drawdown-strategy-mode");
   const includeSPEl = document.getElementById("drawdown-include-state-pension");
   const spAgeEl = document.getElementById("drawdown-state-pension-age");
   const spAmountEl = document.getElementById("drawdown-state-pension-amount");
@@ -3096,30 +3456,36 @@ function exportDrawdownCSV() {
   const spAge = spAgeEl ? spAgeEl.value : "67";
   const spAmount = spAmountEl ? spAmountEl.value : "11973";
 
-  let csv = "Dutta UK Funds Selection Advisor - Retirement Drawdown & Longevity Schedule\n";
+  let csv = "Dutta UK Funds Selection Advisor - Multi-Pot Retirement Drawdown & Tax Schedule\n";
   csv += `Date Generated: ${new Date().toLocaleDateString('en-GB')}\n`;
-  csv += `Starting Fund Value: £${fundValueEl ? fundValueEl.value : ''}\n`;
+  csv += `Starting SIPP Pot: £${sippValEl ? sippValEl.value : ''}\n`;
+  csv += `Starting Stocks & Shares ISA: £${stocksIsaValEl ? stocksIsaValEl.value : ''}\n`;
+  csv += `Starting Cash ISA Buffer: £${cashIsaValEl ? cashIsaValEl.value : ''}\n`;
   csv += `Retirement Age: ${retireAgeEl ? retireAgeEl.value : ''}\n`;
   csv += `Net Monthly Target: £${netMonthlyEl ? netMonthlyEl.value : ''} in hand\n`;
-  csv += `Expected Fund Growth: ${fundGrowthEl ? fundGrowthEl.value : ''}%\n`;
-  csv += `Inflation Assumption: 3.0% per annum compound\n`;
+  csv += `Decumulation Strategy: ${strategyModeEl ? strategyModeEl.value : 'smart_waterfall'}\n`;
   csv += `UK State Pension: ${includeSP ? `Included from Age ${spAge} (£${spAmount}/yr indexed to inflation)` : 'Excluded'}\n\n`;
 
-  csv += "Age,Calendar Year,Start Balance (£),Growth Earned (£),Fund Gross Drawn (£),State Pension (£),UK Tax Paid (£),Net from Fund (£),Total Net in Hand (£),End Balance Nominal (£),End Balance Real (Today's Money £)\n";
+  csv += "Age,Calendar Year,State Pension (£),Final Salary DB (£),Rental & Other (£),SIPP Gross Drawn (£),Stocks ISA Drawn (£),Cash ISA Drawn (£),Total Gross Drawn (£),UK Tax Paid (£),Total Net in Hand (£),SIPP Balance (£),Stocks ISA Balance (£),Cash ISA Balance (£),Total Combined Balance Nominal (£),Total Real Balance (Today's Money £)\n";
 
   cachedDrawdownSchedule.forEach(r => {
     csv += [
       r.age,
       r.year,
-      Math.round(r.startBalance),
-      Math.round(r.growthEarned),
-      Math.round(r.grossWithdrawal),
-      Math.round(r.statePension || 0),
-      Math.round(r.ukTaxPaid),
-      Math.round(r.netFromFund || r.netWithdrawal || 0),
-      Math.round(r.totalNetReceived || r.netWithdrawal || 0),
-      Math.round(r.endBalanceNominal),
-      Math.round(r.endBalanceReal)
+      Math.round(r.sp || 0),
+      Math.round(r.db || 0),
+      Math.round(r.rentalAndOther || 0),
+      Math.round(r.sippGrossDrawn || 0),
+      Math.round(r.stocksIsaDrawn || 0),
+      Math.round(r.cashIsaDrawn || 0),
+      Math.round(r.totalGrossDrawn || 0),
+      Math.round(r.ukTaxPaid || 0),
+      Math.round(r.totalNetReceived || 0),
+      Math.round(r.balSipp || 0),
+      Math.round(r.balStocks || 0),
+      Math.round(r.balCash || 0),
+      Math.round(r.balTotal || 0),
+      Math.round(r.balTotalReal || 0)
     ].join(",") + "\n";
   });
 
@@ -3127,7 +3493,7 @@ function exportDrawdownCSV() {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.setAttribute("href", url);
-  link.setAttribute("download", `Dutta_UK_Retirement_Drawdown_Longevity_Schedule.csv`);
+  link.setAttribute("download", `Dutta_UK_MultiPot_Retirement_Drawdown_Schedule.csv`);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
@@ -3140,13 +3506,19 @@ function syncAdvisorToDrawdown() {
   }, 0);
   const activeVal = calculateFutureValue(inputs.lumpSum, inputs.monthlyAmount, activeRate, inputs.horizon);
 
-  const fundValInput = document.getElementById("drawdown-fund-value");
+  const sippEl = document.getElementById("drawdown-sipp-value");
+  const stocksEl = document.getElementById("drawdown-stocks-isa-value");
+  const cashEl = document.getElementById("drawdown-cash-isa-value");
   const retireAgeInput = document.getElementById("drawdown-retire-age");
-  const growthInput = document.getElementById("drawdown-fund-growth");
+  const fundGrowthInput = document.getElementById("drawdown-sipp-growth");
 
-  if (fundValInput) fundValInput.value = activeVal;
+  if (sippEl && stocksEl && cashEl) {
+    sippEl.value = Math.round(activeVal * 0.60);
+    stocksEl.value = Math.round(activeVal * 0.30);
+    cashEl.value = Math.round(activeVal * 0.10);
+  }
   if (retireAgeInput) retireAgeInput.value = inputs.retirementAge;
-  if (growthInput) growthInput.value = Math.max(4.0, Math.min(8.0, (activeRate * 0.65).toFixed(1)));
+  if (fundGrowthInput) fundGrowthInput.value = Math.max(4.0, Math.min(8.0, (activeRate * 0.65).toFixed(1)));
 
   updateDrawdownCalculator();
 }
@@ -4860,14 +5232,24 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const drawdownInputIds = [
+    "drawdown-sipp-value",
+    "drawdown-sipp-growth",
+    "drawdown-stocks-isa-value",
+    "drawdown-stocks-isa-growth",
+    "drawdown-cash-isa-value",
+    "drawdown-cash-isa-growth",
     "drawdown-fund-value",
     "drawdown-retire-age",
     "drawdown-net-monthly",
     "drawdown-fund-growth",
+    "drawdown-strategy-mode",
     "drawdown-tax-wrapper",
     "drawdown-inflation-rate",
     "drawdown-state-pension-age",
     "drawdown-state-pension-amount",
+    "drawdown-db-pension-amount",
+    "drawdown-db-pension-age",
+    "drawdown-rental-income",
     "drawdown-other-income"
   ];
   drawdownInputIds.forEach(id => {
