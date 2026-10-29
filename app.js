@@ -1785,8 +1785,8 @@ function updateTrajectoryChart(inputs, activeReturn, passiveReturn) {
         {
           label: "Active Strategy",
           data: activeData,
-          borderColor: "#0284c7",
-          backgroundColor: "rgba(2, 132, 199, 0.08)",
+          borderColor: "#1F5A45",
+          backgroundColor: "rgba(31, 90, 69, 0.10)",
           fill: true,
           tension: 0.35,
           borderWidth: 2.5,
@@ -1796,7 +1796,7 @@ function updateTrajectoryChart(inputs, activeReturn, passiveReturn) {
         {
           label: "Passive Strategy",
           data: passiveData,
-          borderColor: "#0d9488",
+          borderColor: "#4D8B74",
           backgroundColor: "transparent",
           tension: 0.35,
           borderWidth: 2.5,
@@ -1806,7 +1806,7 @@ function updateTrajectoryChart(inputs, activeReturn, passiveReturn) {
         {
           label: `Target Return (${inputs.targetGrowth}%)`,
           data: targetData,
-          borderColor: "#f59e0b",
+          borderColor: "#E9774F",
           backgroundColor: "transparent",
           borderDash: [5, 5],
           tension: 0.35,
@@ -1816,7 +1816,7 @@ function updateTrajectoryChart(inputs, activeReturn, passiveReturn) {
         {
           label: "Total Contributions (Principal)",
           data: principalData,
-          borderColor: "#94a3b8",
+          borderColor: "#9E947F",
           backgroundColor: "transparent",
           borderDash: [3, 3],
           tension: 0,
@@ -1832,7 +1832,7 @@ function updateTrajectoryChart(inputs, activeReturn, passiveReturn) {
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: "#0f172a",
+          backgroundColor: "#1F5A45",
           padding: 12,
           callbacks: {
             label: function(context) {
@@ -1882,13 +1882,13 @@ function updateDonutChart(portfolioItems, strategyType) {
   const data = funds.map(f => f.alloc);
   
   const colors = strategyType === "passive"
-    ? ["#0d9488", "#14b8a6", "#2dd4bf", "#5eead4"]
-    : ["#0284c7", "#38bdf8", "#60a5fa", "#818cf8"];
+    ? ["#1F5A45", "#3D7860", "#7FA890", "#AEC8B9"]
+    : ["#1F5A45", "#E9774F", "#F3DD87", "#7FA890", "#D7623A", "#957E2F"];
 
   document.getElementById("donut-strategy-label").textContent = 
     strategyType === "passive" ? "Passive Strategy" : "Active Strategy";
   document.getElementById("donut-strategy-label").className = 
-    `text-xs font-semibold px-2 py-0.5 rounded ${strategyType === "passive" ? "bg-teal-100 text-teal-800" : "bg-brand-100 text-brand-800"}`;
+    `text-xs font-semibold px-2 py-0.5 rounded ${strategyType === "passive" ? "bg-[#E4EDE7] text-[#1F5A45]" : "bg-[#F0F6F3] text-[#1F5A45]"}`;
 
   if (allocationDonutChart) {
     allocationDonutChart.destroy();
@@ -1912,7 +1912,7 @@ function updateDonutChart(portfolioItems, strategyType) {
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: "#0f172a",
+          backgroundColor: "#1F5A45",
           callbacks: {
             label: function(context) {
               return ` Allocation: ${context.raw}%`;
@@ -1973,13 +1973,13 @@ function updateFundFutureValueChart(portfolioItems, inputs) {
         {
           label: "Total Contributions",
           data: initialPrincipal,
-          backgroundColor: "#cbd5e1",
+          backgroundColor: "#C9BEA7",
           borderRadius: 4
         },
         {
           label: "Projected Value at Retirement",
           data: futureValues,
-          backgroundColor: "#0284c7",
+          backgroundColor: "#1F5A45",
           borderRadius: 4
         }
       ]
@@ -1990,7 +1990,7 @@ function updateFundFutureValueChart(portfolioItems, inputs) {
       plugins: {
         legend: { position: "top", labels: { font: { size: 10 }, boxWidth: 12 } },
         tooltip: {
-          backgroundColor: "#0f172a",
+          backgroundColor: "#1F5A45",
           callbacks: {
             title: (items) => {
               const f = funds[items[0].dataIndex];
@@ -2046,13 +2046,13 @@ function updateBenchmarkChart(portfolioItems) {
         {
           label: "Fund 15-Yr Return (% p.a.)",
           data: fundReturns,
-          backgroundColor: "#0d9488",
+          backgroundColor: "#1F5A45",
           borderRadius: 4
         },
         {
           label: "Benchmark Return (% p.a.)",
           data: benchmarkReturns,
-          backgroundColor: "#94a3b8",
+          backgroundColor: "#E9774F",
           borderRadius: 4
         }
       ]
@@ -2063,7 +2063,7 @@ function updateBenchmarkChart(portfolioItems) {
       plugins: {
         legend: { position: "top", labels: { font: { size: 10 }, boxWidth: 12 } },
         tooltip: {
-          backgroundColor: "#0f172a",
+          backgroundColor: "#1F5A45",
           callbacks: {
             label: (ctx) => ` ${ctx.dataset.label}: ${ctx.raw}% p.a.`,
             afterBody: (contexts) => {
@@ -3012,8 +3012,8 @@ function renderDrawdownChart(schedule, inflationPct) {
         {
           label: "Nominal Fund Balance (£)",
           data: nominalData,
-          borderColor: "#6366f1",
-          backgroundColor: "rgba(99, 102, 241, 0.08)",
+          borderColor: "#1F5A45",
+          backgroundColor: "rgba(31, 90, 69, 0.08)",
           fill: true,
           tension: 0.3,
           borderWidth: 3,
@@ -3023,8 +3023,8 @@ function renderDrawdownChart(schedule, inflationPct) {
         {
           label: `Real Money (Today's Value @ ${inflationPct}% Inflation)`,
           data: realData,
-          borderColor: "#059669",
-          backgroundColor: "rgba(5, 150, 105, 0.08)",
+          borderColor: "#E9774F",
+          backgroundColor: "rgba(233, 119, 79, 0.08)",
           fill: true,
           tension: 0.3,
           borderWidth: 3,
@@ -3040,7 +3040,7 @@ function renderDrawdownChart(schedule, inflationPct) {
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: "#0f172a",
+          backgroundColor: "#1F5A45",
           padding: 12,
           callbacks: {
             title: (items) => `${items[0].label} (${schedule[items[0].dataIndex].year})`,
@@ -3657,8 +3657,8 @@ function renderTargetLifetimeChart(schedule, retireAge) {
         {
           label: "Accumulation Pot (Saving £)",
           data: accumData,
-          borderColor: "#4f46e5",
-          backgroundColor: "rgba(79, 70, 229, 0.10)",
+          borderColor: "#1F5A45",
+          backgroundColor: "rgba(31, 90, 69, 0.12)",
           fill: "origin",
           tension: 0.25,
           borderWidth: 3,
@@ -3666,14 +3666,14 @@ function renderTargetLifetimeChart(schedule, retireAge) {
             const index = ctx.dataIndex;
             return schedule[index] && schedule[index].age === retireAge ? 6 : 2;
           },
-          pointBackgroundColor: "#4f46e5",
+          pointBackgroundColor: "#1F5A45",
           pointHoverRadius: 6
         },
         {
           label: "Retirement Pot (Spending £)",
           data: decumData,
-          borderColor: "#059669",
-          backgroundColor: "rgba(5, 150, 105, 0.10)",
+          borderColor: "#E9774F",
+          backgroundColor: "rgba(233, 119, 79, 0.12)",
           fill: "origin",
           tension: 0.25,
           borderWidth: 3,
@@ -3681,13 +3681,13 @@ function renderTargetLifetimeChart(schedule, retireAge) {
             const index = ctx.dataIndex;
             return schedule[index] && schedule[index].age === retireAge ? 6 : 2;
           },
-          pointBackgroundColor: "#059669",
+          pointBackgroundColor: "#E9774F",
           pointHoverRadius: 6
         },
         {
           label: "Real Value in Today's World (£)",
           data: realData,
-          borderColor: "#d97706",
+          borderColor: "#957E2F",
           borderDash: [5, 4],
           borderWidth: 2,
           pointRadius: 1,
@@ -3706,14 +3706,14 @@ function renderTargetLifetimeChart(schedule, retireAge) {
           display: true,
           position: "top",
           labels: {
-            font: { size: 11, weight: "bold" },
-            color: "#334155",
+            font: { size: 11, weight: "bold", family: "'Nunito Sans', sans-serif" },
+            color: "#524C3F",
             boxWidth: 14,
             usePointStyle: true
           }
         },
         tooltip: {
-          backgroundColor: "#0f172a",
+          backgroundColor: "#1F5A45",
           padding: 12,
           callbacks: {
             title: (items) => {
@@ -4544,6 +4544,12 @@ window.copyAppUrlToClipboard = copyAppUrlToClipboard;
 window.initTipDeveloper = initTipDeveloper;
 
 document.addEventListener("DOMContentLoaded", () => {
+  if (window.Chart) {
+    Chart.defaults.font.family = "'Nunito Sans', -apple-system, BlinkMacSystemFont, sans-serif";
+    Chart.defaults.color = "#524C3F";
+    Chart.defaults.borderColor = "#E2D9C5";
+  }
+
   const inputIds = ["current-age", "retirement-age", "lump-sum", "monthly-amount", "target-growth"];
   inputIds.forEach(id => {
     const el = document.getElementById(id);

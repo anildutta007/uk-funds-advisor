@@ -1,61 +1,109 @@
-/* UK Funds Selection Advisor Custom Styles */
+/* UK Funds Selection Advisor Custom Styles - Warm & Calm Palette */
 
-/* Smooth Scrolling */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap');
+
+:root {
+  --bg-cream: #F8F3E8;
+  --bg-beige: #EFE8D8;
+  --bg-card: #FFFFFF;
+  --color-forest: #1F5A45;
+  --color-forest-dark: #164333;
+  --color-coral: #E9774F;
+  --color-coral-dark: #D4623B;
+  --color-butter: #F3DD87;
+  --color-butter-dark: #5C4B13;
+  --color-sage: #E4EDE7;
+  --color-text-main: #1A1813;
+  --color-text-muted: #524C3F;
+  --border-warm: #E2D9C5;
+  --border-warm-light: #EFE8D8;
+}
+
+/* Smooth Scrolling & Typography */
 html {
   scroll-behavior: smooth;
 }
 
-/* Custom Scrollbars */
+body {
+  background-color: #F8F3E8 !important;
+  color: #2A261F;
+  font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+/* Headings in Fraunces serif and Forest Green */
+h1, h2, h3, h4, h5, h6, .font-serif, .heading-serif {
+  font-family: 'Fraunces', Georgia, serif !important;
+  color: #1F5A45;
+  letter-spacing: -0.015em;
+}
+
+/* Timeline & Step Numbers in Coral */
+.step-number, .timeline-number, .badge-coral-number {
+  background-color: #E9774F !important;
+  color: #ffffff !important;
+}
+
+/* Facts Band in Forest Green */
+.facts-band {
+  background-color: #1F5A45 !important;
+  color: #F8F3E8 !important;
+}
+
+/* Custom Scrollbars in Warm Tones */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #EFE8D8;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #C9BEA7;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #9E947F;
 }
 
 /* Risk Card Selection Animation */
 .risk-card {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  background-color: #FFFFFF;
+  border-color: #E2D9C5;
 }
 
 .risk-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 12px -2px rgba(31, 90, 69, 0.08);
 }
 
 .risk-card.active {
-  box-shadow: 0 4px 14px -2px rgba(2, 132, 199, 0.18);
+  border-color: #1F5A45 !important;
+  background-color: #F0F6F3 !important;
+  box-shadow: 0 4px 14px -2px rgba(31, 90, 69, 0.2) !important;
 }
 
 /* Strategy Tab Active State */
 .strategy-tab {
   background-color: transparent;
-  color: #475569;
+  color: #524C3F;
   border: 1px solid transparent;
   transition: all 0.15s ease-in-out;
 }
 
 .strategy-tab:hover {
-  color: #0f172a;
-  background-color: rgba(255, 255, 255, 0.7);
+  color: #1F5A45;
+  background-color: rgba(248, 243, 232, 0.85);
 }
 
 .strategy-tab.active {
   background-color: #ffffff !important;
-  color: #0f172a !important;
-  border-color: rgba(226, 232, 240, 0.8) !important;
-  box-shadow: 0 2px 6px -1px rgba(0, 0, 0, 0.08), 0 1px 3px -1px rgba(0, 0, 0, 0.04) !important;
+  color: #1F5A45 !important;
+  border-color: #E2D9C5 !important;
+  box-shadow: 0 2px 6px -1px rgba(31, 90, 69, 0.12), 0 1px 3px -1px rgba(31, 90, 69, 0.06) !important;
 }
 
 .strategy-tab .popout-btn {
@@ -69,28 +117,33 @@ html {
 }
 
 .strategy-tab .popout-btn:hover {
-  background-color: #e2e8f0;
-  color: #0284c7;
+  background-color: #EFE8D8;
+  color: #1F5A45;
   transform: scale(1.1);
 }
 
 /* Metric card subtle hover effect */
 .metric-card {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background-color: #FFFFFF;
+  border-color: #E2D9C5;
 }
 
 .metric-card:hover {
   transform: translateY(-2px);
+  box-shadow: 0 6px 16px -2px rgba(31, 90, 69, 0.08);
 }
 
 /* Fund card style */
 .fund-card {
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  background-color: #FFFFFF;
+  border-color: #E2D9C5;
 }
 
 .fund-card:hover {
-  border-color: #93c5fd;
-  box-shadow: 0 6px 18px -4px rgba(2, 132, 199, 0.08);
+  border-color: #1F5A45;
+  box-shadow: 0 6px 18px -4px rgba(31, 90, 69, 0.1);
 }
 
 /* Chart Canvas container */
