@@ -4629,6 +4629,7 @@ document.addEventListener("DOMContentLoaded", () => {
     saveAdvisorState();
     const url = new URL(window.location.href);
     url.searchParams.set("tab", tab);
+    url.searchParams.set("popout", "1");
     window.open(url.toString(), "_blank");
   };
 
@@ -4645,7 +4646,12 @@ document.addEventListener("DOMContentLoaded", () => {
     // Update browser URL query without page reload
     try {
       const newUrl = new URL(window.location.href);
-      newUrl.searchParams.set("tab", tab);
+      if (tab === "target") {
+        newUrl.searchParams.delete("tab");
+      } else {
+        newUrl.searchParams.set("tab", tab);
+      }
+      newUrl.searchParams.delete("popout");
       window.history.replaceState({ tab }, "", newUrl.toString());
     } catch (e) {}
 
@@ -4927,10 +4933,21 @@ document.addEventListener("DOMContentLoaded", () => {
   // Check URL query parameters for deep-linking (e.g. ?tab=drawdown or ?tab=target or ?tab=screener or ?tab=pension-news or ?tab=tip or ?tab=regulatory)
   const urlParams = new URLSearchParams(window.location.search);
   const requestedTab = urlParams.get("tab") || window.location.hash.replace("#", "");
-  if (requestedTab && ["active", "passive", "drawdown", "target", "screener", "pension-news", "news", "tip", "tip-developer", "regulatory"].includes(requestedTab)) {
+  const isPopout = urlParams.get("popout") === "1";
+
+  if (requestedTab && isPopout && ["active", "passive", "drawdown", "target", "screener", "pension-news", "news", "tip", "tip-developer", "regulatory"].includes(requestedTab)) {
     window._isPopoutInstance = true;
     setTab(requestedTab.startsWith("tip") ? "tip" : (requestedTab === "news" ? "pension-news" : requestedTab), true);
+  } else if (requestedTab && requestedTab !== "active" && ["passive", "drawdown", "target", "screener", "pension-news", "news", "tip", "tip-developer", "regulatory"].includes(requestedTab)) {
+    setTab(requestedTab.startsWith("tip") ? "tip" : (requestedTab === "news" ? "pension-news" : requestedTab), true);
   } else {
+    // Default initial landing screen: How Much Do I Need to Retire?
+    try {
+      const cleanUrl = new URL(window.location.href);
+      cleanUrl.searchParams.delete("tab");
+      cleanUrl.searchParams.delete("popout");
+      window.history.replaceState({ tab: "target" }, "", cleanUrl.toString());
+    } catch (e) {}
     setTab("target", true);
   }
 });

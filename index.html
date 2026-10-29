@@ -217,7 +217,7 @@
   <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 space-y-8">
     
     <!-- Investor Profile Input Card -->
-    <section id="section-investor-profile" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 relative overflow-hidden">
+    <section id="section-investor-profile" class="hidden bg-white rounded-2xl border border-slate-200 shadow-sm p-6 relative overflow-hidden">
       <div class="absolute -right-16 -top-16 w-64 h-64 bg-brand-50 rounded-full blur-3xl pointer-events-none -z-0"></div>
 
       <div class="relative z-10">
@@ -377,7 +377,7 @@
     </section>
 
     <!-- Executive Summary Metric Cards -->
-    <section id="section-metrics-summary" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <section id="section-metrics-summary" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       
       <!-- Card 1: Total Capital Contributed -->
       <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
@@ -489,7 +489,7 @@
     </section>
 
     <!-- Interactive Visual Graphs Section -->
-    <section id="section-charts-overview" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <section id="section-charts-overview" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
       
       <!-- Chart 1: Wealth Accumulation Trajectory (8 cols) -->
       <div class="lg:col-span-8 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
@@ -575,7 +575,7 @@
     </section>
 
     <!-- Strategy Section: Active Fund Strategy -->
-    <section id="section-active" class="strategy-section space-y-4">
+    <section id="section-active" class="strategy-section hidden space-y-4">
       <div class="flex flex-wrap items-center justify-between gap-3 bg-brand-50/60 p-4 rounded-xl border border-brand-200/80">
         <div>
           <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
@@ -1069,28 +1069,19 @@
     </section>
 
     <!-- Strategy Section: How Much Money Do I Need to Retire? (Target Nest Egg & Savings Planner) -->
-    <section id="section-target" class="strategy-section hidden space-y-6">
+    <section id="section-target" class="strategy-section space-y-6">
       
       <!-- Top Banner / Explainer -->
-      <div class="bg-gradient-to-r from-brand-950 via-slate-900 to-indigo-950 rounded-2xl p-6 text-white shadow-md border border-brand-800/40 relative overflow-hidden">
-        <div class="relative z-10 flex flex-wrap items-center justify-between gap-4">
-          <div class="space-y-1.5 max-w-2xl">
-            <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-brand-500/20 border border-brand-400/30 text-brand-300 text-xs font-semibold">
-              <i data-lucide="target" class="w-3.5 h-3.5 text-brand-400"></i>
-              <span>Target Nest Egg & Monthly Savings Accumulation Planner</span>
-            </div>
-            <h3 class="text-xl font-extrabold tracking-tight">How Much Money Do I Need to Retire?</h3>
-            <p class="text-xs text-slate-300 leading-relaxed">
-              Find out the exact nest egg needed to provide your desired retirement income for life with 3% annual inflation protection. Then see how much you need to save monthly based on your current lump sum and risk profile (Low, Medium, or High Risk).
-            </p>
+      <div class="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-sm relative overflow-hidden">
+        <div class="space-y-2 max-w-3xl">
+          <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-brand-50 border border-brand-200 text-brand-700 text-xs font-bold">
+            <i data-lucide="target" class="w-3.5 h-3.5 text-brand-600"></i>
+            <span>Target Nest Egg & Monthly Savings Accumulation Planner</span>
           </div>
-          <div class="flex items-center gap-3">
-            <button id="btn-sync-advisor-to-target" type="button"
-              class="px-4 py-2.5 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-2 border border-brand-400/40">
-              <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-              <span>Sync Current Age & Lump Sum</span>
-            </button>
-          </div>
+          <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">How Much Money Do I Need to Retire?</h2>
+          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            Find out the exact nest egg needed to provide your desired retirement income for life with 3% annual inflation protection. Then see how much you need to save monthly based on your current lump sum and risk profile (Low, Medium, or High Risk).
+          </p>
         </div>
       </div>
 
