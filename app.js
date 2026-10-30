@@ -1216,7 +1216,8 @@ function getInputs() {
   const retirementAge = !isNaN(rawRetireAge) ? rawRetireAge : Math.max(currentAge + 1, 65);
   const lumpSum = parseFloat(document.getElementById("lump-sum").value) || 0;
   const monthlyAmount = parseFloat(document.getElementById("monthly-amount").value) || 0;
-  const targetGrowth = parseFloat(document.getElementById("target-growth").value) || 7.5;
+  const targetGrowthEl = document.getElementById("target-growth");
+  const targetGrowth = targetGrowthEl ? (parseFloat(targetGrowthEl.value) || 7.5) : 7.5;
   
   const horizon = Math.max(1, retirementAge - currentAge);
 
@@ -1249,7 +1250,8 @@ function updateAdvisor() {
 
   document.getElementById("horizon-years").textContent = `${inputs.horizon} Years`;
   document.getElementById("trajectory-end-age").textContent = inputs.retirementAge;
-  document.getElementById("legend-target-rate").textContent = `${inputs.targetGrowth}%`;
+  const legendTarget = document.getElementById("legend-target-rate");
+  if (legendTarget) legendTarget.textContent = `${inputs.targetGrowth}%`;
 
   const currentYearTotal = inputs.lumpSum + (inputs.monthlyAmount * 12);
   document.getElementById("current-year-total").textContent = formatCurrency(currentYearTotal);
@@ -5001,7 +5003,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const curAgeEl = document.getElementById("current-age");
   const retAgeEl = document.getElementById("retirement-age");
 
-  const inputIds = ["current-age", "retirement-age", "lump-sum", "monthly-amount", "target-growth"];
+  const inputIds = ["current-age", "retirement-age", "lump-sum", "monthly-amount"];
   inputIds.forEach(id => {
     const el = document.getElementById(id);
     if (el) {
