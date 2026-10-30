@@ -548,7 +548,7 @@
               <span class="font-black text-[#1F5A45] text-sm" id="active-summary-pot-preview">£1,413,589</span>
             </div>
             <div class="flex items-center justify-between gap-2">
-              <button type="button" onclick="setTab('active')" class="w-full px-4 py-2.5 rounded-xl bg-[#1F5A45] hover:bg-[#164333] text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow-sm cursor-pointer">
+              <button type="button" id="btn-see-active-funds" onclick="setTab('active')" class="w-full px-4 py-2.5 rounded-xl bg-[#1F5A45] hover:bg-[#164333] text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow-sm cursor-pointer">
                 <i data-lucide="eye" class="w-4 h-4"></i>
                 <span>See Active Funds Details →</span>
               </button>
@@ -583,7 +583,7 @@
               <span class="font-black text-teal-900 text-sm" id="passive-summary-pot-preview">£783,759</span>
             </div>
             <div class="flex items-center justify-between gap-2">
-              <button type="button" onclick="setTab('passive')" class="w-full px-4 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow-sm cursor-pointer">
+              <button type="button" id="btn-see-passive-funds" onclick="setTab('passive')" class="w-full px-4 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow-sm cursor-pointer">
                 <i data-lucide="eye" class="w-4 h-4"></i>
                 <span>See Passive Funds Details →</span>
               </button>
@@ -813,6 +813,9 @@
         </div>
       </div>
 
+      <!-- Charts Slot for Active Portfolio -->
+      <div id="active-charts-slot" class="space-y-4"></div>
+
       <!-- Active Funds Cards / Table -->
       <div class="grid grid-cols-1 gap-4" id="active-funds-container">
         <!-- Rendered dynamically -->
@@ -885,6 +888,9 @@
           </div>
         </div>
       </div>
+
+      <!-- Charts Slot for Passive Portfolio -->
+      <div id="passive-charts-slot" class="space-y-4"></div>
 
       <!-- Passive Funds Cards / Table -->
       <div class="grid grid-cols-1 gap-4" id="passive-funds-container">

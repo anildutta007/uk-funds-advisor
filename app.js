@@ -5111,7 +5111,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.open(url.toString(), "_blank");
   };
 
-  function setTab(tab, forceSameWindow = false) {
+  window.setTab = function setTab(tab, forceSameWindow = false) {
     if (tab === "regulatory") {
       setTab("target");
       setTimeout(() => {
@@ -5179,6 +5179,10 @@ document.addEventListener("DOMContentLoaded", () => {
       updateAdvisor();
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else if (tab === "active") {
+      const activeSlot = document.getElementById("active-charts-slot");
+      if (activeSlot && secChartsOverview && secChartsOverview.parentElement !== activeSlot) {
+        activeSlot.appendChild(secChartsOverview);
+      }
       if (secActive) secActive.classList.remove("hidden");
       if (secChartsOverview) secChartsOverview.classList.remove("hidden");
       if (secFundsSelection) secFundsSelection.classList.add("hidden");
@@ -5186,6 +5190,10 @@ document.addEventListener("DOMContentLoaded", () => {
       updateAdvisor();
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else if (tab === "passive") {
+      const passiveSlot = document.getElementById("passive-charts-slot");
+      if (passiveSlot && secChartsOverview && secChartsOverview.parentElement !== passiveSlot) {
+        passiveSlot.appendChild(secChartsOverview);
+      }
       if (secPassive) secPassive.classList.remove("hidden");
       if (secChartsOverview) secChartsOverview.classList.remove("hidden");
       if (secFundsSelection) secFundsSelection.classList.add("hidden");
@@ -5234,6 +5242,21 @@ document.addEventListener("DOMContentLoaded", () => {
   if (tabFunds) tabFunds.addEventListener("click", () => setTab("funds"));
   if (tabActive) tabActive.addEventListener("click", () => setTab("active"));
   if (tabPassive) tabPassive.addEventListener("click", () => setTab("passive"));
+
+  const btnSeeActive = document.getElementById("btn-see-active-funds");
+  if (btnSeeActive) {
+    btnSeeActive.addEventListener("click", (e) => {
+      e.preventDefault();
+      setTab("active");
+    });
+  }
+  const btnSeePassive = document.getElementById("btn-see-passive-funds");
+  if (btnSeePassive) {
+    btnSeePassive.addEventListener("click", (e) => {
+      e.preventDefault();
+      setTab("passive");
+    });
+  }
   if (tabDrawdown) tabDrawdown.addEventListener("click", () => setTab("drawdown"));
   if (tabTarget) tabTarget.addEventListener("click", () => setTab("target"));
   if (tabScreener) tabScreener.addEventListener("click", () => setTab("screener"));
