@@ -1316,6 +1316,25 @@ function updateAdvisor() {
   const passivePotPreview = document.getElementById("passive-summary-pot-preview");
   if (passivePotPreview) passivePotPreview.textContent = formatCurrency(passiveProjectedValue);
 
+  const riskLabels = {
+    low: "Low Risk (Capital Preservation)",
+    medium: "Medium Risk (Balanced Growth)",
+    high: "High Risk (Aggressive Global Equity)"
+  };
+  const activeAgePill = document.getElementById("active-summary-age-pill");
+  if (activeAgePill) activeAgePill.textContent = `Age ${inputs.currentAge} → ${inputs.retirementAge} (${inputs.horizon} yrs)`;
+  const activeContribPill = document.getElementById("active-summary-contributions-pill");
+  if (activeContribPill) activeContribPill.textContent = `${formatCurrency(inputs.lumpSum)} lump sum + ${formatCurrency(inputs.monthlyAmount)}/mo`;
+  const activeRiskPill = document.getElementById("active-summary-risk-pill");
+  if (activeRiskPill) activeRiskPill.textContent = riskLabels[currentRisk] || `${currentRisk} Risk`;
+
+  const passiveAgePill = document.getElementById("passive-summary-age-pill");
+  if (passiveAgePill) passiveAgePill.textContent = `Age ${inputs.currentAge} → ${inputs.retirementAge} (${inputs.horizon} yrs)`;
+  const passiveContribPill = document.getElementById("passive-summary-contributions-pill");
+  if (passiveContribPill) passiveContribPill.textContent = `${formatCurrency(inputs.lumpSum)} lump sum + ${formatCurrency(inputs.monthlyAmount)}/mo`;
+  const passiveRiskPill = document.getElementById("passive-summary-risk-pill");
+  if (passiveRiskPill) passiveRiskPill.textContent = riskLabels[currentRisk] || `${currentRisk} Risk`;
+
   renderPortfolioCards("active", activeCustomPortfolio, inputs);
   renderPortfolioCards("passive", passiveCustomPortfolio, inputs);
 
@@ -5130,6 +5149,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // Isolate views cleanly so each option has its own clear presentation
     if (tab === "funds") {
       if (secFundsSelection) secFundsSelection.classList.remove("hidden");
+      if (secInvestorProfile) secInvestorProfile.classList.remove("hidden");
+      if (secMetricsSummary) secMetricsSummary.classList.remove("hidden");
       if (secChartsOverview) secChartsOverview.classList.add("hidden");
       if (secActive) secActive.classList.add("hidden");
       if (secPassive) secPassive.classList.add("hidden");
@@ -5150,42 +5171,30 @@ document.addEventListener("DOMContentLoaded", () => {
       updateAdvisor();
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else if (tab === "drawdown") {
-      secDrawdown.classList.remove("hidden");
+      if (secDrawdown) secDrawdown.classList.remove("hidden");
       if (secChartsOverview) secChartsOverview.classList.add("hidden"); // Dedicated longevity simulator
-      if (secInvestorProfile) secInvestorProfile.classList.add("hidden");
-      if (secMetricsSummary) secMetricsSummary.classList.add("hidden");
       updateDrawdownCalculator();
     } else if (tab === "target") {
       if (secTarget) secTarget.classList.remove("hidden");
       if (secChartsOverview) secChartsOverview.classList.add("hidden"); // Dedicated target planner
-      if (secInvestorProfile) secInvestorProfile.classList.add("hidden");
-      if (secMetricsSummary) secMetricsSummary.classList.add("hidden");
       updateTargetRetirementPlanner();
     } else if (tab === "screener") {
-      secScreener.classList.remove("hidden");
+      if (secScreener) secScreener.classList.remove("hidden");
       if (secChartsOverview) secChartsOverview.classList.add("hidden"); // Dedicated full-width screener
-      if (secInvestorProfile) secInvestorProfile.classList.add("hidden");
-      if (secMetricsSummary) secMetricsSummary.classList.add("hidden");
     } else if (tab === "pension-news" || tab === "news") {
       if (secPensionNews) secPensionNews.classList.remove("hidden"); // Dedicated UK Pension News Hub
       if (secChartsOverview) secChartsOverview.classList.add("hidden");
-      if (secInvestorProfile) secInvestorProfile.classList.add("hidden");
-      if (secMetricsSummary) secMetricsSummary.classList.add("hidden");
       initPensionNews();
       fetchLivePensionNews(false);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else if (tab === "tip" || tab === "tip-developer") {
       if (secTipDeveloper) secTipDeveloper.classList.remove("hidden"); // Dedicated Tip Developer Tab
       if (secChartsOverview) secChartsOverview.classList.add("hidden");
-      if (secInvestorProfile) secInvestorProfile.classList.add("hidden");
-      if (secMetricsSummary) secMetricsSummary.classList.add("hidden");
       initTipDeveloper();
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else if (tab === "regulatory") {
       if (secCompliance) secCompliance.classList.remove("hidden"); // Only show when user presses Regulatory Info
       if (secChartsOverview) secChartsOverview.classList.add("hidden");
-      if (secInvestorProfile) secInvestorProfile.classList.add("hidden");
-      if (secMetricsSummary) secMetricsSummary.classList.add("hidden");
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
