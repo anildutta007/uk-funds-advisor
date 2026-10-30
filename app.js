@@ -1311,6 +1311,11 @@ function updateAdvisor() {
   const passiveRealHeader = document.getElementById("passive-total-real-header");
   if (passiveRealHeader) passiveRealHeader.innerHTML = `<i data-lucide="coins" class="w-3 h-3 text-teal-600"></i><span>Today's World: ${formatCurrency(passiveRealValue)} (@ 3% infl.)</span>`;
 
+  const activePotPreview = document.getElementById("active-summary-pot-preview");
+  if (activePotPreview) activePotPreview.textContent = formatCurrency(activeProjectedValue);
+  const passivePotPreview = document.getElementById("passive-summary-pot-preview");
+  if (passivePotPreview) passivePotPreview.textContent = formatCurrency(passiveProjectedValue);
+
   renderPortfolioCards("active", activeCustomPortfolio, inputs);
   renderPortfolioCards("passive", passiveCustomPortfolio, inputs);
 
@@ -5019,6 +5024,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  const tabFunds = document.getElementById("tab-funds");
   const tabActive = document.getElementById("tab-active");
   const tabPassive = document.getElementById("tab-passive");
   const tabDrawdown = document.getElementById("tab-drawdown");
@@ -5028,6 +5034,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const tabTipDeveloper = document.getElementById("tab-tip-developer");
   const btnRegulatoryInfo = document.getElementById("btn-regulatory-info");
 
+  const secFundsSelection = document.getElementById("section-funds-selection");
   const secActive = document.getElementById("section-active");
   const secPassive = document.getElementById("section-passive");
   const secDrawdown = document.getElementById("section-drawdown");
@@ -5091,7 +5098,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (e) {}
 
     // Reset all strategy tabs to inactive styling
-    [tabActive, tabPassive, tabDrawdown, tabTarget, tabScreener, tabPensionNews, tabTipDeveloper].forEach(t => {
+    [tabFunds, tabActive, tabPassive, tabDrawdown, tabTarget, tabScreener, tabPensionNews, tabTipDeveloper].forEach(t => {
       if (t) {
         t.classList.remove("active");
         t.classList.remove("bg-white", "text-slate-900", "shadow-sm");
@@ -5100,11 +5107,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // Hide all sections initially (including regulatory compliance)
-    [secActive, secPassive, secDrawdown, secTarget, secScreener, secPensionNews, secTipDeveloper, secCompliance].forEach(s => s && s.classList.add("hidden"));
+    [secFundsSelection, secActive, secPassive, secDrawdown, secTarget, secScreener, secPensionNews, secTipDeveloper, secCompliance].forEach(s => s && s.classList.add("hidden"));
 
     const activeBtn = {
-      active: tabActive,
-      passive: tabPassive,
+      funds: tabFunds,
+      active: tabFunds,
+      passive: tabFunds,
       drawdown: tabDrawdown,
       target: tabTarget,
       screener: tabScreener,
@@ -5120,16 +5128,27 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Isolate views cleanly so each option has its own clear presentation
-    if (tab === "active") {
-      secActive.classList.remove("hidden");
+    if (tab === "funds") {
+      if (secFundsSelection) secFundsSelection.classList.remove("hidden");
+      if (secChartsOverview) secChartsOverview.classList.add("hidden");
+      if (secActive) secActive.classList.add("hidden");
+      if (secPassive) secPassive.classList.add("hidden");
+      updateAdvisor();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else if (tab === "active") {
+      if (secActive) secActive.classList.remove("hidden");
       if (secChartsOverview) secChartsOverview.classList.remove("hidden");
-      if (secInvestorProfile) secInvestorProfile.classList.remove("hidden");
-      if (secMetricsSummary) secMetricsSummary.classList.remove("hidden");
+      if (secFundsSelection) secFundsSelection.classList.add("hidden");
+      if (secPassive) secPassive.classList.add("hidden");
+      updateAdvisor();
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } else if (tab === "passive") {
-      secPassive.classList.remove("hidden");
+      if (secPassive) secPassive.classList.remove("hidden");
       if (secChartsOverview) secChartsOverview.classList.remove("hidden");
-      if (secInvestorProfile) secInvestorProfile.classList.remove("hidden");
-      if (secMetricsSummary) secMetricsSummary.classList.remove("hidden");
+      if (secFundsSelection) secFundsSelection.classList.add("hidden");
+      if (secActive) secActive.classList.add("hidden");
+      updateAdvisor();
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } else if (tab === "drawdown") {
       secDrawdown.classList.remove("hidden");
       if (secChartsOverview) secChartsOverview.classList.add("hidden"); // Dedicated longevity simulator
@@ -5172,7 +5191,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const inputs = getInputs();
     const currentPortfolioList = tab === "passive" ? passiveCustomPortfolio : activeCustomPortfolio;
-    updateDonutChart(currentPortfolioList, tab);
+    updateDonutChart(currentPortfolioList, tab === "passive" ? "passive" : "active");
     updateFundFutureValueChart(currentPortfolioList, inputs);
     updateBenchmarkChart(currentPortfolioList);
 
@@ -5181,6 +5200,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  if (tabFunds) tabFunds.addEventListener("click", () => setTab("funds"));
   if (tabActive) tabActive.addEventListener("click", () => setTab("active"));
   if (tabPassive) tabPassive.addEventListener("click", () => setTab("passive"));
   if (tabDrawdown) tabDrawdown.addEventListener("click", () => setTab("drawdown"));
@@ -5356,10 +5376,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const requestedTab = urlParams.get("tab") || window.location.hash.replace("#", "");
   const isPopout = urlParams.get("popout") === "1";
 
-  if (requestedTab && isPopout && ["active", "passive", "drawdown", "target", "screener", "pension-news", "news", "tip", "tip-developer", "regulatory"].includes(requestedTab)) {
+  if (requestedTab && isPopout && ["funds", "active", "passive", "drawdown", "target", "screener", "pension-news", "news", "tip", "tip-developer", "regulatory"].includes(requestedTab)) {
     window._isPopoutInstance = true;
     setTab(requestedTab.startsWith("tip") ? "tip" : (requestedTab === "news" ? "pension-news" : requestedTab), true);
-  } else if (requestedTab && requestedTab !== "active" && ["passive", "drawdown", "target", "screener", "pension-news", "news", "tip", "tip-developer", "regulatory"].includes(requestedTab)) {
+  } else if (requestedTab && requestedTab !== "target" && ["funds", "active", "passive", "drawdown", "screener", "pension-news", "news", "tip", "tip-developer", "regulatory"].includes(requestedTab)) {
     setTab(requestedTab.startsWith("tip") ? "tip" : (requestedTab === "news" ? "pension-news" : requestedTab), true);
   } else {
     // Default initial landing screen: How Much Do I Need to Retire?

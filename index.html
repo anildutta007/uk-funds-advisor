@@ -197,23 +197,17 @@
             </span>
           </button>
 
-          <!-- Tab 3: Active Fund Strategy -->
-          <button id="tab-active" type="button" class="strategy-tab px-3.5 py-2 text-xs font-bold rounded-lg transition text-[#524C3F] hover:text-[#1F5A45] flex items-center gap-1.5" title="View Active Fund Strategy">
+          <!-- Tab 3: Funds selection for Investment -->
+          <button id="tab-funds" type="button" class="strategy-tab px-3.5 py-2 text-xs font-bold rounded-lg transition text-[#524C3F] hover:text-[#1F5A45] flex items-center gap-1.5" title="Funds selection for Investment (Active vs. Passive Model Portfolios)">
             <i data-lucide="briefcase" class="w-4 h-4 text-[#1F5A45] flex-shrink-0"></i>
-            <span>Active Fund Strategy</span>
-            <span onclick="event.stopPropagation(); openOptionInNewTab('active')" class="popout-btn ml-1 p-0.5 rounded hover:bg-[#EFE8D8] text-[#9E947F] hover:text-[#1F5A45] transition cursor-pointer" title="Open Active Strategy in a new browser tab">
+            <span>Funds selection for Investment</span>
+            <span onclick="event.stopPropagation(); openOptionInNewTab('funds')" class="popout-btn ml-1 p-0.5 rounded hover:bg-[#EFE8D8] text-[#9E947F] hover:text-[#1F5A45] transition cursor-pointer" title="Open Funds selection for Investment in a new browser tab">
               <i data-lucide="external-link" class="w-3 h-3"></i>
             </span>
           </button>
-
-          <!-- Tab 4: Passive Fund Strategy -->
-          <button id="tab-passive" type="button" class="strategy-tab px-3.5 py-2 text-xs font-bold rounded-lg transition text-[#524C3F] hover:text-[#1F5A45] flex items-center gap-1.5" title="View Passive Index Strategy">
-            <i data-lucide="layers" class="w-4 h-4 text-[#4D8B74] flex-shrink-0"></i>
-            <span>Passive Fund Strategy</span>
-            <span onclick="event.stopPropagation(); openOptionInNewTab('passive')" class="popout-btn ml-1 p-0.5 rounded hover:bg-[#EFE8D8] text-[#9E947F] hover:text-[#1F5A45] transition cursor-pointer" title="Open Passive Strategy in a new browser tab">
-              <i data-lucide="external-link" class="w-3 h-3"></i>
-            </span>
-          </button>
+          <!-- Hidden compatibility elements for existing event attachments -->
+          <button id="tab-active" type="button" class="hidden"></button>
+          <button id="tab-passive" type="button" class="hidden"></button>
 
           <!-- Tab 5: Screener (Explore All Trustnet Funds) -->
           <button id="tab-screener" type="button" class="strategy-tab px-3.5 py-2 text-xs font-bold rounded-lg transition text-[#524C3F] hover:text-[#1F5A45] flex items-center gap-1.5" title="Explore Trustnet Fund Database">
@@ -249,274 +243,443 @@
   <!-- Main Container -->
   <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 space-y-8">
     
-    <!-- Investor Profile Input Card -->
-    <section id="section-investor-profile" class="hidden bg-white rounded-2xl border border-slate-200 shadow-sm p-6 relative overflow-hidden">
-      <div class="absolute -right-16 -top-16 w-64 h-64 bg-brand-50 rounded-full blur-3xl pointer-events-none -z-0"></div>
-
-      <div class="relative z-10">
-        <div class="flex flex-wrap items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-100">
-          <div>
-            <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-              <i data-lucide="sliders" class="w-5 h-5 text-brand-600"></i>
-              Investor Profile & Demographics
-            </h2>
-            <p class="text-xs text-slate-500">Provide your investment timeline, capital, and risk preferences to generate tailored fund portfolios.</p>
-          </div>
-          <div id="horizon-badge" class="px-3.5 py-1.5 bg-gradient-to-r from-brand-600 to-cyan-600 text-white font-semibold text-xs rounded-full shadow-sm flex items-center gap-1.5">
-            <i data-lucide="hourglass" class="w-3.5 h-3.5"></i>
-            <span>Investment Horizon: <strong id="horizon-years">30 Years</strong></span>
-          </div>
-        </div>
-
-        <form id="advisor-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5">
-          
-          <!-- Current Age -->
-          <div class="space-y-1.5">
-            <label for="current-age" class="block text-xs font-semibold text-slate-700">
-              Current Age (Years)
-            </label>
-            <div class="relative">
-              <input type="number" id="current-age" min="18" max="85" value="35" required
-                class="w-full pl-3 pr-10 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 font-medium text-slate-800 transition">
-              <span class="absolute right-3 top-2 text-xs text-slate-400 font-medium">yrs</span>
-            </div>
-            <p class="text-[11px] text-slate-400">UK adult investing age (18+)</p>
-          </div>
-
-          <!-- Retirement Age -->
-          <div class="space-y-1.5">
-            <label for="retirement-age" class="block text-xs font-semibold text-slate-700">
-              Target Retirement Age
-            </label>
-            <div class="relative">
-              <input type="number" id="retirement-age" min="30" max="90" value="65" required
-                class="w-full pl-3 pr-10 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 font-medium text-slate-800 transition">
-              <span class="absolute right-3 top-2 text-xs text-slate-400 font-medium">yrs</span>
-            </div>
-            <p class="text-[11px] text-slate-400">UK state pension age ~67</p>
-          </div>
-
-          <!-- Lump Sum Investment -->
-          <div class="space-y-1.5">
-            <label for="lump-sum" class="block text-xs font-semibold text-slate-700">
-              Initial Lump Sum (£)
-            </label>
-            <div class="relative">
-              <span class="absolute left-3 top-2 text-sm text-slate-500 font-semibold">£</span>
-              <input type="number" id="lump-sum" min="0" step="500" value="20000"
-                class="w-full pl-7 pr-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 font-medium text-slate-800 transition">
-            </div>
-            <p class="text-[11px] text-slate-400">Available starting capital</p>
-          </div>
-
-          <!-- Monthly Contribution -->
-          <div class="space-y-1.5">
-            <label for="monthly-amount" class="block text-xs font-semibold text-slate-700">
-              Monthly Contribution (£)
-            </label>
-            <div class="relative">
-              <span class="absolute left-3 top-2 text-sm text-slate-500 font-semibold">£</span>
-              <input type="number" id="monthly-amount" min="0" step="50" value="500"
-                class="w-full pl-7 pr-12 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 font-medium text-slate-800 transition">
-              <span class="absolute right-3 top-2 text-xs text-slate-400 font-medium">/mo</span>
-            </div>
-            <p class="text-[11px] text-slate-400">Regular standing order</p>
-          </div>
-
-          <!-- Target Annual Growth Rate -->
-          <div class="space-y-1.5">
-            <label for="target-growth" class="block text-xs font-semibold text-slate-700">
-              Target Annual Growth (%)
-            </label>
-            <div class="relative">
-              <input type="number" id="target-growth" min="1" max="25" step="0.5" value="7.5" required
-                class="w-full pl-3 pr-8 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 font-medium text-slate-800 transition">
-              <span class="absolute right-3 top-2 text-xs text-slate-400 font-medium">%</span>
-            </div>
-            <p class="text-[11px] text-slate-400">Target benchmark rate</p>
-          </div>
-
-        </form>
-
-        <!-- Risk Tolerance Selector -->
-        <div class="mt-6 pt-5 border-t border-slate-100">
-          <label class="block text-xs font-semibold text-slate-700 mb-3">
-            Select Risk Profile & Volatility Tolerance:
-          </label>
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="risk-options">
-            
-            <!-- Low Risk Card -->
-            <label class="risk-card relative flex flex-col p-3.5 rounded-xl border border-slate-200 bg-white hover:border-brand-400 cursor-pointer transition select-none">
-              <input type="radio" name="risk-profile" value="low" class="sr-only">
-              <div class="flex items-center justify-between mb-1">
-                <span class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-                  <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
-                  Low (Conservative)
-                </span>
-                <span class="text-[10px] px-2 py-0.5 rounded font-semibold bg-emerald-50 text-emerald-700">20-30% Equity</span>
-              </div>
-              <p class="text-xs text-slate-500 leading-relaxed">
-                Capital preservation priority. Heavy focus on UK Gilts, short-term bonds, and sterling money market liquidity.
-              </p>
-            </label>
-
-            <!-- Medium Risk Card (Default) -->
-            <label class="risk-card active relative flex flex-col p-3.5 rounded-xl border-2 border-brand-600 bg-brand-50/50 hover:border-brand-600 cursor-pointer transition select-none shadow-sm">
-              <input type="radio" name="risk-profile" value="medium" checked class="sr-only">
-              <div class="flex items-center justify-between mb-1">
-                <span class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-                  <i data-lucide="scale" class="w-4 h-4 text-brand-600"></i>
-                  Medium (Balanced)
-                </span>
-                <span class="text-[10px] px-2 py-0.5 rounded font-semibold bg-brand-100 text-brand-800">60% Equity / 40% Bonds</span>
-              </div>
-              <p class="text-xs text-slate-500 leading-relaxed">
-                Balanced capital growth with downside cushion. Global equities, dividend leaders, strategic bonds, and multi-asset reserves.
-              </p>
-            </label>
-
-            <!-- High Risk Card -->
-            <label class="risk-card relative flex flex-col p-3.5 rounded-xl border border-slate-200 bg-white hover:border-brand-400 cursor-pointer transition select-none">
-              <input type="radio" name="risk-profile" value="high" class="sr-only">
-              <div class="flex items-center justify-between mb-1">
-                <span class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-                  <i data-lucide="trending-up" class="w-4 h-4 text-rose-600"></i>
-                  High (Growth / Aggressive)
-                </span>
-                <span class="text-[10px] px-2 py-0.5 rounded font-semibold bg-rose-50 text-rose-700">90-100% Equity</span>
-              </div>
-              <p class="text-xs text-slate-500 leading-relaxed">
-                Maximum long-term compounding. High exposure to UK & US large-caps, global quality equities, and emerging markets.
-              </p>
-            </label>
-
-          </div>
-        </div>
-
-        <!-- UK Tax Allowances Notice -->
-        <div class="mt-4 pt-3 flex flex-wrap items-center justify-between text-xs text-slate-500 gap-2">
-          <div class="flex items-center gap-1.5">
-            <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i>
-            <span>Annual ISA Allowance: <strong>£20,000</strong></span>
-            <span class="mx-1">|</span>
-            <span>Annual SIPP Allowance: <strong>£60,000</strong></span>
-          </div>
-          <div id="allowance-tracker" class="font-medium text-slate-600">
-            Current Year Contribution: <span id="current-year-total" class="font-bold text-brand-700">£26,000</span>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- Executive Summary Metric Cards -->
-    <section id="section-metrics-summary" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- Strategy Section: Funds Selection for Investment (Merged Active & Passive Overview) -->
+    <section id="section-funds-selection" class="strategy-section hidden space-y-6">
       
-      <!-- Card 1: Total Capital Contributed -->
-      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Principal Invested</span>
-          <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-700">
-            <i data-lucide="wallet" class="w-4 h-4"></i>
+      <!-- Top Banner / Explainer -->
+      <div class="bg-[#FCFAF4] rounded-2xl p-5 sm:p-6 border border-[#E2D9C5] shadow-sm relative overflow-hidden">
+        <div class="space-y-2 max-w-3xl">
+          <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-[#F3DD87] border border-[#E2C56A] text-[#5C4B13] text-xs font-bold">
+            <i data-lucide="briefcase" class="w-3.5 h-3.5 text-[#5C4B13]"></i>
+            <span>Active vs. Passive Fund Allocation Models</span>
           </div>
-        </div>
-        <div class="mt-2">
-          <div id="stat-total-contributions" class="text-2xl font-extrabold text-slate-900">£200,000</div>
-          <p id="stat-contributions-breakdown" class="text-xs text-slate-400 mt-1">£20,000 lump sum + £180,000 monthly</p>
+          <h2 class="text-xl sm:text-2xl font-extrabold text-[#1F5A45] tracking-tight font-serif">
+            Funds Selection for Investment
+          </h2>
+          <p class="text-xs sm:text-sm text-[#524C3F] leading-relaxed">
+            Compare hand-picked human-managed portfolios (<strong>Active</strong>) against automated low-cost market trackers (<strong>Passive</strong>). Adjust your investment timeline, lump sum, regular monthly deposits, and risk profile below to compare long-term wealth projections.
+          </p>
         </div>
       </div>
 
-      <!-- Card 2: Projected Value (Active Strategy) -->
-      <div class="bg-white p-5 rounded-2xl border border-blue-200 shadow-sm relative overflow-hidden bg-gradient-to-br from-white to-blue-50/40">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-semibold text-brand-700 uppercase tracking-wider">Active Strategy Value</span>
-          <div class="w-8 h-8 rounded-lg bg-brand-100 flex items-center justify-center text-brand-700">
-            <i data-lucide="award" class="w-4 h-4"></i>
-          </div>
-        </div>
-        <div class="mt-2 space-y-1.5">
-          <div class="flex items-baseline justify-between gap-1 flex-wrap">
-            <div id="stat-active-value" class="text-2xl font-extrabold text-brand-900">£842,500</div>
-            <span class="text-[10px] text-slate-400 font-semibold uppercase">Nominal</span>
+      <!-- Investor Profile Input Card -->
+      <div id="section-investor-profile" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 relative overflow-hidden">
+        <div class="absolute -right-16 -top-16 w-64 h-64 bg-brand-50 rounded-full blur-3xl pointer-events-none -z-0"></div>
+
+        <div class="relative z-10">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-100">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <i data-lucide="sliders" class="w-5 h-5 text-brand-600"></i>
+                Investor Profile & Demographics
+              </h2>
+              <p class="text-xs text-slate-500">Provide your investment timeline, capital, and risk preferences to generate tailored fund portfolios.</p>
+            </div>
+            <div id="horizon-badge" class="px-3.5 py-1.5 bg-gradient-to-r from-brand-600 to-cyan-600 text-white font-semibold text-xs rounded-full shadow-sm flex items-center gap-1.5">
+              <i data-lucide="hourglass" class="w-3.5 h-3.5"></i>
+              <span>Investment Horizon: <strong id="horizon-years">30 Years</strong></span>
+            </div>
           </div>
 
-          <!-- Real Terms in Today's World (@ 3% inflation) -->
-          <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200/80 text-xs font-bold text-emerald-900 w-full justify-between">
-            <span class="flex items-center gap-1">
-              <i data-lucide="coins" class="w-3.5 h-3.5 text-emerald-600"></i>
-              <span>Today's World:</span>
-            </span>
-            <span id="stat-active-real-value" class="font-black text-emerald-700">£347,000</span>
-            <span class="text-[10px] font-normal text-slate-500">(@ 3% infl.)</span>
+          <form id="advisor-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5">
+            
+            <!-- Current Age -->
+            <div class="space-y-1.5">
+              <label for="current-age" class="block text-xs font-semibold text-slate-700">
+                Current Age (Years)
+              </label>
+              <div class="relative">
+                <input type="number" id="current-age" min="18" max="85" value="35" required
+                  class="w-full pl-3 pr-10 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 font-medium text-slate-800 transition">
+                <span class="absolute right-3 top-2 text-xs text-slate-400 font-medium">yrs</span>
+              </div>
+              <p class="text-[11px] text-slate-400">UK adult investing age (18+)</p>
+            </div>
+
+            <!-- Retirement Age -->
+            <div class="space-y-1.5">
+              <label for="retirement-age" class="block text-xs font-semibold text-slate-700">
+                Target Retirement Age
+              </label>
+              <div class="relative">
+                <input type="number" id="retirement-age" min="30" max="90" value="65" required
+                  class="w-full pl-3 pr-10 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 font-medium text-slate-800 transition">
+                <span class="absolute right-3 top-2 text-xs text-slate-400 font-medium">yrs</span>
+              </div>
+              <p class="text-[11px] text-slate-400">UK state pension age ~67</p>
+            </div>
+
+            <!-- Lump Sum Investment -->
+            <div class="space-y-1.5">
+              <label for="lump-sum" class="block text-xs font-semibold text-slate-700">
+                Initial Lump Sum (£)
+              </label>
+              <div class="relative">
+                <span class="absolute left-3 top-2 text-sm text-slate-500 font-semibold">£</span>
+                <input type="number" id="lump-sum" min="0" step="500" value="20000"
+                  class="w-full pl-7 pr-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 font-medium text-slate-800 transition">
+              </div>
+              <p class="text-[11px] text-slate-400">Available starting capital</p>
+            </div>
+
+            <!-- Monthly Contribution -->
+            <div class="space-y-1.5">
+              <label for="monthly-amount" class="block text-xs font-semibold text-slate-700">
+                Monthly Contribution (£)
+              </label>
+              <div class="relative">
+                <span class="absolute left-3 top-2 text-sm text-slate-500 font-semibold">£</span>
+                <input type="number" id="monthly-amount" min="0" step="50" value="500"
+                  class="w-full pl-7 pr-12 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 font-medium text-slate-800 transition">
+                <span class="absolute right-3 top-2 text-xs text-slate-400 font-medium">/mo</span>
+              </div>
+              <p class="text-[11px] text-slate-400">Regular standing order</p>
+            </div>
+
+            <!-- Target Annual Growth Rate -->
+            <div class="space-y-1.5">
+              <label for="target-growth" class="block text-xs font-semibold text-slate-700">
+                Target Annual Growth (%)
+              </label>
+              <div class="relative">
+                <input type="number" id="target-growth" min="1" max="25" step="0.5" value="7.5" required
+                  class="w-full pl-3 pr-8 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 font-medium text-slate-800 transition">
+                <span class="absolute right-3 top-2 text-xs text-slate-400 font-medium">%</span>
+              </div>
+              <p class="text-[11px] text-slate-400">Target benchmark rate</p>
+            </div>
+
+          </form>
+
+          <!-- Risk Tolerance Selector -->
+          <div class="mt-6 pt-5 border-t border-slate-100">
+            <label class="block text-xs font-semibold text-slate-700 mb-3">
+              Select Risk Profile & Volatility Tolerance:
+            </label>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="risk-options">
+              
+              <!-- Low Risk Card -->
+              <label class="risk-card relative flex flex-col p-3.5 rounded-xl border border-slate-200 bg-white hover:border-brand-400 cursor-pointer transition select-none">
+                <input type="radio" name="risk-profile" value="low" class="sr-only">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                    <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
+                    Low (Conservative)
+                  </span>
+                  <span class="text-[10px] px-2 py-0.5 rounded font-semibold bg-emerald-50 text-emerald-700">20-30% Equity</span>
+                </div>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                  Capital preservation priority. Heavy focus on UK Gilts, short-term bonds, and sterling money market liquidity.
+                </p>
+              </label>
+
+              <!-- Medium Risk Card (Default) -->
+              <label class="risk-card active relative flex flex-col p-3.5 rounded-xl border-2 border-brand-600 bg-brand-50/50 hover:border-brand-600 cursor-pointer transition select-none shadow-sm">
+                <input type="radio" name="risk-profile" value="medium" checked class="sr-only">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                    <i data-lucide="scale" class="w-4 h-4 text-brand-600"></i>
+                    Medium (Balanced)
+                  </span>
+                  <span class="text-[10px] px-2 py-0.5 rounded font-semibold bg-brand-100 text-brand-800">60% Equity / 40% Bonds</span>
+                </div>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                  Balanced capital growth with downside cushion. Global equities, dividend leaders, strategic bonds, and multi-asset reserves.
+                </p>
+              </label>
+
+              <!-- High Risk Card -->
+              <label class="risk-card relative flex flex-col p-3.5 rounded-xl border border-slate-200 bg-white hover:border-brand-400 cursor-pointer transition select-none">
+                <input type="radio" name="risk-profile" value="high" class="sr-only">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                    <i data-lucide="trending-up" class="w-4 h-4 text-rose-600"></i>
+                    High (Growth / Aggressive)
+                  </span>
+                  <span class="text-[10px] px-2 py-0.5 rounded font-semibold bg-rose-50 text-rose-700">90-100% Equity</span>
+                </div>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                  Maximum long-term compounding. High exposure to UK & US large-caps, global quality equities, and emerging markets.
+                </p>
+              </label>
+
+            </div>
           </div>
 
-          <p id="stat-active-gain" class="text-xs text-emerald-600 font-semibold pt-0.5">+£642,500 (+321% growth)</p>
-        </div>
-        <div class="mt-2 text-[11px] text-slate-500">
-          Weighted 15-Yr Return: <strong id="stat-active-rate" class="text-slate-800">10.4% p.a.</strong>
+          <!-- UK Tax Allowances Notice -->
+          <div class="mt-4 pt-3 flex flex-wrap items-center justify-between text-xs text-slate-500 gap-2">
+            <div class="flex items-center gap-1.5">
+              <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i>
+              <span>Annual ISA Allowance: <strong>£20,000</strong></span>
+              <span class="mx-1">|</span>
+              <span>Annual SIPP Allowance: <strong>£60,000</strong></span>
+            </div>
+            <div id="allowance-tracker" class="font-medium text-slate-600">
+              Current Year Contribution: <span id="current-year-total" class="font-bold text-brand-700">£26,000</span>
+            </div>
+          </div>
+
         </div>
       </div>
 
-      <!-- Card 3: Projected Value (Passive Strategy) -->
-      <div class="bg-white p-5 rounded-2xl border border-teal-200 shadow-sm relative overflow-hidden bg-gradient-to-br from-white to-teal-50/40">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-semibold text-teal-700 uppercase tracking-wider">Passive Strategy Value</span>
-          <div class="w-8 h-8 rounded-lg bg-teal-100 flex items-center justify-center text-teal-700">
-            <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+      <!-- What is Active vs. Passive Investing? Educational Explainer -->
+      <div class="bg-white rounded-2xl border border-[#E2D9C5] shadow-sm p-6 space-y-5">
+        <div class="flex items-center justify-between pb-3 border-b border-[#EFE8D8]">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-[#E4EDE7] flex items-center justify-center text-[#1F5A45] font-bold">
+              <i data-lucide="help-circle" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <h3 class="text-base font-bold text-[#1F5A45] font-serif">What is Active vs. Passive Investing?</h3>
+              <p class="text-xs text-[#524C3F]">Understanding the two core investment philosophies so you can choose the right strategy.</p>
+            </div>
           </div>
         </div>
-        <div class="mt-2 space-y-1.5">
-          <div class="flex items-baseline justify-between gap-1 flex-wrap">
-            <div id="stat-passive-value" class="text-2xl font-extrabold text-teal-900">£765,400</div>
-            <span class="text-[10px] text-slate-400 font-semibold uppercase">Nominal</span>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <!-- Active Explanation -->
+          <div class="p-4 rounded-xl border border-brand-200/80 bg-brand-50/30 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="inline-flex items-center gap-1.5 font-bold text-[#1F5A45] text-xs">
+                <i data-lucide="briefcase" class="w-4 h-4 text-[#1F5A45]"></i>
+                <span>Active Fund Strategy</span>
+              </span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#E4EDE7] text-[#1F5A45]">Alpha &amp; Stock-Picking</span>
+            </div>
+            <p class="text-xs text-slate-700 leading-relaxed">
+              <strong>How it works:</strong> A professional fund manager (e.g. Terry Smith, Sebastian Lyon, Mark Slater) actively researches companies, hand-picks top stocks or bonds, and decides when to buy, sell, or hold cash.
+            </p>
+            <ul class="space-y-1.5 text-[11px] text-slate-600">
+              <li class="flex items-start gap-1.5">
+                <i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+                <span><strong>The Goal:</strong> Beat the market index returns (generating &ldquo;Alpha&rdquo;).</span>
+              </li>
+              <li class="flex items-start gap-1.5">
+                <i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+                <span><strong>Downside Defense:</strong> Managers can pivot to cash or defensive assets during bear markets.</span>
+              </li>
+              <li class="flex items-start gap-1.5">
+                <i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+                <span><strong>Costs:</strong> Higher fees (typically 0.60%–0.95% OCF) to pay for research and management.</span>
+              </li>
+            </ul>
           </div>
 
-          <!-- Real Terms in Today's World (@ 3% inflation) -->
-          <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-teal-50 border border-teal-200/80 text-xs font-bold text-teal-900 w-full justify-between">
-            <span class="flex items-center gap-1">
-              <i data-lucide="coins" class="w-3.5 h-3.5 text-teal-600"></i>
-              <span>Today's World:</span>
-            </span>
-            <span id="stat-passive-real-value" class="font-black text-teal-700">£315,000</span>
-            <span class="text-[10px] font-normal text-slate-500">(@ 3% infl.)</span>
+          <!-- Passive Explanation -->
+          <div class="p-4 rounded-xl border border-teal-200/80 bg-teal-50/30 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="inline-flex items-center gap-1.5 font-bold text-teal-900 text-xs">
+                <i data-lucide="layers" class="w-4 h-4 text-teal-700"></i>
+                <span>Passive Fund Strategy (Trackers &amp; ETFs)</span>
+              </span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-teal-100 text-teal-800">Beta &amp; Low Fees</span>
+            </div>
+            <p class="text-xs text-slate-700 leading-relaxed">
+              <strong>How it works:</strong> Automated, rules-based funds (e.g. Vanguard, iShares, Fidelity) that simply copy a whole index (like the S&amp;P 500, FTSE 100, or MSCI World) with no human stock-picking.
+            </p>
+            <ul class="space-y-1.5 text-[11px] text-slate-600">
+              <li class="flex items-start gap-1.5">
+                <i data-lucide="check" class="w-3.5 h-3.5 text-teal-600 flex-shrink-0 mt-0.5"></i>
+                <span><strong>The Goal:</strong> Match the market index return exactly with zero manager risk.</span>
+              </li>
+              <li class="flex items-start gap-1.5">
+                <i data-lucide="check" class="w-3.5 h-3.5 text-teal-600 flex-shrink-0 mt-0.5"></i>
+                <span><strong>Ultra-Low Fees:</strong> Charges are rock-bottom (0.06%–0.22% OCF), so more money compounds.</span>
+              </li>
+              <li class="flex items-start gap-1.5">
+                <i data-lucide="check" class="w-3.5 h-3.5 text-teal-600 flex-shrink-0 mt-0.5"></i>
+                <span><strong>Full Market Exposure:</strong> Holds all index constituents without attempting to time the market.</span>
+              </li>
+            </ul>
           </div>
-
-          <p id="stat-passive-gain" class="text-xs text-emerald-600 font-semibold pt-0.5">+£565,400 (+282% growth)</p>
-        </div>
-        <div class="mt-2 text-[11px] text-slate-500">
-          Weighted 15-Yr Return: <strong id="stat-passive-rate" class="text-slate-800">8.9% p.a.</strong>
         </div>
       </div>
 
-      <!-- Card 4: Active vs Passive Alpha Difference -->
-      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Historical Net Difference</span>
-          <div class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center text-purple-700">
-            <i data-lucide="git-compare" class="w-4 h-4"></i>
+      <!-- Executive Summary Metric Cards (The 4 Cards from Image 2) -->
+      <div id="section-metrics-summary" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- Card 1: Total Capital Contributed -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Principal Invested</span>
+            <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-700">
+              <i data-lucide="wallet" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="mt-2">
+            <div id="stat-total-contributions" class="text-2xl font-extrabold text-slate-900">£200,000</div>
+            <p id="stat-contributions-breakdown" class="text-xs text-slate-400 mt-1">£20,000 lump sum + £180,000 monthly</p>
           </div>
         </div>
-        <div class="mt-2 space-y-1.5">
-          <div class="flex items-baseline justify-between gap-1 flex-wrap">
-            <div id="stat-alpha-difference" class="text-2xl font-extrabold text-purple-900">+£77,100</div>
-            <span class="text-[10px] text-slate-400 font-semibold uppercase">Nominal</span>
+
+        <!-- Card 2: Projected Value (Active Strategy) -->
+        <div class="bg-white p-5 rounded-2xl border border-blue-200 shadow-sm relative overflow-hidden bg-gradient-to-br from-white to-blue-50/40">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-brand-700 uppercase tracking-wider">Active Strategy Value</span>
+            <div class="w-8 h-8 rounded-lg bg-brand-100 flex items-center justify-center text-brand-700">
+              <i data-lucide="award" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="mt-2 space-y-1.5">
+            <div class="flex items-baseline justify-between gap-1 flex-wrap">
+              <div id="stat-active-value" class="text-2xl font-extrabold text-brand-900">£842,500</div>
+              <span class="text-[10px] text-slate-400 font-semibold uppercase">Nominal</span>
+            </div>
+
+            <!-- Real Terms in Today's World (@ 3% inflation) -->
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200/80 text-xs font-bold text-emerald-900 w-full justify-between">
+              <span class="flex items-center gap-1">
+                <i data-lucide="coins" class="w-3.5 h-3.5 text-emerald-600"></i>
+                <span>Today's World:</span>
+              </span>
+              <span id="stat-active-real-value" class="font-black text-emerald-700">£347,000</span>
+              <span class="text-[10px] font-normal text-slate-500">(@ 3% infl.)</span>
+            </div>
+
+            <p id="stat-active-gain" class="text-xs text-emerald-600 font-semibold pt-0.5">+£642,500 (+321% growth)</p>
+          </div>
+          <div class="mt-2 text-[11px] text-slate-500">
+            Weighted 15-Yr Return: <strong id="stat-active-rate" class="text-slate-800">10.4% p.a.</strong>
+          </div>
+        </div>
+
+        <!-- Card 3: Projected Value (Passive Strategy) -->
+        <div class="bg-white p-5 rounded-2xl border border-teal-200 shadow-sm relative overflow-hidden bg-gradient-to-br from-white to-teal-50/40">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-teal-700 uppercase tracking-wider">Passive Strategy Value</span>
+            <div class="w-8 h-8 rounded-lg bg-teal-100 flex items-center justify-center text-teal-700">
+              <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="mt-2 space-y-1.5">
+            <div class="flex items-baseline justify-between gap-1 flex-wrap">
+              <div id="stat-passive-value" class="text-2xl font-extrabold text-teal-900">£765,400</div>
+              <span class="text-[10px] text-slate-400 font-semibold uppercase">Nominal</span>
+            </div>
+
+            <!-- Real Terms in Today's World (@ 3% inflation) -->
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-teal-50 border border-teal-200/80 text-xs font-bold text-teal-900 w-full justify-between">
+              <span class="flex items-center gap-1">
+                <i data-lucide="coins" class="w-3.5 h-3.5 text-teal-600"></i>
+                <span>Today's World:</span>
+              </span>
+              <span id="stat-passive-real-value" class="font-black text-teal-700">£315,000</span>
+              <span class="text-[10px] font-normal text-slate-500">(@ 3% infl.)</span>
+            </div>
+
+            <p id="stat-passive-gain" class="text-xs text-emerald-600 font-semibold pt-0.5">+£565,400 (+282% growth)</p>
+          </div>
+          <div class="mt-2 text-[11px] text-slate-500">
+            Weighted 15-Yr Return: <strong id="stat-passive-rate" class="text-slate-800">8.9% p.a.</strong>
+          </div>
+        </div>
+
+        <!-- Card 4: Active vs Passive Alpha Difference -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Historical Net Difference</span>
+            <div class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center text-purple-700">
+              <i data-lucide="git-compare" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="mt-2 space-y-1.5">
+            <div class="flex items-baseline justify-between gap-1 flex-wrap">
+              <div id="stat-alpha-difference" class="text-2xl font-extrabold text-purple-900">+£77,100</div>
+              <span class="text-[10px] text-slate-400 font-semibold uppercase">Nominal</span>
+            </div>
+
+            <!-- Real Terms in Today's World (@ 3% inflation) -->
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-50 border border-purple-200/80 text-xs font-bold text-purple-900 w-full justify-between">
+              <span class="flex items-center gap-1">
+                <i data-lucide="coins" class="w-3.5 h-3.5 text-purple-600"></i>
+                <span>Today's World:</span>
+              </span>
+              <span id="stat-alpha-real-difference" class="font-black text-purple-700">+£32,000</span>
+              <span class="text-[10px] font-normal text-slate-500">(@ 3% infl.)</span>
+            </div>
+
+            <p id="stat-alpha-subtext" class="text-xs text-slate-500 mt-1">Active historical premium</p>
+          </div>
+          <div class="mt-2 text-[11px] text-slate-400">
+            Real purchasing power calculated at 3.0% compound annual inflation.
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Strategy Gateways to Dedicated Fund Pages -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
+        
+        <!-- Active Gateway Card -->
+        <div class="bg-white p-5 sm:p-6 rounded-2xl border-2 border-brand-200/90 hover:border-brand-500 shadow-sm transition space-y-4 flex flex-col justify-between">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-brand-100 text-brand-900 border border-brand-200">
+                <i data-lucide="briefcase" class="w-3.5 h-3.5 text-brand-700"></i>
+                <span>Active Strategy Portfolio</span>
+              </span>
+              <span class="text-xs font-semibold text-slate-500">4 Hand-Picked Holdings</span>
+            </div>
+            <h4 class="text-base font-bold text-[#1F5A45] font-serif">
+              High-Conviction Alpha Portfolio
+            </h4>
+            <p class="text-xs text-[#524C3F] leading-relaxed">
+              Curated active managers (Slater, Fundsmith, Fidelity, BlackRock) selected for consistent 15-year alpha generation, downside resilience, and veteran manager tenure.
+            </p>
           </div>
 
-          <!-- Real Terms in Today's World (@ 3% inflation) -->
-          <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-50 border border-purple-200/80 text-xs font-bold text-purple-900 w-full justify-between">
-            <span class="flex items-center gap-1">
-              <i data-lucide="coins" class="w-3.5 h-3.5 text-purple-600"></i>
-              <span>Today's World:</span>
-            </span>
-            <span id="stat-alpha-real-difference" class="font-black text-purple-700">+£32,000</span>
-            <span class="text-[10px] font-normal text-slate-500">(@ 3% infl.)</span>
+          <div class="pt-3 border-t border-slate-100 space-y-3">
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-slate-500">Projected Pot:</span>
+              <span class="font-black text-[#1F5A45] text-sm" id="active-summary-pot-preview">£1,413,589</span>
+            </div>
+            <div class="flex items-center justify-between gap-2">
+              <button type="button" onclick="setTab('active')" class="w-full px-4 py-2.5 rounded-xl bg-[#1F5A45] hover:bg-[#164333] text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow-sm cursor-pointer">
+                <i data-lucide="eye" class="w-4 h-4"></i>
+                <span>See Active Funds Details →</span>
+              </button>
+              <button type="button" onclick="openOptionInNewTab('active')" class="p-2.5 rounded-xl border border-[#E2D9C5] bg-[#FCFAF4] hover:bg-[#EFE8D8] text-[#1F5A45] transition cursor-pointer" title="Open Active Funds in new tab">
+                <i data-lucide="external-link" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Passive Gateway Card -->
+        <div class="bg-white p-5 sm:p-6 rounded-2xl border-2 border-teal-200/90 hover:border-teal-500 shadow-sm transition space-y-4 flex flex-col justify-between">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-teal-100 text-teal-900 border border-teal-200">
+                <i data-lucide="layers" class="w-3.5 h-3.5 text-teal-700"></i>
+                <span>Passive Index Portfolio</span>
+              </span>
+              <span class="text-xs font-semibold text-slate-500">4 Low-Cost Trackers</span>
+            </div>
+            <h4 class="text-base font-bold text-teal-950 font-serif">
+              Ultra-Low Cost Index Trackers &amp; ETFs
+            </h4>
+            <p class="text-xs text-[#524C3F] leading-relaxed">
+              Institutional passive index funds (Vanguard, iShares, Fidelity, LGIM) mirroring global equity and bond benchmarks with ongoing charges as low as 0.06% p.a.
+            </p>
           </div>
 
-          <p id="stat-alpha-subtext" class="text-xs text-slate-500 mt-1">Active historical premium</p>
+          <div class="pt-3 border-t border-slate-100 space-y-3">
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-slate-500">Projected Pot:</span>
+              <span class="font-black text-teal-900 text-sm" id="passive-summary-pot-preview">£783,759</span>
+            </div>
+            <div class="flex items-center justify-between gap-2">
+              <button type="button" onclick="setTab('passive')" class="w-full px-4 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow-sm cursor-pointer">
+                <i data-lucide="eye" class="w-4 h-4"></i>
+                <span>See Passive Funds Details →</span>
+              </button>
+              <button type="button" onclick="openOptionInNewTab('passive')" class="p-2.5 rounded-xl border border-[#E2D9C5] bg-[#FCFAF4] hover:bg-[#EFE8D8] text-teal-800 transition cursor-pointer" title="Open Passive Funds in new tab">
+                <i data-lucide="external-link" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
         </div>
-        <div class="mt-2 text-[11px] text-slate-400">
-          Real purchasing power calculated at 3.0% compound annual inflation.
-        </div>
+
       </div>
 
     </section>
@@ -608,7 +771,24 @@
     </section>
 
     <!-- Strategy Section: Active Fund Strategy -->
-    <section id="section-active" class="strategy-section hidden space-y-4">
+    <section id="section-active" class="strategy-section hidden space-y-5">
+      
+      <!-- Top Navigation & Return Bar -->
+      <div class="bg-[#FCFAF4] p-3.5 sm:p-4 rounded-xl border border-[#E2D9C5] shadow-xs flex flex-wrap items-center justify-between gap-3">
+        <button type="button" onclick="setTab('funds')" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-[#1F5A45] bg-[#E4EDE7] hover:bg-[#CCDED3] border border-[#CCDED3] transition shadow-xs cursor-pointer">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          <span>← Back to Funds Selection for Investment (Summary)</span>
+        </button>
+        <div class="flex items-center gap-2 text-xs text-[#524C3F]">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand-100 text-brand-900 font-bold border border-brand-200">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-brand-700"></i>
+            <span>Active Model Portfolio</span>
+          </span>
+          <span class="hidden sm:inline text-slate-400">•</span>
+          <span class="hidden sm:inline font-semibold">4 High-Conviction Alpha Funds</span>
+        </div>
+      </div>
+
       <div class="flex flex-wrap items-center justify-between gap-3 bg-brand-50/60 p-4 rounded-xl border border-brand-200/80">
         <div>
           <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
@@ -633,10 +813,38 @@
       <div class="grid grid-cols-1 gap-4" id="active-funds-container">
         <!-- Rendered dynamically -->
       </div>
+
+      <!-- Bottom Return Footer -->
+      <div class="pt-4 border-t border-[#E2D9C5] flex flex-wrap items-center justify-between gap-3">
+        <button type="button" onclick="setTab('funds')" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-[#1F5A45] bg-[#E4EDE7] hover:bg-[#CCDED3] border border-[#CCDED3] transition shadow-xs cursor-pointer">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          <span>← Back to Funds Selection for Investment (Summary)</span>
+        </button>
+        <button type="button" onclick="setTab('passive')" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-200 transition cursor-pointer">
+          <span>Compare with Passive Trackers →</span>
+        </button>
+      </div>
     </section>
 
     <!-- Strategy Section: Passive Fund Strategy -->
-    <section id="section-passive" class="strategy-section hidden space-y-4">
+    <section id="section-passive" class="strategy-section hidden space-y-5">
+      
+      <!-- Top Navigation & Return Bar -->
+      <div class="bg-[#FCFAF4] p-3.5 sm:p-4 rounded-xl border border-[#E2D9C5] shadow-xs flex flex-wrap items-center justify-between gap-3">
+        <button type="button" onclick="setTab('funds')" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-teal-900 bg-teal-100 hover:bg-teal-200 border border-teal-200 transition shadow-xs cursor-pointer">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          <span>← Back to Funds Selection for Investment (Summary)</span>
+        </button>
+        <div class="flex items-center gap-2 text-xs text-[#524C3F]">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-teal-100 text-teal-900 font-bold border border-teal-200">
+            <i data-lucide="layers" class="w-3.5 h-3.5 text-teal-700"></i>
+            <span>Passive Index Portfolio</span>
+          </span>
+          <span class="hidden sm:inline text-slate-400">•</span>
+          <span class="hidden sm:inline font-semibold">4 Low-Cost Market Trackers</span>
+        </div>
+      </div>
+
       <div class="flex flex-wrap items-center justify-between gap-3 bg-teal-50/60 p-4 rounded-xl border border-teal-200/80">
         <div>
           <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
@@ -660,6 +868,17 @@
       <!-- Passive Funds Cards / Table -->
       <div class="grid grid-cols-1 gap-4" id="passive-funds-container">
         <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Bottom Return Footer -->
+      <div class="pt-4 border-t border-[#E2D9C5] flex flex-wrap items-center justify-between gap-3">
+        <button type="button" onclick="setTab('funds')" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-teal-900 bg-teal-100 hover:bg-teal-200 border border-teal-200 transition shadow-xs cursor-pointer">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          <span>← Back to Funds Selection for Investment (Summary)</span>
+        </button>
+        <button type="button" onclick="setTab('active')" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-[#1F5A45] bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition cursor-pointer">
+          <span>Compare with Active Managers →</span>
+        </button>
       </div>
     </section>
 
