@@ -5064,6 +5064,17 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   function setTab(tab, forceSameWindow = false) {
+    if (tab === "regulatory") {
+      setTab("target");
+      setTimeout(() => {
+        const regEl = document.getElementById("regulatory-info-target");
+        if (regEl) {
+          regEl.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 120);
+      return;
+    }
+
     activeTab = tab;
     trackGAEvent("tab_view", { tab_name: tab });
 
@@ -5087,17 +5098,6 @@ document.addEventListener("DOMContentLoaded", () => {
         t.classList.add("text-slate-600");
       }
     });
-
-    // Update Regulatory Info button styling on top bar
-    if (btnRegulatoryInfo) {
-      if (tab === "regulatory") {
-        btnRegulatoryInfo.classList.remove("bg-slate-100", "text-slate-700");
-        btnRegulatoryInfo.classList.add("bg-emerald-100", "text-emerald-900", "border-emerald-300", "shadow-xs");
-      } else {
-        btnRegulatoryInfo.classList.remove("bg-emerald-100", "text-emerald-900", "border-emerald-300", "shadow-xs");
-        btnRegulatoryInfo.classList.add("bg-slate-100", "text-slate-700");
-      }
-    }
 
     // Hide all sections initially (including regulatory compliance)
     [secActive, secPassive, secDrawdown, secTarget, secScreener, secPensionNews, secTipDeveloper, secCompliance].forEach(s => s && s.classList.add("hidden"));
