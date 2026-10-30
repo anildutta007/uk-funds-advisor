@@ -1212,7 +1212,8 @@ function renderFeCrowns(crowns) {
 
 function getInputs() {
   const currentAge = parseInt(document.getElementById("current-age").value, 10) || 35;
-  const retirementAge = parseInt(document.getElementById("retirement-age").value, 10) || 65;
+  const rawRetireAge = parseInt(document.getElementById("retirement-age").value, 10);
+  const retirementAge = !isNaN(rawRetireAge) ? rawRetireAge : Math.max(currentAge + 1, 65);
   const lumpSum = parseFloat(document.getElementById("lump-sum").value) || 0;
   const monthlyAmount = parseFloat(document.getElementById("monthly-amount").value) || 0;
   const targetGrowth = parseFloat(document.getElementById("target-growth").value) || 7.5;
@@ -3667,11 +3668,10 @@ function updateTargetRetirementPlanner() {
   if (!incomeInput || !retireAgeInput || !lifeExpInput) return;
 
   const currentAge = Math.max(18, Math.min(80, parseInt(curAgeInput ? curAgeInput.value : 45, 10) || 45));
-  let retireAge = Math.max(currentAge + 1, Math.min(85, parseInt(retireAgeInput.value, 10) || 65));
-  let lifeExpectancy = Math.max(retireAge + 1, Math.min(105, parseInt(lifeExpInput.value, 10) || 90));
-
-  if (retireAgeInput.value != retireAge) retireAgeInput.value = retireAge;
-  if (lifeExpInput.value != lifeExpectancy) lifeExpInput.value = lifeExpectancy;
+  const rawRetire = parseInt(retireAgeInput.value, 10);
+  const retireAge = !isNaN(rawRetire) ? Math.max(currentAge + 1, Math.min(85, rawRetire)) : 65;
+  const rawLife = parseInt(lifeExpInput.value, 10);
+  const lifeExpectancy = !isNaN(rawLife) ? Math.max(retireAge + 1, Math.min(105, rawLife)) : 90;
 
   const rawIncome = Math.max(1000, parseFloat(incomeInput.value) || 30000);
   const desiredNetAnnualToday = targetIncomeMode === "monthly" ? rawIncome * 12 : rawIncome;
@@ -4998,16 +4998,14 @@ document.addEventListener("DOMContentLoaded", () => {
     Chart.defaults.borderColor = "#E2D9C5";
   }
 
+  const curAgeEl = document.getElementById("current-age");
+  const retAgeEl = document.getElementById("retirement-age");
+
   const inputIds = ["current-age", "retirement-age", "lump-sum", "monthly-amount", "target-growth"];
   inputIds.forEach(id => {
     const el = document.getElementById(id);
     if (el) {
       el.addEventListener("input", () => {
-        const curAge = parseInt(document.getElementById("current-age").value, 10);
-        const retAgeEl = document.getElementById("retirement-age");
-        if (parseInt(retAgeEl.value, 10) <= curAge) {
-          retAgeEl.value = curAge + 1;
-        }
         updateAdvisor();
         if (activeTab === "drawdown") {
           updateDrawdownCalculator();
@@ -5017,6 +5015,28 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
   });
+
+  if (retAgeEl) {
+    retAgeEl.addEventListener("change", () => {
+      const curAge = parseInt(curAgeEl ? curAgeEl.value : 35, 10) || 18;
+      const retAge = parseInt(retAgeEl.value, 10);
+      if (isNaN(retAge) || retAge <= curAge) {
+        retAgeEl.value = Math.max(curAge + 1, 65);
+        updateAdvisor();
+      }
+    });
+  }
+
+  if (curAgeEl) {
+    curAgeEl.addEventListener("change", () => {
+      const curAge = parseInt(curAgeEl.value, 10);
+      const retAge = parseInt(retAgeEl ? retAgeEl.value : 65, 10);
+      if (!isNaN(curAge) && !isNaN(retAge) && retAge <= curAge && retAgeEl) {
+        retAgeEl.value = curAge + 1;
+        updateAdvisor();
+      }
+    });
+  }
 
   const riskRadios = document.querySelectorAll('input[name="risk-profile"]');
   riskRadios.forEach(radio => {
@@ -5348,6 +5368,32 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
   });
+
+  const targetRetireAgeEl = document.getElementById("target-retire-age");
+  const targetCurAgeEl = document.getElementById("target-current-age");
+  const targetLifeExpEl = document.getElementById("target-life-expectancy");
+
+  if (targetRetireAgeEl) {
+    targetRetireAgeEl.addEventListener("change", () => {
+      const cAge = parseInt(targetCurAgeEl ? targetCurAgeEl.value : 45, 10) || 45;
+      const rAge = parseInt(targetRetireAgeEl.value, 10);
+      if (isNaN(rAge) || rAge <= cAge) {
+        targetRetireAgeEl.value = Math.max(cAge + 1, 65);
+      }
+      updateTargetRetirementPlanner();
+    });
+  }
+
+  if (targetLifeExpEl) {
+    targetLifeExpEl.addEventListener("change", () => {
+      const rAge = parseInt(targetRetireAgeEl ? targetRetireAgeEl.value : 65, 10) || 65;
+      const lExp = parseInt(targetLifeExpEl.value, 10);
+      if (isNaN(lExp) || lExp <= rAge) {
+        targetLifeExpEl.value = Math.max(rAge + 1, 90);
+      }
+      updateTargetRetirementPlanner();
+    });
+  }
 
   const targetIncludeSPEl = document.getElementById("target-include-state-pension");
   if (targetIncludeSPEl) {
